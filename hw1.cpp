@@ -48,8 +48,8 @@ void draw_fireworks()
         {
             float angle = j * 10.0 * (M_PI / 180.0); // Convert degrees to radians
             float lineSize = (rand() % 40) / 100.0 + 0.1; // Random size between 0.1 and 0.5
-            float dx = size * cos(angle);
-            float dy = size * sin(angle);
+            float dx = lineSize * cos(angle);
+            float dy = lineSize * sin(angle);
             glVertex2f(x, y);
             glVertex2f(x + dx, y + dy);
         }
