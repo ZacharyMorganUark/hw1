@@ -43,7 +43,7 @@ void draw_fireworks()
         glEnd();
 
         glBegin(GL_LINES);
-        int numLines = rand() % 41 + 10; // Random number of lines between 10-50
+        int numLines = rand() % 41 + 30; // Random number of lines between 30-70?
         for (int j = 0; j < numLines; j++)
         {
             float angle = j * 10.0 * (M_PI / 180.0); // Convert degrees to radians
