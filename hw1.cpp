@@ -1,6 +1,7 @@
 //---------------------------------------
 //hw1.cpp
 //Zachary Morgan
+//2-12-2024
 //---------------------------------------
 #include <math.h>
 #include <stdio.h>
@@ -16,7 +17,7 @@ const int MIN_FIREWORKS = 5;
 const int MAX_FIREWORKS = 10;
 
 //---------------------------------------
-// Function to generate a random color
+// generate a random color
 //---------------------------------------
 void set_random_color()
 {
@@ -42,7 +43,8 @@ void draw_fireworks()
         glEnd();
 
         glBegin(GL_LINES);
-        for (int j = 0; j < 36; j++)
+        int numLines = rand() % 41 + 10; // Random number of lines [10..50]
+        for (int j = 0; j < numLines; j++)
         {
             float angle = j * 10.0 * (M_PI / 180.0); // Convert degrees to radians
             float dx = size * cos(angle);
