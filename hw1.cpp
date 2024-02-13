@@ -25,7 +25,7 @@ void set_random_color()
 }
 
 //---------------------------------------
-// Function to draw random fireworks
+// draw random fireworks
 //---------------------------------------
 void draw_fireworks()
 {
@@ -33,20 +33,21 @@ void draw_fireworks()
 
     for (int i = 0; i < numFireworks; i++)
     {
-        float size = (rand() % 50) / 100.0 + 0.5; // Random size between 0.5 and 1.0
-        float x = (rand() % 200) / 100.0 - 1.0;    // Random x location between -1.0 and 1.0
-        float y = (rand() % 200) / 100.0 - 1.0;    // Random y location between -1.0 and 1.0
+        //float size = (rand() % 40) / 100.0 + 0.1; // Random size between 0.1 and 0.5
+        float x = (rand() % 200) / 100.0 - 1.0;    // Random x between -1.0 and 1.0
+        float y = (rand() % 200) / 100.0 - 1.0;    // Random y between -1.0 and 1.0
 
-        set_random_color(); // Set a random color for the firework
+        set_random_color(); // Set a random color
         glBegin(GL_POINTS);
         glVertex2f(x, y);
         glEnd();
 
         glBegin(GL_LINES);
-        int numLines = rand() % 41 + 10; // Random number of lines [10..50]
+        int numLines = rand() % 41 + 10; // Random number of lines between 10-50
         for (int j = 0; j < numLines; j++)
         {
             float angle = j * 10.0 * (M_PI / 180.0); // Convert degrees to radians
+            float lineSize = (rand() % 40) / 100.0 + 0.1; // Random size between 0.1 and 0.5
             float dx = size * cos(angle);
             float dy = size * sin(angle);
             glVertex2f(x, y);
@@ -89,7 +90,7 @@ int main(int argc, char *argv[])
     glutInitWindowSize(500, 500);
     glutInitWindowPosition(250, 250);
     glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
-    glutCreateWindow("Random Fireworks");
+    glutCreateWindow("Fireworks");
     glutDisplayFunc(display);
     init();
     glutMainLoop();
