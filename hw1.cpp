@@ -18,7 +18,6 @@ const int MAX_FIREWORKS = 10;
 
 //---------------------------------------
 // generate a random color
-//---------------------------------------
 void set_random_color()
 {
     glColor3f((rand() % 100) / 100.0, (rand() % 100) / 100.0, (rand() % 100) / 100.0);
@@ -26,7 +25,7 @@ void set_random_color()
 
 //---------------------------------------
 // draw random fireworks
-//---------------------------------------
+
 void draw_fireworks()
 {
     int numFireworks = rand() % (MAX_FIREWORKS - 4) + MIN_FIREWORKS; // Random number of fireworks [5..10]
@@ -58,8 +57,8 @@ void draw_fireworks()
 }
 
 //---------------------------------------
-// Display callback for OpenGL
-//---------------------------------------
+// Display 
+
 void display()
 {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -68,8 +67,8 @@ void display()
 }
 
 //---------------------------------------
-// Init function for OpenGL
-//---------------------------------------
+// Init function
+
 void init()
 {
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -82,8 +81,8 @@ void init()
 }
 
 //---------------------------------------
-// Main program
-//---------------------------------------
+// Main 
+
 int main(int argc, char *argv[])
 {
     glutInit(&argc, argv);
