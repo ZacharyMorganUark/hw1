@@ -85,7 +85,7 @@ void movePolygon() {
 // Function to display the scene
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
-    glColor3f(2.0, 2.0, 1.0); // Set color
+    glColor3f(0.0, 0.0, 1.0); // Set color
 
     if (drawing) {
         drawPolygon();
