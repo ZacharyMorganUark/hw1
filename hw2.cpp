@@ -60,7 +60,7 @@ void animatePolygon() {
 // Function to display the scene
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
-    glColor3f(1.0, 1.0, 1.0); // Set color to white
+    glColor3f(1.0, 2.0, 1.0); // Set color to white
 
     if (drawing) {
         // Draw the polygon while drawing
@@ -87,7 +87,7 @@ void init() {
 int main(int argc, char *argv[]) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutCreateWindow("Draw and Animate Polygon");
+    glutCreateWindow("Homework 2");
 
     // Register callback functions
     glutDisplayFunc(display);
