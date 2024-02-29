@@ -118,5 +118,9 @@ int main(int argc, char *argv[]) {
 
     init();
 
+
     // Enter the GLUT event loop
-    glutMain
+    glutMainLoop();
+
+    return 0;
+}
