@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctime>
 #ifdef MAC
 #include <GLUT/glut.h>
 #else
@@ -8,6 +9,8 @@
 #endif
 
 const int MAX_VERTICES = 100;
+const int MOVEMENT_DURATION = 5000; // Animation duration in milliseconds
+clock_t moveStartTime;              // Start time of the animation
 
 // Structure to represent a point
 struct Point {
@@ -52,9 +55,31 @@ void mouseMotion(int x, int y) {
     }
 }
 
-// Function to animate the polygon along the recorded path
+//move the polygon along the user path for 5 seconds
 void movePolygon() {
-    // Animation logic goes here
+    if (vertexCount > 1) {
+        // Calculate elapsed time since the animation started
+        clock_t currentTime = clock();
+        double elapsedTime = (double)(currentTime - moveStartTime) / CLOCKS_PER_SEC;
+
+        // Calculate the current position along the path based on elapsed time
+        float t = fmin(1.0, elapsedTime / (MOVEMENT_DURATION / 1000.0)); // Ensure t does not exceed 1
+        float currentX = (1 - t) * vertices[0].x + t * vertices[vertexCount - 1].x;
+        float currentY = (1 - t) * vertices[0].y + t * vertices[vertexCount - 1].y;
+
+        // Draw the polygon at the current position
+        glBegin(GL_POLYGON);
+        glVertex2f(currentX - 0.05, currentY - 0.05); // Adjust the size of the drawn polygon
+        glVertex2f(currentX + 0.05, currentY - 0.05);
+        glVertex2f(currentX + 0.05, currentY + 0.05);
+        glVertex2f(currentX - 0.05, currentY + 0.05);
+        glEnd();
+
+        // Check if the animation is complete
+        if (t >= 1.0) {
+            drawing = false; // Stop drawing when animation is complete
+        }
+    }
 }
 
 // Function to display the scene
