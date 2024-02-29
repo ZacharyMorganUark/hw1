@@ -17,18 +17,9 @@ struct Point {
     float x, y;
 };
 
-Point vertices[MAX_VERTICES]; // Array to store the vertices of the polygon
+Point vertices[MAX_VERTICES]; // Array to store the vertices of the path
 int vertexCount = 0;          // Counter to keep track of the number of vertices
 bool drawing = false;         // Flag to indicate whether drawing is in progress
-
-// Function to draw a polygon
-void drawPolygon() {
-    glBegin(GL_POLYGON);
-    for (int i = 0; i < vertexCount; ++i) {
-        glVertex2f(vertices[i].x, vertices[i].y);
-    }
-    glEnd();
-}
 
 // Function to handle mouse click events
 void mouseClick(int button, int state, int x, int y) {
@@ -40,6 +31,7 @@ void mouseClick(int button, int state, int x, int y) {
         } else if (state == GLUT_UP) {
             // Stop drawing when the left mouse button is released
             drawing = false;
+            moveStartTime = clock(); // Record the start time for animation
         }
     }
 }
@@ -51,25 +43,27 @@ void mouseMotion(int x, int y) {
         vertices[vertexCount].x = (float)x / glutGet(GLUT_WINDOW_WIDTH) * 2 - 1;
         vertices[vertexCount].y = 1 - (float)y / glutGet(GLUT_WINDOW_HEIGHT) * 2;
         ++vertexCount;
-        glutPostRedisplay(); // Trigger a redraw to update the display
     }
 }
 
-//move the polygon along the user path for 5 seconds
+// Function to animate the polygon along the recorded path
 void movePolygon() {
     if (vertexCount > 1) {
         // Calculate elapsed time since the animation started
         clock_t currentTime = clock();
         double elapsedTime = (double)(currentTime - moveStartTime) / CLOCKS_PER_SEC;
 
-        // Calculate the current position along the path based on elapsed time
-        float t = fmin(1.0, elapsedTime / (MOVEMENT_DURATION / 1000.0)); // Ensure t does not exceed 1
+        // Speed factor controls the pace of the movement
+        float speedFactor = 0.2; // Adjust this value to control the speed
+
+        // Calculate the current position along the path based on elapsed time and speed factor
+        float t = fmin(1.0, elapsedTime / (MOVEMENT_DURATION / 1000.0 * speedFactor));
         float currentX = (1 - t) * vertices[0].x + t * vertices[vertexCount - 1].x;
         float currentY = (1 - t) * vertices[0].y + t * vertices[vertexCount - 1].y;
 
         // Draw the polygon at the current position
         glBegin(GL_POLYGON);
-        glVertex2f(currentX - 0.05, currentY - 0.05); // Adjust the size of the drawn polygon
+        glVertex2f(currentX - 0.05, currentY - 0.05);
         glVertex2f(currentX + 0.05, currentY - 0.05);
         glVertex2f(currentX + 0.05, currentY + 0.05);
         glVertex2f(currentX - 0.05, currentY + 0.05);
@@ -88,7 +82,12 @@ void display() {
     glColor3f(0.0, 0.0, 1.0); // Set color
 
     if (drawing) {
-        drawPolygon();
+        // Draw the path being drawn by the user
+        glBegin(GL_LINE_STRIP);
+        for (int i = 0; i < vertexCount; ++i) {
+            glVertex2f(vertices[i].x, vertices[i].y);
+        }
+        glEnd();
     } else {
         movePolygon();
     }
@@ -98,7 +97,7 @@ void display() {
 
 // Function to initialize OpenGL settings
 void init() {
-    glClearColor(1.0, 1.0, 1.0, 1.0); // Set clear color to black
+    glClearColor(1.0, 1.0, 1.0, 1.0); // Set clear color to white
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluOrtho2D(-1.0, 1.0, -1.0, 1.0); // Set up an orthographic view
@@ -120,7 +119,4 @@ int main(int argc, char *argv[]) {
     init();
 
     // Enter the GLUT event loop
-    glutMainLoop();
-
-    return 0;
-}
+    glutMain
