@@ -12,5 +12,5 @@ endif
 # define compiler options
 CC = g++ -std=c++11 -Wall -Wno-deprecated-declarations -O3
 
-hw1: hw1.cpp
-	$(CC) -o hw1 hw1.cpp $(LIB)
+hw2: hw2.cpp
+	$(CC) -o hw2 hw2.cpp $(LIB)
