@@ -53,7 +53,7 @@ void mouseMotion(int x, int y) {
 }
 
 // Function to animate the polygon along the recorded path
-void animatePolygon() {
+void movePolygon() {
     // Animation logic goes here
 }
 
@@ -63,11 +63,9 @@ void display() {
     glColor3f(1.0, 2.0, 1.0); // Set color to white
 
     if (drawing) {
-        // Draw the polygon while drawing
         drawPolygon();
     } else {
-        // Animate the polygon along the recorded path when not drawing
-        animatePolygon();
+        movePolygon();
     }
 
     glutSwapBuffers();
