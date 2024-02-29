@@ -85,7 +85,7 @@ void movePolygon() {
 // Function to display the scene
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
-    glColor3f(1.0, 2.0, 1.0); // Set color to white
+    glColor3f(2.0, 2.0, 1.0); // Set color
 
     if (drawing) {
         drawPolygon();
@@ -98,7 +98,7 @@ void display() {
 
 // Function to initialize OpenGL settings
 void init() {
-    glClearColor(0.0, 0.0, 0.0, 1.0); // Set clear color to black
+    glClearColor(1.0, 1.0, 1.0, 1.0); // Set clear color to black
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluOrtho2D(-1.0, 1.0, -1.0, 1.0); // Set up an orthographic view
