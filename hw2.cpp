@@ -1,18 +1,17 @@
 #include <GL/glut.h>
 #include <cmath>
-#include <chrono>
-#include <thread>
 
 GLfloat squareSize = 50.0f;
 GLfloat squarePositionX = 0.0f;
 GLfloat squarePositionY = 0.0f;
 bool drawLine = false;
 GLfloat lineStartX, lineStartY, controlPointX, controlPointY, lineEndX, lineEndY;
-int curveResolution = 100; // Number of points to approximate the curve
 
-// Timer variables
-bool timerStarted = false;
-std::chrono::time_point<std::chrono::high_resolution_clock> timerStartTime;
+// Animation properties
+bool animationStarted = false;
+GLfloat animationStartTime;
+
+int curveResolution = 100; // Number of points to approximate the curve
 
 void drawSquare() {
     glColor3f(0.0f, 0.0f, 1.0f); // Blue color
@@ -36,14 +35,23 @@ void drawBezierCurve() {
     glEnd();
 }
 
-void animateSquare() {
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    float elapsedTime = std::chrono::duration<float>(currentTime - timerStartTime).count();
+void animateSquare(int value) {
+    if (animationStarted) {
+        float currentTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+        float elapsedTime = currentTime - animationStartTime;
 
-    if (elapsedTime > 1.0f) {  // Start animation after 1 second
-        float t = (elapsedTime - 1.0f) / 5.0f;  // Adjust 5.0f to control animation speed
-        squarePositionX = (1 - t) * lineStartX + t * lineEndX;
-        squarePositionY = (1 - t) * lineStartY + t * lineEndY;
+        if (elapsedTime < 5.0f) {  // Adjust 5.0f to control animation duration
+            float t = elapsedTime / 5.0f;  // Adjust 5.0f to control animation speed
+            squarePositionX = (1 - t) * lineStartX + t * lineEndX;
+            squarePositionY = (1 - t) * lineStartY + t * lineEndY;
+            glutPostRedisplay();
+            glutTimerFunc(16, animateSquare, 0);  // 60 FPS (1000 ms / 60 frames)
+        } else {
+            // Animation completed, reset square position
+            squarePositionX = lineEndX;
+            squarePositionY = lineEndY;
+            animationStarted = false;
+        }
     }
 }
 
@@ -54,7 +62,6 @@ void display() {
 
     if (drawLine) {
         drawBezierCurve();
-        animateSquare();
     }
 
     glutSwapBuffers();
@@ -63,17 +70,20 @@ void display() {
 void mouse(int button, int state, int x, int y) {
     if (button == GLUT_LEFT_BUTTON) {
         if (state == GLUT_DOWN) {
-            // Record the starting point of the line and start the timer
+            // Record the starting point of the line
             lineStartX = x;
             lineStartY = glutGet(GLUT_WINDOW_HEIGHT) - y;
             drawLine = true;
-            timerStarted = true;
-            timerStartTime = std::chrono::high_resolution_clock::now();
         } else if (state == GLUT_UP) {
             // Record the control point and ending point of the curve
             controlPointX = x;
             controlPointY = glutGet(GLUT_WINDOW_HEIGHT) - y;
+            lineEndX = squarePositionX;  // Store the current square position as the starting point
+            lineEndY = squarePositionY;
             drawLine = false;
+            animationStarted = true;
+            animationStartTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+            glutTimerFunc(1000, animateSquare, 0);  // Wait for 1 second before starting animation
         }
     }
     glutPostRedisplay();
