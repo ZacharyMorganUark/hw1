@@ -1,67 +1,71 @@
 #include <GL/glut.h>
-#include <iostream>
-#include <vector>
+#include <cmath>
 
-// Triangle properties
-GLfloat triangleVertices[] = { 0.0f, 0.0f, -25.0f, 50.0f, 25.0f, 50.0f };
+GLfloat squareSize = 50.0f;
+GLfloat squarePositionX = 0.0f;
+GLfloat squarePositionY = 0.0f;
+bool drawLine = false;
+GLfloat lineStartX, lineStartY, controlPointX, controlPointY, lineEndX, lineEndY;
+int curveResolution = 100; // Number of points to approximate the curve
 
-// Line properties
-std::vector<std::pair<float, float>> linePoints;
-bool drawingLine = false;
-
-void drawTriangle() {
-    glColor3f(1.0f, 0.0f, 0.0f); // Red color
-    glBegin(GL_TRIANGLES);
-    for (int i = 0; i < 6; i += 2) {
-        glVertex2f(triangleVertices[i], triangleVertices[i + 1]);
-    }
+void drawSquare() {
+    glColor3f(0.0f, 0.0f, 1.0f); // Blue color
+    glBegin(GL_QUADS);
+    glVertex2f(squarePositionX, squarePositionY);
+    glVertex2f(squarePositionX + squareSize, squarePositionY);
+    glVertex2f(squarePositionX + squareSize, squarePositionY + squareSize);
+    glVertex2f(squarePositionX, squarePositionY + squareSize);
     glEnd();
 }
 
-void drawFreeformLine() {
-    if (!linePoints.empty()) {
-        glColor3f(0.0f, 0.0f, 1.0f); // Blue color
-        glBegin(GL_LINE_STRIP);
-        for (const auto& point : linePoints) {
-            glVertex2f(point.first, point.second);
-        }
-        glEnd();
+void drawBezierCurve() {
+    glColor3f(1.0f, 0.0f, 0.0f); // Red color
+    glBegin(GL_LINE_STRIP);
+    for (int i = 0; i <= curveResolution; ++i) {
+        float t = static_cast<float>(i) / curveResolution;
+        float x = (1 - t) * (1 - t) * lineStartX + 2 * (1 - t) * t * controlPointX + t * t * lineEndX;
+        float y = (1 - t) * (1 - t) * lineStartY + 2 * (1 - t) * t * controlPointY + t * t * lineEndY;
+        glVertex2f(x, y);
     }
+    glEnd();
 }
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    drawTriangle();
+    drawSquare();
 
-    if (drawingLine) {
-        drawFreeformLine();
+    if (drawLine) {
+        drawBezierCurve();
     }
 
     glutSwapBuffers();
 }
 
+void keyboard(unsigned char key, int x, int y) {
+    if (key == 'M' || key == 'm') {
+        // Move the square along the curve
+        squarePositionX = lineEndX;
+        squarePositionY = lineEndY;
+    }
+}
+
 void mouse(int button, int state, int x, int y) {
-    if (button == GLUT_LEFT_BUTTON) {
-        if (state == GLUT_DOWN) {
-            // When the left mouse button is pressed, start drawing the freeform line
-            linePoints.clear();
-            drawingLine = true;
-        } else if (state == GLUT_UP) {
-            // When the left mouse button is released, end drawing the freeform line
-            drawingLine = false;
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        if (!drawLine) {
+            // Record the starting point of the line
+            lineStartX = x;
+            lineStartY = glutGet(GLUT_WINDOW_HEIGHT) - y;
+            drawLine = true;
+        } else {
+            // Record the control point and ending point of the curve
+            controlPointX = x;
+            controlPointY = glutGet(GLUT_WINDOW_HEIGHT) - y;
+            drawLine = false;
+            // Uncomment the following line if you want to reset the square position after drawing each curve
+            // squarePositionX = squarePositionY = 0.0f;
         }
     }
-
-    // Convert screen coordinates to OpenGL coordinates
-    float mouseX = static_cast<float>(x) / glutGet(GLUT_WINDOW_WIDTH) * 2.0f - 1.0f;
-    float mouseY = 1.0f - static_cast<float>(y) / glutGet(GLUT_WINDOW_HEIGHT) * 2.0f;
-
-    // Add the current mouse position to the line points
-    if (drawingLine) {
-        linePoints.push_back(std::make_pair(mouseX, mouseY));
-    }
-
     glutPostRedisplay();
 }
 
@@ -69,19 +73,20 @@ void reshape(int width, int height) {
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
+    gluOrtho2D(0, width, 0, height);
     glMatrixMode(GL_MODELVIEW);
 }
 
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutCreateWindow("Draw Triangle and Freeform Line");
+    glutCreateWindow("OpenGL Square and Curved Line");
     glutReshapeWindow(800, 600);
 
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
     glutDisplayFunc(display);
+    glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse);
     glutReshapeFunc(reshape);
 
