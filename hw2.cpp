@@ -9,7 +9,7 @@ float mouseX, mouseY;
 
 // Animation properties
 float animationStartTime;
-float animationDuration = 7.0f;
+float animationDuration = 10.0f;
 bool startAnimation = false;
 
 void drawTriangle() {
