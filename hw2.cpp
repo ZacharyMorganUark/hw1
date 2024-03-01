@@ -1,114 +1,121 @@
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#ifdef MAC
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
-#include <cmath>
+#endif
 
-GLfloat squareSize = 50.0f;
-GLfloat squarePositionX = 0.0f;
-GLfloat squarePositionY = 0.0f;
-bool drawLine = false;
-GLfloat lineStartX, lineStartY, controlPointX, controlPointY, lineEndX, lineEndY;
+const int MAX_VERTICES = 100;
 
-// Animation properties
-bool animationStarted = false;
-GLfloat animationStartTime;
+struct Point {
+    float x, y;
+};
 
-int curveResolution = 100; // Number of points to approximate the curve
+Point vertices[MAX_VERTICES];
+int vertexCount = 0;
+bool drawing = false;
+bool moving = false;
+clock_t moveStartTime;
+const int MOVEMENT_DURATION = 5000;
 
-void drawSquare() {
-    glColor3f(0.0f, 0.0f, 1.0f); // Blue color
-    glBegin(GL_QUADS);
-    glVertex2f(squarePositionX, squarePositionY);
-    glVertex2f(squarePositionX + squareSize, squarePositionY);
-    glVertex2f(squarePositionX + squareSize, squarePositionY + squareSize);
-    glVertex2f(squarePositionX, squarePositionY + squareSize);
-    glEnd();
-}
-
-void drawBezierCurve() {
-    glColor3f(1.0f, 0.0f, 0.0f); // Red color
-    glBegin(GL_LINE_STRIP);
-    for (int i = 0; i <= curveResolution; ++i) {
-        float t = static_cast<float>(i) / curveResolution;
-        float x = (1 - t) * (1 - t) * lineStartX + 2 * (1 - t) * t * controlPointX + t * t * lineEndX;
-        float y = (1 - t) * (1 - t) * lineStartY + 2 * (1 - t) * t * controlPointY + t * t * lineEndY;
-        glVertex2f(x, y);
+void drawPolygon() {
+    glBegin(GL_POLYGON);
+    for (int i = 0; i < vertexCount; ++i) {
+        glVertex2f(vertices[i].x, vertices[i].y);
     }
     glEnd();
 }
 
-void animateSquare(int value) {
-    if (animationStarted) {
-        float currentTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-        float elapsedTime = currentTime - animationStartTime;
+void mouseClick(int button, int state, int x, int y) {
+    float x_scale = 2.0 / glutGet(GLUT_WINDOW_WIDTH);
+    float y_scale = -2.0 / glutGet(GLUT_WINDOW_HEIGHT);
 
-        if (elapsedTime < 5.0f) {  // Adjust 5.0f to control animation duration
-            float t = elapsedTime / 5.0f;  // Adjust 5.0f to control animation speed
-            squarePositionX = (1 - t) * lineStartX + t * lineEndX;
-            squarePositionY = (1 - t) * lineStartY + t * lineEndY;
-            glutPostRedisplay();
-            glutTimerFunc(16, animateSquare, 0);  // 60 FPS (1000 ms / 60 frames)
-        } else {
-            // Animation completed, reset square position
-            squarePositionX = lineEndX;
-            squarePositionY = lineEndY;
-            animationStarted = false;
+    if (button == GLUT_LEFT_BUTTON) {
+        if (state == GLUT_DOWN) {
+            if (!moving) {
+                drawing = true;
+                vertexCount = 0;
+            }
+        } else if (state == GLUT_UP) {
+            drawing = false;
+            if (!moving) {
+                vertices[vertexCount].x = (x - glutGet(GLUT_WINDOW_WIDTH) / 2) * x_scale;
+                vertices[vertexCount].y = (glutGet(GLUT_WINDOW_HEIGHT) / 2 - y) * y_scale;
+                vertexCount++;
+            } else {
+                moving = false;
+                moveStartTime = clock();
+            }
+        }
+    }
+}
+
+void mouseMotion(int x, int y) {
+    if (drawing && vertexCount < MAX_VERTICES) {
+        float x_scale = 2.0 / glutGet(GLUT_WINDOW_WIDTH);
+        float y_scale = -2.0 / glutGet(GLUT_WINDOW_HEIGHT);
+
+        vertices[vertexCount].x = (x - glutGet(GLUT_WINDOW_WIDTH) / 2) * x_scale;
+        vertices[vertexCount].y = (glutGet(GLUT_WINDOW_HEIGHT) / 2 - y) * y_scale;
+        ++vertexCount;
+        glutPostRedisplay();
+    }
+}
+
+void movePolygon() {
+    if (vertexCount > 1) {
+        clock_t currentTime = clock();
+        double elapsedTime = (double)(currentTime - moveStartTime) / CLOCKS_PER_SEC;
+
+        float t = fmin(1.0, elapsedTime / (MOVEMENT_DURATION / 1000.0));
+        float currentX = (1 - t) * vertices[0].x + t * vertices[vertexCount - 1].x;
+        float currentY = (1 - t) * vertices[0].y + t * vertices[vertexCount - 1].y;
+
+        glTranslatef(currentX, currentY, 0.0);
+        drawPolygon();
+
+        if (t >= 1.0) {
+            drawing = false;
+            moving = true;
         }
     }
 }
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(1.0, 1.0, 1.0);
 
-    drawSquare();
-
-    if (drawLine) {
-        drawBezierCurve();
+    if (drawing) {
+        drawPolygon();
+    } else {
+        movePolygon();
     }
 
     glutSwapBuffers();
 }
 
-void mouse(int button, int state, int x, int y) {
-    if (button == GLUT_LEFT_BUTTON) {
-        if (state == GLUT_DOWN) {
-            // Record the starting point of the line
-            lineStartX = x;
-            lineStartY = glutGet(GLUT_WINDOW_HEIGHT) - y;
-            drawLine = true;
-        } else if (state == GLUT_UP) {
-            // Record the control point and ending point of the curve
-            controlPointX = x;
-            controlPointY = glutGet(GLUT_WINDOW_HEIGHT) - y;
-            lineEndX = squarePositionX;  // Store the current square position as the starting point
-            lineEndY = squarePositionY;
-            drawLine = false;
-            animationStarted = true;
-            animationStartTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-            glutTimerFunc(1000, animateSquare, 0);  // Wait for 1 second before starting animation
-        }
-    }
-    glutPostRedisplay();
-}
-
-void reshape(int width, int height) {
-    glViewport(0, 0, width, height);
+void init() {
+    glClearColor(0.0, 0.0, 0.0, 1.0);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(0, width, 0, height);
+    gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
     glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char *argv[]) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutCreateWindow("OpenGL Square and Curved Line");
-    glutReshapeWindow(800, 600);
-
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-
+    glutCreateWindow("Drawing and Moving Polygon");
     glutDisplayFunc(display);
-    glutMouseFunc(mouse);
-    glutReshapeFunc(reshape);
+    glutMouseFunc(mouseClick);
+    glutMotionFunc(mouseMotion);
+    init();
 
     glutMainLoop();
+
     return 0;
 }
