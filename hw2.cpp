@@ -1,6 +1,6 @@
 #include <GL/glut.h>
 #include <iostream>
-//dfd
+//daaaa
 
 // Triangle properties
 GLfloat triangleVertices[] = { 0.0f, 0.0f, -25.0f, 50.0f, 25.0f, 50.0f };
@@ -9,7 +9,7 @@ float mouseX, mouseY;
 
 // Animation properties
 float animationStartTime;
-float animationDuration = 5.0f;
+float animationDuration = 10.0f;
 bool startAnimation = false;
 
 void drawTriangle() {
@@ -61,7 +61,7 @@ void mouse(int button, int state, int x, int y) {
             // When the mouse button is released, stop following the mouse and start the animation
             followMouse = false;
             startAnimation = true;
-            animationStartTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+            animationStartTime = glutGet(GLUT_ELAPSED_TIME) / 2000.0f;
         }
     }
 
@@ -83,7 +83,7 @@ void reshape(int width, int height) {
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutCreateWindow("Triangle Follows Mouse and Animates");
+    glutCreateWindow("Homework2");
     glutReshapeWindow(800, 600);
 
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
