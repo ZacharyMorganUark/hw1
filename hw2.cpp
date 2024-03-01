@@ -8,7 +8,7 @@
 #else
 #include <GL/glut.h>
 #endif
-//dddddd
+//d11111
 const int MAX_VERTICES = 4;
 const int LINE_COUNT = 100;  // You can adjust this value
 const int MOVEMENT_DURATION = 5000;
@@ -74,14 +74,9 @@ void moveSquare() {
         float currentY = (1 - t) * pathVertices[0][1] + t * pathVertices[vertexCount - 1][1];
 
         glPushMatrix();
-        glLoadIdentity();  // Reset the modelview matrix
         glTranslatef(currentX, currentY, 0.0);
         drawSquare();
         glPopMatrix();
-
-        if (t >= 1.0) {
-            drawing = false;
-        }
     }
 }
 
