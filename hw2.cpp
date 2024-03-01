@@ -6,7 +6,7 @@
 #else
 #include <GL/glut.h>
 #endif
-//gggg
+//g1111
 
 // Global constants
 #define MIN_X_VIEW -50
@@ -166,15 +166,7 @@ int main(int argc, char *argv[])
    glutMouseFunc(mouse);
    glutMotionFunc(motion);
    init();
-   printf("Keyboard commands:\n");
-   printf("   'x' - rotate x-axis -5 degrees\n");
-   printf("   'X' - rotate x-axis +5 degrees\n");
-   printf("   'y' - rotate y-axis -5 degrees\n");
-   printf("   'Y' - rotate y-axis +5 degrees\n");
-   printf("   '2' - enter 2D display mode\n");
-   printf("   '3' - enter 3D display mode\n");
-   printf("   'L' - load building.txt file\n");
-   printf("   'S' - save building.txt file\n");
+
    printf("Mouse operations:\n");
    printf("   'mouse down' - start drawing line\n");
    printf("   'mouse motion' - draw curve\n");
