@@ -8,6 +8,7 @@
 #else
 #include <GL/glut.h>
 #endif
+//dfdfd
 
 const int MAX_VERTICES = 4;
 const int LINE_COUNT = 100;  // You can adjust this value
@@ -73,10 +74,9 @@ void moveSquare() {
         float currentX = (1 - t) * pathVertices[0][0] + t * pathVertices[vertexCount - 1][0];
         float currentY = (1 - t) * pathVertices[0][1] + t * pathVertices[vertexCount - 1][1];
 
-        glPushMatrix();
+        glLoadIdentity();
         glTranslatef(currentX, currentY, 0.0);
         drawSquare();
-        glPopMatrix();
 
         if (t >= 1.0) {
             drawing = false;
@@ -98,7 +98,7 @@ void display() {
 }
 
 void init() {
-    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
