@@ -6,7 +6,7 @@
 #else
 #include <GL/glut.h>
 #endif
-//kkkk
+//the
 
 #define MIN_X_VIEW -50
 #define MAX_X_VIEW 50
@@ -36,26 +36,15 @@ void init()
     glEnable(GL_DEPTH_TEST);
 }
 
-float calculateBezierPoint(float t, float p0, float p1, float p2)
+void drawBezierCurve(float lineStartX, float lineStartY, float lineEndX, float lineEndY, float controlPointX, float controlPointY)
 {
-    float u = 1 - t;
-    return u * u * p0 + 2 * u * t * p1 + t * t * p2;
-}
-
-void drawBezierCurve(float x0, float y0, float x1, float y1, float controlX, float controlY)
-{
-    float controlX0 = (x0 + controlX) / 2;
-    float controlY0 = (y0 + controlY) / 2;
-    float controlX1 = (x1 + controlX) / 2;
-    float controlY1 = (y1 + controlY) / 2;
-
-    glColor3f(0.0, 1.0, 0.0); // Green color
+    glColor3f(1.0f, 0.0f, 0.0f); // Red color
     glBegin(GL_LINE_STRIP);
     for (int i = 0; i <= curveResolution; ++i)
     {
         float t = static_cast<float>(i) / curveResolution;
-        float x = calculateBezierPoint(t, x0, controlX0, x1);
-        float y = calculateBezierPoint(t, y0, controlY0, y1);
+        float x = (1 - t) * (1 - t) * lineStartX + 2 * (1 - t) * t * controlPointX + t * t * lineEndX;
+        float y = (1 - t) * (1 - t) * lineStartY + 2 * (1 - t) * t * controlPointY + t * t * lineEndY;
         glVertex3f(x, y, 0.0);
     }
     glEnd();
