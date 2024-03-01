@@ -6,7 +6,7 @@
 #else
 #include <GL/glut.h>
 #endif
-//fsdfdfdfdf
+//888
 
 #define MIN_X_VIEW -50
 #define MAX_X_VIEW 50
@@ -50,6 +50,12 @@ void drawCurve(float x0, float y0, float x1, float y1)
     glEnd();
 }
 
+float calculateBezierPoint(float t, float p0, float p1, float p2)
+{
+    float u = 1 - t;
+    return u * u * p0 + 2 * u * t * p1 + t * t * p2;
+}
+
 void drawBezierCurve(float x0, float y0, float x1, float y1, float controlX, float controlY)
 {
     glColor3f(0.0, 1.0, 0.0); // Green color
@@ -64,11 +70,7 @@ void drawBezierCurve(float x0, float y0, float x1, float y1, float controlX, flo
     glEnd();
 }
 
-float calculateBezierPoint(float t, float p0, float p1, float p2)
-{
-    float u = 1 - t;
-    return u * u * p0 + 2 * u * t * p1 + t * t * p2;
-}
+
 
 void mouse(int button, int state, int x, int y)
 {
