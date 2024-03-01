@@ -1,12 +1,6 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
 #include <GL/glut.h>
-#endif
-//dddddd
+#include <cmath>
+//ggggggggggg
 #define LINE_COUNT 1000
 
 int curveResolution = 100;
@@ -43,9 +37,14 @@ void mouse(int button, int state, int x, int y) {
         } else if (state == GLUT_UP) {
             lineEndX = x * x_scale - 1.0;
             lineEndY = y * y_scale + 1.0;
-            points[currentCurveIndex + 1][0] = lineEndX;
-            points[currentCurveIndex + 1][1] = lineEndY;
-            points[currentCurveIndex + 1][2] = 0; // 0 indicates an end point
+            currentCurveIndex++;
+            points[currentCurveIndex][0] = controlPointX; // Store control point
+            points[currentCurveIndex][1] = controlPointY;
+            points[currentCurveIndex][2] = 1; // 1 indicates a control point
+            currentCurveIndex++;
+            points[currentCurveIndex][0] = lineEndX; // Store end point
+            points[currentCurveIndex][1] = lineEndY;
+            points[currentCurveIndex][2] = 0; // 0 indicates an end point
             glutPostRedisplay();
         }
     }
@@ -68,29 +67,20 @@ void motion(int x, int y) {
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    for (int i = 0; i <= currentCurveIndex; i++) {
-        if (points[i][2] == 1) {
-            // Control point
-            glColor3f(0.0f, 1.0f, 0.0f); // Green color
-            glPointSize(5.0);
-        } else {
-            // End point
-            glColor3f(1.0f, 0.0f, 0.0f); // Red color
-            glPointSize(2.0);
-        }
-
-        glBegin(GL_POINTS);
-        glVertex2f(points[i][0], points[i][1]);
-        glEnd();
-
-        glPointSize(1.0);
-
-        if (i > 0 && points[i][2] == 0) {
-            // Draw Bezier curve
-            drawBezierCurve(points[i - 1][0], points[i - 1][1], points[i][0], points[i][1],
-                            points[i - 1][0], points[i - 1][1]);
-        }
+    for (int i = 0; i < currentCurveIndex; i += 3) {
+        // Draw Bezier curve
+        drawBezierCurve(points[i][0], points[i][1], points[i + 1][0], points[i + 1][1],
+                        points[i + 2][0], points[i + 2][1]);
     }
+
+    glPointSize(5.0);
+    glBegin(GL_POINTS);
+    glColor3f(0.0f, 1.0f, 0.0f); // Green color
+    for (int i = 0; i <= currentCurveIndex; ++i) {
+        glVertex2f(points[i][0], points[i][1]);
+    }
+    glEnd();
+    glPointSize(1.0);
 
     glutSwapBuffers();
 }
@@ -105,7 +95,7 @@ void init() {
 int main(int argc, char *argv[]) {
     glutInit(&argc, argv);
     glutInitWindowSize(500, 500);
-    glutCreateWindow("cars 2");
+    glutCreateWindow("car 9");
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
