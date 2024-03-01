@@ -6,7 +6,8 @@
 #else
 #include <GL/glut.h>
 #endif
-//69
+
+//djfhkdjsf
 
 #define MIN_X_VIEW -50
 #define MAX_X_VIEW 50
@@ -36,20 +37,6 @@ void init()
     glEnable(GL_DEPTH_TEST);
 }
 
-void drawCurve(float x0, float y0, float x1, float y1)
-{
-    glColor3f(0.0, 1.0, 0.0); // Green color
-    glBegin(GL_LINE_STRIP);
-    for (int i = 0; i <= curveResolution; ++i)
-    {
-        float t = static_cast<float>(i) / curveResolution;
-        float x = (1 - t) * x0 + t * x1;
-        float y = (1 - t) * y0 + t * y1;
-        glVertex3f(x, y, 0.0);
-    }
-    glEnd();
-}
-
 float calculateBezierPoint(float t, float p0, float p1, float p2)
 {
     float u = 1 - t;
@@ -58,7 +45,7 @@ float calculateBezierPoint(float t, float p0, float p1, float p2)
 
 void drawBezierCurve(float x0, float y0, float x1, float y1, float controlX, float controlY)
 {
-    float controlX0 = (x0 + controlX) / 2;  // Calculate the control points
+    float controlX0 = (x0 + controlX) / 2;
     float controlY0 = (y0 + controlY) / 2;
     float controlX1 = (x1 + controlX) / 2;
     float controlY1 = (y1 + controlY) / 2;
@@ -74,8 +61,6 @@ void drawBezierCurve(float x0, float y0, float x1, float y1, float controlX, flo
     }
     glEnd();
 }
-
-
 
 void mouse(int button, int state, int x, int y)
 {
@@ -151,7 +136,7 @@ int main(int argc, char *argv[])
     printf("Mouse operations:\n");
     printf("   'mouse down' - start drawing line\n");
     printf("   'mouse motion' - draw curve\n");
-   printf("   'mouse up' - finish drawing line\n");
-   glutMainLoop();
-   return 0;
+    printf("   'mouse up' - finish drawing line\n");
+    glutMainLoop();
+    return 0;
 }
