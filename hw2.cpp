@@ -1,79 +1,126 @@
 #include <GL/glut.h>
 #include <iostream>
+#include <vector>
 
-// Triangle properties
-GLfloat triangleVertices[] = { 0.0f, 0.0f, -25.0f, 50.0f, 25.0f, 50.0f };
+struct Point {
+    int x, y;
+};
 
-// Line properties
-bool drawingLine = false;
-GLfloat lineStartX, lineStartY, lineEndX, lineEndY;
+std::vector<Point> flightPath;
+float objectPositionX = 0.0f;
+float objectPositionY = 0.0f;
+bool drawingPath = false;
+int windowWidth = 800;
+int windowHeight = 600;
+float animationDuration = 5.0f;
+float animationStartTime = 0.0f;
 
-void drawTriangle() {
+void drawObject() {
     glColor3f(1.0f, 0.0f, 0.0f); // Red color
-    glBegin(GL_TRIANGLES);
-    for (int i = 0; i < 6; i += 2) {
-        glVertex2f(triangleVertices[i], triangleVertices[i + 1]);
-    }
+    glBegin(GL_POLYGON);
+    glVertex2f(objectPositionX - 10, objectPositionY - 10);
+    glVertex2f(objectPositionX + 10, objectPositionY - 10);
+    glVertex2f(objectPositionX, objectPositionY + 15);
     glEnd();
 }
 
-void drawLine() {
+void drawFlightPath() {
     glColor3f(0.0f, 0.0f, 1.0f); // Blue color
-    glBegin(GL_LINES);
-    glVertex2f(lineStartX, lineStartY);
-    glVertex2f(lineEndX, lineEndY);
+    glBegin(GL_LINE_STRIP);
+    for (const Point& point : flightPath) {
+        glVertex2f(point.x, windowHeight - point.y);
+    }
     glEnd();
 }
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    drawTriangle();
+    drawObject();
 
-    if (drawingLine) {
-        drawLine();
+    if (drawingPath) {
+        drawFlightPath();
     }
 
     glutSwapBuffers();
-}
-
-void mouse(int button, int state, int x, int y) {
-    if (button == GLUT_LEFT_BUTTON) {
-        if (state == GLUT_DOWN) {
-            // When the left mouse button is pressed, start drawing the line
-            lineStartX = static_cast<float>(x) / glutGet(GLUT_WINDOW_WIDTH) * 2.0f - 1.0f;
-            lineStartY = 1.0f - static_cast<float>(y) / glutGet(GLUT_WINDOW_HEIGHT) * 2.0f;
-            drawingLine = true;
-        } else if (state == GLUT_UP) {
-            // When the left mouse button is released, end drawing the line
-            lineEndX = static_cast<float>(x) / glutGet(GLUT_WINDOW_WIDTH) * 2.0f - 1.0f;
-            lineEndY = 1.0f - static_cast<float>(y) / glutGet(GLUT_WINDOW_HEIGHT) * 2.0f;
-            drawingLine = false;
-        }
-    }
-
-    glutPostRedisplay();
 }
 
 void reshape(int width, int height) {
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
+    gluOrtho2D(0, width, 0, height);
     glMatrixMode(GL_MODELVIEW);
+
+    windowWidth = width;
+    windowHeight = height;
+}
+
+void mouse(int button, int state, int x, int y) {
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        if (!drawingPath) {
+            // Start drawing the flight path
+            drawingPath = true;
+            flightPath.clear();
+            objectPositionX = x;
+            objectPositionY = windowHeight - y;
+            flightPath.push_back({x, y});
+        } else {
+            // End drawing the flight path
+            drawingPath = false;
+        }
+        glutPostRedisplay();
+    }
+}
+
+void mouseMotion(int x, int y) {
+    if (drawingPath) {
+        flightPath.push_back({x, y});
+        glutPostRedisplay();
+    }
+}
+
+void animateObject() {
+    if (!drawingPath) {
+        // If not drawing, return
+        return;
+    }
+
+    float currentTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f; // Convert to seconds
+    float elapsedTime = currentTime - animationStartTime;
+
+    if (elapsedTime < animationDuration) {
+        float t = elapsedTime / animationDuration;
+
+        // Interpolate object position along the flight path
+        size_t pathSize = flightPath.size();
+        size_t index = static_cast<size_t>(t * (pathSize - 1));
+        float tInSegment = t * (pathSize - 1) - index;
+
+        objectPositionX = (1 - tInSegment) * flightPath[index].x + tInSegment * flightPath[index + 1].x;
+        objectPositionY = windowHeight - ((1 - tInSegment) * flightPath[index].y + tInSegment * flightPath[index + 1].y);
+
+        glutPostRedisplay();
+    } else {
+        // Animation completed, reset object position
+        objectPositionX = flightPath.back().x;
+        objectPositionY = windowHeight - flightPath.back().y;
+    }
 }
 
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutCreateWindow("Draw Triangle and Line");
+    glutCreateWindow("Object Flight Animation");
     glutReshapeWindow(800, 600);
 
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
     glutDisplayFunc(display);
-    glutMouseFunc(mouse);
     glutReshapeFunc(reshape);
+    glutMouseFunc(mouse);
+    glutMotionFunc(mouseMotion);
+    glutIdleFunc(animateObject);
 
     glutMainLoop();
     return 0;
