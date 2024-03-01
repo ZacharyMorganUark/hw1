@@ -9,7 +9,7 @@ float mouseX, mouseY;
 
 // Animation properties
 float animationStartTime;
-float animationDuration = 10.0f;
+float animationDuration = 7.0f;
 bool startAnimation = false;
 
 void drawTriangle() {
@@ -61,7 +61,7 @@ void mouse(int button, int state, int x, int y) {
             // When the mouse button is released, stop following the mouse and start the animation
             followMouse = false;
             startAnimation = true;
-            animationStartTime = glutGet(GLUT_ELAPSED_TIME) / 2000.0f;
+            animationStartTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
         }
     }
 
