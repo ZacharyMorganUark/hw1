@@ -1,96 +1,48 @@
 #include <GL/glut.h>
-#include <cmath>
-#include <chrono>
-#include <thread>
+#include <iostream>
+#include <vector>
 
-GLfloat squareSize = 50.0f;
-GLfloat squarePositionX = 0.0f;
-GLfloat squarePositionY = 0.0f;
-bool drawLine = false;
-GLfloat lineStartX, lineStartY, controlPointX, controlPointY, lineEndX, lineEndY;
-int curveResolution = 100; // Number of points to approximate the curve
-const float animationDuration = 5.0f; // 5 seconds
+struct Point {
+    int x, y;
+};
 
-// Timer variables
-std::chrono::time_point<std::chrono::high_resolution_clock> animationStartTime;
+std::vector<Point> flightPath;
+float objectPositionX = 0.0f;
+float objectPositionY = 0.0f;
+bool drawingPath = false;
+int windowWidth = 800;
+int windowHeight = 600;
+float animationDuration = 5.0f;
+float animationStartTime = 0.0f;
 
-void drawSquare() {
-    glColor3f(0.0f, 0.0f, 1.0f); // Blue color
-    glBegin(GL_QUADS);
-    glVertex2f(squarePositionX, squarePositionY);
-    glVertex2f(squarePositionX + squareSize, squarePositionY);
-    glVertex2f(squarePositionX + squareSize, squarePositionY + squareSize);
-    glVertex2f(squarePositionX, squarePositionY + squareSize);
-    glEnd();
-}
-
-void drawBezierCurve() {
+void drawObject() {
     glColor3f(1.0f, 0.0f, 0.0f); // Red color
-    glBegin(GL_LINE_STRIP);
-    for (int i = 0; i <= curveResolution; ++i) {
-        float t = static_cast<float>(i) / curveResolution;
-        float x = (1 - t) * (1 - t) * lineStartX + 2 * (1 - t) * t * controlPointX + t * t * lineEndX;
-        float y = (1 - t) * (1 - t) * lineStartY + 2 * (1 - t) * t * controlPointY + t * t * lineEndY;
-        glVertex2f(x, y);
-    }
+    glBegin(GL_POLYGON);
+    glVertex2f(objectPositionX - 10, objectPositionY - 10);
+    glVertex2f(objectPositionX + 10, objectPositionY - 10);
+    glVertex2f(objectPositionX, objectPositionY + 15);
     glEnd();
 }
 
-void animateSquare() {
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    float elapsedTime = std::chrono::duration<float>(currentTime - animationStartTime).count();
-
-    if (elapsedTime < animationDuration) {
-        float t = elapsedTime / animationDuration;
-        squarePositionX = (1 - t) * lineStartX + t * lineEndX;
-        squarePositionY = (1 - t) * lineStartY + t * lineEndY;
-        glutPostRedisplay();
-    } else {
-        // Animation completed, reset square position
-        squarePositionX = lineEndX;
-        squarePositionY = lineEndY;
+void drawFlightPath() {
+    glColor3f(0.0f, 0.0f, 1.0f); // Blue color
+    glBegin(GL_LINE_STRIP);
+    for (const Point& point : flightPath) {
+        glVertex2f(point.x, windowHeight - point.y);
     }
+    glEnd();
 }
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    drawSquare();
+    drawObject();
 
-    if (drawLine) {
-        drawBezierCurve();
-        animateSquare();
+    if (drawingPath) {
+        drawFlightPath();
     }
 
     glutSwapBuffers();
-}
-
-void keyboard(unsigned char key, int x, int y) {
-    if (key == 'M' || key == 'm') {
-        // Move the square along the curve
-        drawLine = false; // Stop drawing the curve
-        animationStartTime = std::chrono::high_resolution_clock::now(); // Start the animation timer
-        glutPostRedisplay();
-    }
-}
-
-void mouse(int button, int state, int x, int y) {
-    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-        if (!drawLine) {
-            // Record the starting point of the line
-            lineStartX = x;
-            lineStartY = glutGet(GLUT_WINDOW_HEIGHT) - y;
-            drawLine = true;
-        } else {
-            // Record the control point and ending point of the curve
-            controlPointX = x;
-            controlPointY = glutGet(GLUT_WINDOW_HEIGHT) - y;
-            drawLine = false;
-            // Uncomment the following line if you want to reset the square position after drawing each curve
-            // squarePositionX = squarePositionY = 0.0f;
-        }
-    }
-    glutPostRedisplay();
 }
 
 void reshape(int width, int height) {
@@ -99,20 +51,76 @@ void reshape(int width, int height) {
     glLoadIdentity();
     gluOrtho2D(0, width, 0, height);
     glMatrixMode(GL_MODELVIEW);
+
+    windowWidth = width;
+    windowHeight = height;
+}
+
+void mouse(int button, int state, int x, int y) {
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        if (!drawingPath) {
+            // Start drawing the flight path
+            drawingPath = true;
+            flightPath.clear();
+            objectPositionX = x;
+            objectPositionY = windowHeight - y;
+            flightPath.push_back({x, y});
+        } else {
+            // End drawing the flight path
+            drawingPath = false;
+        }
+        glutPostRedisplay();
+    }
+}
+
+void mouseMotion(int x, int y) {
+    if (drawingPath) {
+        flightPath.push_back({x, y});
+        glutPostRedisplay();
+    }
+}
+
+void animateObject() {
+    if (!drawingPath) {
+        // If not drawing, return
+        return;
+    }
+
+    float currentTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f; // Convert to seconds
+    float elapsedTime = currentTime - animationStartTime;
+
+    if (elapsedTime < animationDuration) {
+        float t = elapsedTime / animationDuration;
+
+        // Interpolate object position along the flight path
+        size_t pathSize = flightPath.size();
+        size_t index = static_cast<size_t>(t * (pathSize - 1));
+        float tInSegment = t * (pathSize - 1) - index;
+
+        objectPositionX = (1 - tInSegment) * flightPath[index].x + tInSegment * flightPath[index + 1].x;
+        objectPositionY = windowHeight - ((1 - tInSegment) * flightPath[index].y + tInSegment * flightPath[index + 1].y);
+
+        glutPostRedisplay();
+    } else {
+        // Animation completed, reset object position
+        objectPositionX = flightPath.back().x;
+        objectPositionY = windowHeight - flightPath.back().y;
+    }
 }
 
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutCreateWindow("OpenGL Square Animation");
+    glutCreateWindow("Object Flight Animation");
     glutReshapeWindow(800, 600);
 
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
     glutDisplayFunc(display);
-    glutKeyboardFunc(keyboard);
-    glutMouseFunc(mouse);
     glutReshapeFunc(reshape);
+    glutMouseFunc(mouse);
+    glutMotionFunc(mouseMotion);
+    glutIdleFunc(animateObject);
 
     glutMainLoop();
     return 0;
