@@ -6,7 +6,7 @@
 #else
 #include <GL/glut.h>
 #endif
-//sdfd
+//s
 
 #define MIN_X_VIEW -50
 #define MAX_X_VIEW 50
@@ -85,6 +85,12 @@ void motion(int x, int y)
    glutPostRedisplay();
 }
 
+// Add this function to calculate a point on the Bezier curve
+float calculateBezierPoint(float t, float p0, float p1, float p2) {
+    float u = 1 - t;
+    return u * u * p0 + 2 * u * t * p1 + t * t * p2;
+}
+
 void display()
 {
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -116,11 +122,7 @@ void display()
    }
 }
 
-// Add this function to calculate a point on the Bezier curve
-float calculateBezierPoint(float t, float p0, float p1, float p2) {
-    float u = 1 - t;
-    return u * u * p0 + 2 * u * t * p1 + t * t * p2;
-}
+
 
 int main(int argc, char *argv[])
 {
