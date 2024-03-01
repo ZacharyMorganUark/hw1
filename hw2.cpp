@@ -1,8 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctime>
-
+#include <iostream>
 #ifdef MAC
 #include <GLUT/glut.h>
 #else
@@ -10,119 +9,116 @@
 #endif
 
 const int MAX_VERTICES = 100;
-const int MOVEMENT_DURATION = 5000; // Animation duration in milliseconds
-clock_t moveStartTime;              // Start time of the animation
 
-// Structure to represent a point
 struct Point {
     float x, y;
 };
 
-Point vertices[MAX_VERTICES]; // Array to store the vertices of the polygon
-int vertexCount = 0;          // Counter to keep track of the number of vertices
-bool drawing = false;         // Flag to indicate whether drawing is in progress
+Point vertices[MAX_VERTICES];
+int vertexCount = 0;
+bool drawing = false;
+bool moving = false;
+clock_t moveStartTime;
+const int MOVEMENT_DURATION = 5000;
 
-// Function to draw the initial square
-void drawInitialSquare() {
+void drawPolygon() {
     glBegin(GL_POLYGON);
-    glVertex2f(-0.05, -0.05);
-    glVertex2f(0.05, -0.05);
-    glVertex2f(0.05, 0.05);
-    glVertex2f(-0.05, 0.05);
-    glEnd();
-}
-
-// Function to draw the user-drawn path
-void drawUserPath() {
-    glBegin(GL_LINE_STRIP);
     for (int i = 0; i < vertexCount; ++i) {
         glVertex2f(vertices[i].x, vertices[i].y);
     }
     glEnd();
 }
 
-// Function to handle mouse click events
 void mouseClick(int button, int state, int x, int y) {
+    float x_scale = 2.0 / glutGet(GLUT_WINDOW_WIDTH);
+    float y_scale = -2.0 / glutGet(GLUT_WINDOW_HEIGHT);
+
     if (button == GLUT_LEFT_BUTTON) {
         if (state == GLUT_DOWN) {
-            // Start drawing when the left mouse button is pressed
-            drawing = true;
-            vertexCount = 0;
+            if (!moving) {
+                drawing = true;
+                vertexCount = 0;
+            }
         } else if (state == GLUT_UP) {
-            // Stop drawing when the left mouse button is released
             drawing = false;
+            if (!moving) {
+                vertices[vertexCount].x = (x - glutGet(GLUT_WINDOW_WIDTH) / 2) * x_scale;
+                vertices[vertexCount].y = (glutGet(GLUT_WINDOW_HEIGHT) / 2 - y) * y_scale;
+                vertexCount++;
+            } else {
+                moving = false;
+                moveStartTime = clock();
+            }
         }
     }
 }
 
-// Function to handle mouse motion events
 void mouseMotion(int x, int y) {
     if (drawing && vertexCount < MAX_VERTICES) {
-        // Record the mouse position while drawing
-        vertices[vertexCount].x = (float)x / glutGet(GLUT_WINDOW_WIDTH) * 2 - 1;
-        vertices[vertexCount].y = 1 - (float)y / glutGet(GLUT_WINDOW_HEIGHT) * 2;
+        float x_scale = 2.0 / glutGet(GLUT_WINDOW_WIDTH);
+        float y_scale = -2.0 / glutGet(GLUT_WINDOW_HEIGHT);
+
+        vertices[vertexCount].x = (x - glutGet(GLUT_WINDOW_WIDTH) / 2) * x_scale;
+        vertices[vertexCount].y = (glutGet(GLUT_WINDOW_HEIGHT) / 2 - y) * y_scale;
         ++vertexCount;
-        glutPostRedisplay(); // Trigger a redraw to update the display
+        glutPostRedisplay();
     }
 }
 
-// Function to animate the polygon along the recorded path
 void movePolygon() {
     if (vertexCount > 1) {
-        // Calculate elapsed time since the animation started
         clock_t currentTime = clock();
         double elapsedTime = (double)(currentTime - moveStartTime) / CLOCKS_PER_SEC;
 
-        // Calculate the current position along the path based on elapsed time
-        float t = fmin(1.0, elapsedTime / (MOVEMENT_DURATION / 1000.0)); // Ensure t does not exceed 1
+        float t = fmin(1.0, elapsedTime / (MOVEMENT_DURATION / 1000.0));
         float currentX = (1 - t) * vertices[0].x + t * vertices[vertexCount - 1].x;
         float currentY = (1 - t) * vertices[0].y + t * vertices[vertexCount - 1].y;
 
-        // Draw the polygon at the current position
-        glBegin(GL_POLYGON);
-        glVertex2f(currentX - 0.05, currentY - 0.05); // Adjust the size of the drawn polygon
-        glVertex2f(currentX + 0.05, currentY - 0.05);
-        glVertex2f(currentX + 0.05, currentY + 0.05);
-        glVertex2f(currentX - 0.05, currentY + 0.05);
-        glEnd();
+        glTranslatef(currentX, currentY, 0.0);
+        drawPolygon();
 
-        // Check if the animation is complete
         if (t >= 1.0) {
-            drawing = false; // Stop drawing when the animation is complete
+            drawing = false;
+            moving = true;
         }
     }
 }
 
-// Function to display the scene
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
-    glColor3f(0.0, 0.0, 1.0); // Set color
-
-    drawInitialSquare(); // Draw the initial square
+    glColor3f(1.0, 1.0, 1.0);
 
     if (drawing) {
-        drawUserPath(); // Draw the user-drawn path
+        drawPolygon();
     } else {
-        movePolygon(); // Move the polygon along the recorded path
+        movePolygon();
     }
 
     glutSwapBuffers();
 }
 
-// Function to initialize OpenGL settings
 void init() {
-    glClearColor(1.0, 1.0, 1.0, 1.0); // Set clear color to black
+    glClearColor(0.0, 0.0, 0.0, 1.0);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(-1.0, 1.0, -1.0, 1.0); // Set up an orthographic view
+    gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
 
-// Main function
 int main(int argc, char *argv[]) {
     glutInit(&argc, argv);
-    glutInitDisplayMode
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutCreateWindow("Drawing and Moving Polygon");
+    glutDisplayFunc(display);
+    glutMouseFunc(mouseClick);
+    glutMotionFunc(mouseMotion);
+    init();
+
+    glutMainLoop();
+
+    return 0;
+}
 
     return 0;
 }
