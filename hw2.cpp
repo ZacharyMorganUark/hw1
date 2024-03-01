@@ -8,10 +8,11 @@
 #else
 #include <GL/glut.h>
 #endif
-//sss
+
+//4545
 
 const int MAX_VERTICES = 4;
-const int LINE_COUNT = 100;  // You can adjust this value
+const int LINE_COUNT = 100;
 const int MOVEMENT_DURATION = 5000;
 
 float squareVertices[MAX_VERTICES][2] = {
@@ -88,6 +89,7 @@ void display() {
     if (drawing) {
         drawPath();
     } else {
+        drawSquare();
         moveSquare();
     }
 
@@ -105,7 +107,7 @@ void init() {
 
 int main(int argc, char *argv[]) {
     glutInit(&argc, argv);
-    glutInitWindowSize(500, 500); // Set the window size
+    glutInitWindowSize(500, 500);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutCreateWindow("Drawing and Moving Square");
     glutDisplayFunc(display);
