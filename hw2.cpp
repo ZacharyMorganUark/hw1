@@ -6,8 +6,7 @@
 #else
 #include <GL/glut.h>
 #endif
-
-//djfhkdjsf
+//kkkk
 
 #define MIN_X_VIEW -50
 #define MAX_X_VIEW 50
@@ -55,8 +54,8 @@ void drawBezierCurve(float x0, float y0, float x1, float y1, float controlX, flo
     for (int i = 0; i <= curveResolution; ++i)
     {
         float t = static_cast<float>(i) / curveResolution;
-        float x = calculateBezierPoint(t, x0, controlX0, controlX1, x1);
-        float y = calculateBezierPoint(t, y0, controlY0, controlY1, y1);
+        float x = calculateBezierPoint(t, x0, controlX0, x1);
+        float y = calculateBezierPoint(t, y0, controlY0, y1);
         glVertex3f(x, y, 0.0);
     }
     glEnd();
