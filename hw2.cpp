@@ -6,6 +6,7 @@
 #else
 #include <GL/glut.h>
 #endif
+//gggg
 
 // Global constants
 #define MIN_X_VIEW -50
@@ -109,7 +110,7 @@ void motion(int x, int y)
    float y_scale = (MIN_Y_VIEW - MAX_Y_VIEW) / 
       (float)(MAX_Y_SCREEN - MIN_Y_SCREEN);
 
-   // Handle mouse motion
+   // Update endpoint of the current line segment
    point[count][2] = MIN_X_VIEW + (x - MIN_X_SCREEN) * x_scale;
    point[count][3] = MAX_Y_VIEW + (y - MIN_Y_SCREEN) * y_scale;
    glutPostRedisplay();
@@ -131,9 +132,23 @@ void display()
    }
 
    // Draw all walls
-   for (int i=0; i<=count; i++)
+   for (int i=0; i<count; i++)
       if ((point[i][0] != point[i][2]) || (point[i][1] != point[i][3])) 
          wall(point[i][0], point[i][1], point[i][2], point[i][3]);
+   
+   // Draw the current line being drawn
+   if (count > 0) {
+      glColor3f(0.0, 1.0, 0.0); // Green color
+      glBegin(GL_LINE_STRIP);
+      for (int i = 0; i <= 10; ++i) {
+         float t = static_cast<float>(i) / 10;
+         float x = (1 - t) * point[count - 1][0] + t * point[count - 1][2];
+         float y = (1 - t) * point[count - 1][1] + t * point[count - 1][3];
+         glVertex3f(x, y, 0.0);
+      }
+      glEnd();
+   }
+
    glFlush();
 }
 
@@ -162,7 +177,7 @@ int main(int argc, char *argv[])
    printf("   'S' - save building.txt file\n");
    printf("Mouse operations:\n");
    printf("   'mouse down' - start drawing line\n");
-   printf("   'mouse motion' - draw rubber-band line\n");
+   printf("   'mouse motion' - draw curve\n");
    printf("   'mouse up' - finish drawing line\n");
    glutMainLoop();
    return 0;
