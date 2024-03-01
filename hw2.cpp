@@ -8,7 +8,8 @@
 #else
 #include <GL/glut.h>
 #endif
-//d11111
+//sss
+
 const int MAX_VERTICES = 4;
 const int LINE_COUNT = 100;  // You can adjust this value
 const int MOVEMENT_DURATION = 5000;
@@ -94,7 +95,7 @@ void display() {
 }
 
 void init() {
-    glClearColor(0.0, 0.0, 0.0, 0.0);  // Set clear color to black
+    glClearColor(0.0, 0.0, 0.0, 1.0); // Set clear color to black
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
@@ -104,6 +105,7 @@ void init() {
 
 int main(int argc, char *argv[]) {
     glutInit(&argc, argv);
+    glutInitWindowSize(500, 500); // Set the window size
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutCreateWindow("Drawing and Moving Square");
     glutDisplayFunc(display);
