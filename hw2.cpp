@@ -1,6 +1,8 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cmath>
+#include <ctime>
+#include <cstdio>
+#include <cstdlib>
+
 #ifdef MAC
 #include <GLUT/glut.h>
 #else
@@ -8,7 +10,8 @@
 #endif
 
 const int MAX_VERTICES = 4;
-const int MOVEMENT_DURATION = 5000;  // Animation duration in milliseconds
+const int LINE_COUNT = 100;  // You can adjust this value
+const int MOVEMENT_DURATION = 5000;
 
 float squareVertices[MAX_VERTICES][2] = {
     {-0.1, -0.1},
@@ -20,7 +23,7 @@ float squareVertices[MAX_VERTICES][2] = {
 float pathVertices[MAX_VERTICES * LINE_COUNT][2];
 int vertexCount = 0;
 bool drawing = false;
-clock_t moveStartTime;
+std::clock_t moveStartTime;
 
 void drawSquare() {
     glBegin(GL_POLYGON);
@@ -45,7 +48,7 @@ void mouseClick(int button, int state, int x, int y) {
             vertexCount = 0;
         } else if (state == GLUT_UP) {
             drawing = false;
-            moveStartTime = clock();  // Start animation
+            moveStartTime = std::clock();  // Start animation
         }
     }
 }
@@ -63,7 +66,7 @@ void mouseMotion(int x, int y) {
 
 void moveSquare() {
     if (vertexCount > 1) {
-        clock_t currentTime = clock();
+        std::clock_t currentTime = std::clock();
         double elapsedTime = (double)(currentTime - moveStartTime) / CLOCKS_PER_SEC;
 
         float t = fmin(1.0, elapsedTime / (MOVEMENT_DURATION / 1000.0));
@@ -95,10 +98,10 @@ void display() {
 }
 
 void init() {
-    glClearColor(1.0, 1.0, 1.0, 1.0);  // Set clear color to black
+    glClearColor(1.0, 1.0, 1.0, 1.0);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(-1.0, 1.0, -1.0, 1.0);  // Set up an orthographic view
+    gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
