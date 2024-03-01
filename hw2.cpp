@@ -6,7 +6,7 @@
 #else
 #include <GL/glut.h>
 #endif
-//4444
+//sdfd
 
 #define MIN_X_VIEW -50
 #define MAX_X_VIEW 50
@@ -102,6 +102,24 @@ void display()
          drawCurve(point[i][0], point[i][1], point[i][2], point[i][3]);
 
    glutSwapBuffers();
+
+   if (count > 0) {
+      glColor3f(0.0, 1.0, 0.0); // Green color
+      glBegin(GL_LINE_STRIP);
+      for (int i = 0; i <= curveResolution; ++i) {
+         float t = static_cast<float>(i) / curveResolution;
+         float x = calculateBezierPoint(t, point[count - 1][0], point[i][0], point[count - 1][2]);
+         float y = calculateBezierPoint(t, point[count - 1][1], point[i][1], point[count - 1][3]);
+         glVertex3f(x, y, 0.0);
+      }
+      glEnd();
+   }
+}
+
+// Add this function to calculate a point on the Bezier curve
+float calculateBezierPoint(float t, float p0, float p1, float p2) {
+    float u = 1 - t;
+    return u * u * p0 + 2 * u * t * p1 + t * t * p2;
 }
 
 int main(int argc, char *argv[])
