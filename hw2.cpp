@@ -2,13 +2,11 @@
 #include <iostream>
 
 // Triangle properties
-GLfloat triangleVertices[] = { 0.0f, 0.0f,  -25.0f, 50.0f,  25.0f, 50.0f };
-bool followMouse = false;
-float mouseX, mouseY;
+GLfloat triangleVertices[] = { 0.0f, 0.0f, -25.0f, 50.0f, 25.0f, 50.0f };
 
-// Animation properties
-float animationStartTime;
-float animationDuration = 5.0f;
+// Line properties
+bool drawingLine = false;
+GLfloat lineStartX, lineStartY, lineEndX, lineEndY;
 
 void drawTriangle() {
     glColor3f(1.0f, 0.0f, 0.0f); // Red color
@@ -19,31 +17,22 @@ void drawTriangle() {
     glEnd();
 }
 
-void animateTriangle() {
-    float currentTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-    float elapsedTime = currentTime - animationStartTime;
-
-    if (followMouse) {
-        // If the mouse button is held down, update the triangle position
-        triangleVertices[0] = mouseX;
-        triangleVertices[1] = mouseY;
-    } else if (elapsedTime <= animationDuration) {
-        // If the mouse button is released, animate the triangle for a few seconds
-        float t = elapsedTime / animationDuration;
-        float x = (1 - t) * mouseX + t * 0.0f;
-        float y = (1 - t) * mouseY + t * 0.0f;
-
-        // Update the triangle position
-        triangleVertices[0] = x;
-        triangleVertices[1] = y;
-    }
+void drawLine() {
+    glColor3f(0.0f, 0.0f, 1.0f); // Blue color
+    glBegin(GL_LINES);
+    glVertex2f(lineStartX, lineStartY);
+    glVertex2f(lineEndX, lineEndY);
+    glEnd();
 }
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     drawTriangle();
-    animateTriangle();
+
+    if (drawingLine) {
+        drawLine();
+    }
 
     glutSwapBuffers();
 }
@@ -51,18 +40,17 @@ void display() {
 void mouse(int button, int state, int x, int y) {
     if (button == GLUT_LEFT_BUTTON) {
         if (state == GLUT_DOWN) {
-            // When the mouse button is pressed, start following the mouse
-            followMouse = true;
+            // When the left mouse button is pressed, start drawing the line
+            lineStartX = static_cast<float>(x) / glutGet(GLUT_WINDOW_WIDTH) * 2.0f - 1.0f;
+            lineStartY = 1.0f - static_cast<float>(y) / glutGet(GLUT_WINDOW_HEIGHT) * 2.0f;
+            drawingLine = true;
         } else if (state == GLUT_UP) {
-            // When the mouse button is released, stop following the mouse and start the animation
-            followMouse = false;
-            animationStartTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+            // When the left mouse button is released, end drawing the line
+            lineEndX = static_cast<float>(x) / glutGet(GLUT_WINDOW_WIDTH) * 2.0f - 1.0f;
+            lineEndY = 1.0f - static_cast<float>(y) / glutGet(GLUT_WINDOW_HEIGHT) * 2.0f;
+            drawingLine = false;
         }
     }
-
-    // Convert screen coordinates to OpenGL coordinates
-    mouseX = static_cast<float>(x) / glutGet(GLUT_WINDOW_WIDTH) * 2.0f - 1.0f;
-    mouseY = 1.0f - static_cast<float>(y) / glutGet(GLUT_WINDOW_HEIGHT) * 2.0f;
 
     glutPostRedisplay();
 }
@@ -78,7 +66,7 @@ void reshape(int width, int height) {
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutCreateWindow("Triangle Follows Mouse");
+    glutCreateWindow("Draw Triangle and Line");
     glutReshapeWindow(800, 600);
 
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
