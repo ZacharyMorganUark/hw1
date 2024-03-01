@@ -148,7 +148,6 @@ int main(int argc, char *argv[])
    glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE | GLUT_DEPTH);
    glutCreateWindow("Building");
    glutDisplayFunc(display);
-   glutKeyboardFunc(keyboard);
    glutMouseFunc(mouse);
    glutMotionFunc(motion);
    init();
