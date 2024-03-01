@@ -1,121 +1,92 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#ifdef MAC
-#include <GLUT/glut.h>
-#else
 #include <GL/glut.h>
-#endif
+#include <iostream>
 
-const int MAX_VERTICES = 100;
+// Triangle properties
+GLfloat triangleVertices[] = { 0.0f, 0.0f,  -25.0f, 50.0f,  25.0f, 50.0f };
+bool followMouse = false;
+float mouseX, mouseY;
 
-struct Point {
-    float x, y;
-};
+// Animation properties
+float animationStartTime;
+float animationDuration = 5.0f;
 
-Point vertices[MAX_VERTICES];
-int vertexCount = 0;
-bool drawing = false;
-bool moving = false;
-clock_t moveStartTime;
-const int MOVEMENT_DURATION = 5000;
-
-void drawPolygon() {
-    glBegin(GL_POLYGON);
-    for (int i = 0; i < vertexCount; ++i) {
-        glVertex2f(vertices[i].x, vertices[i].y);
+void drawTriangle() {
+    glColor3f(1.0f, 0.0f, 0.0f); // Red color
+    glBegin(GL_TRIANGLES);
+    for (int i = 0; i < 6; i += 2) {
+        glVertex2f(triangleVertices[i], triangleVertices[i + 1]);
     }
     glEnd();
 }
 
-void mouseClick(int button, int state, int x, int y) {
-    float x_scale = 2.0 / glutGet(GLUT_WINDOW_WIDTH);
-    float y_scale = -2.0 / glutGet(GLUT_WINDOW_HEIGHT);
+void animateTriangle() {
+    float currentTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+    float elapsedTime = currentTime - animationStartTime;
 
-    if (button == GLUT_LEFT_BUTTON) {
-        if (state == GLUT_DOWN) {
-            if (!moving) {
-                drawing = true;
-                vertexCount = 0;
-            }
-        } else if (state == GLUT_UP) {
-            drawing = false;
-            if (!moving) {
-                vertices[vertexCount].x = (x - glutGet(GLUT_WINDOW_WIDTH) / 2) * x_scale;
-                vertices[vertexCount].y = (glutGet(GLUT_WINDOW_HEIGHT) / 2 - y) * y_scale;
-                vertexCount++;
-            } else {
-                moving = false;
-                moveStartTime = clock();
-            }
-        }
-    }
-}
+    if (followMouse) {
+        // If the mouse button is held down, update the triangle position
+        triangleVertices[0] = mouseX;
+        triangleVertices[1] = mouseY;
+    } else if (elapsedTime <= animationDuration) {
+        // If the mouse button is released, animate the triangle for a few seconds
+        float t = elapsedTime / animationDuration;
+        float x = (1 - t) * mouseX + t * 0.0f;
+        float y = (1 - t) * mouseY + t * 0.0f;
 
-void mouseMotion(int x, int y) {
-    if (drawing && vertexCount < MAX_VERTICES) {
-        float x_scale = 2.0 / glutGet(GLUT_WINDOW_WIDTH);
-        float y_scale = -2.0 / glutGet(GLUT_WINDOW_HEIGHT);
-
-        vertices[vertexCount].x = (x - glutGet(GLUT_WINDOW_WIDTH) / 2) * x_scale;
-        vertices[vertexCount].y = (glutGet(GLUT_WINDOW_HEIGHT) / 2 - y) * y_scale;
-        ++vertexCount;
-        glutPostRedisplay();
-    }
-}
-
-void movePolygon() {
-    if (vertexCount > 1) {
-        clock_t currentTime = clock();
-        double elapsedTime = (double)(currentTime - moveStartTime) / CLOCKS_PER_SEC;
-
-        float t = fmin(1.0, elapsedTime / (MOVEMENT_DURATION / 1000.0));
-        float currentX = (1 - t) * vertices[0].x + t * vertices[vertexCount - 1].x;
-        float currentY = (1 - t) * vertices[0].y + t * vertices[vertexCount - 1].y;
-
-        glTranslatef(currentX, currentY, 0.0);
-        drawPolygon();
-
-        if (t >= 1.0) {
-            drawing = false;
-            moving = true;
-        }
+        // Update the triangle position
+        triangleVertices[0] = x;
+        triangleVertices[1] = y;
     }
 }
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
-    glColor3f(1.0, 1.0, 1.0);
 
-    if (drawing) {
-        drawPolygon();
-    } else {
-        movePolygon();
-    }
+    drawTriangle();
+    animateTriangle();
 
     glutSwapBuffers();
 }
 
-void init() {
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+void mouse(int button, int state, int x, int y) {
+    if (button == GLUT_LEFT_BUTTON) {
+        if (state == GLUT_DOWN) {
+            // When the mouse button is pressed, start following the mouse
+            followMouse = true;
+        } else if (state == GLUT_UP) {
+            // When the mouse button is released, stop following the mouse and start the animation
+            followMouse = false;
+            animationStartTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+        }
+    }
+
+    // Convert screen coordinates to OpenGL coordinates
+    mouseX = static_cast<float>(x) / glutGet(GLUT_WINDOW_WIDTH) * 2.0f - 1.0f;
+    mouseY = 1.0f - static_cast<float>(y) / glutGet(GLUT_WINDOW_HEIGHT) * 2.0f;
+
+    glutPostRedisplay();
+}
+
+void reshape(int width, int height) {
+    glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
     glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutCreateWindow("Drawing and Moving Polygon");
+    glutCreateWindow("Triangle Follows Mouse");
+    glutReshapeWindow(800, 600);
+
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
     glutDisplayFunc(display);
-    glutMouseFunc(mouseClick);
-    glutMotionFunc(mouseMotion);
-    init();
+    glutMouseFunc(mouse);
+    glutReshapeFunc(reshape);
 
     glutMainLoop();
-
     return 0;
 }
