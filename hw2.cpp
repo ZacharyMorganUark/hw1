@@ -1,9 +1,3 @@
-//---------------------------------------
-// Program: building3.cpp
-// Purpose: Demonstrate use of mouse callbacks to draw lines.
-// Author:  John Gauch
-// Date:    Spring 2012
-//---------------------------------------
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -72,51 +66,6 @@ void wall(float x1, float y1, float x2, float y2)
    glVertex3f(x2, y2, z2);
    glVertex3f(x1, y1, z2);
    glEnd();
-}
-
-//---------------------------------------
-// Keyboard callback for OpenGL
-//---------------------------------------
-void keyboard(unsigned char key, int x, int y)
-{
-   // Update angles
-   if ((key == 'x') && (mode == 3))
-      xangle -= 5;
-   else if ((key == 'y') && (mode == 3))
-      yangle -= 5;
-   else if ((key == 'X') && (mode == 3))
-      xangle += 5;
-   else if ((key == 'Y') && (mode == 3))
-      yangle += 5;
-   else if (key == '2')
-      mode = 2;
-   else if (key == '3')
-      mode = 3;
-   else if (key == 'L')
-   {
-      // Load wall information from building.txt
-      FILE *fd = fopen("building.txt", "r");
-      if (fscanf(fd, "%d\n", &count) != 1)
-         printf("Error: could not execute fscanf command\n");
-      for (int i=0; i<count; i++)
-         if (fscanf(fd, "%f %f %f %f\n",
-            &point[i][0], &point[i][1], &point[i][2], &point[i][3]) != 4)
-            printf("Error: could not execute fscanf command\n");
-      fclose(fd);
-   }
-   else if (key == 'S')
-   {
-      // Save wall information in building.txt
-      FILE *fd = fopen("building.txt", "w");
-      fprintf(fd, "%d\n", count);
-      for (int i=0; i<count; i++)
-         fprintf(fd, "%f %f %f %f\n",
-            point[i][0], point[i][1], point[i][2], point[i][3]);
-      fclose(fd);
-   }
-   
-   // Redraw objects
-   glutPostRedisplay();
 }
 
 //---------------------------------------
