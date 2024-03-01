@@ -9,7 +9,7 @@
 #include <GL/glut.h>
 #endif
 
-//4545
+//4500
 
 const int MAX_VERTICES = 4;
 const int LINE_COUNT = 100;
@@ -67,6 +67,8 @@ void mouseMotion(int x, int y) {
 }
 
 void moveSquare() {
+    glPushMatrix();
+
     if (vertexCount > 1) {
         std::clock_t currentTime = std::clock();
         double elapsedTime = (double)(currentTime - moveStartTime) / CLOCKS_PER_SEC;
@@ -75,11 +77,12 @@ void moveSquare() {
         float currentX = (1 - t) * pathVertices[0][0] + t * pathVertices[vertexCount - 1][0];
         float currentY = (1 - t) * pathVertices[0][1] + t * pathVertices[vertexCount - 1][1];
 
-        glPushMatrix();
         glTranslatef(currentX, currentY, 0.0);
-        drawSquare();
-        glPopMatrix();
     }
+
+    drawSquare();
+
+    glPopMatrix();
 }
 
 void display() {
