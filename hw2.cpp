@@ -1,42 +1,55 @@
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctime>
+
+#ifdef MAC
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
-#include <vector>
+#endif
+
+const int MAX_VERTICES = 100;
+const int MOVEMENT_DURATION = 5000; // Animation duration in milliseconds
+clock_t moveStartTime;              // Start time of the animation
 
 // Structure to represent a point
 struct Point {
     float x, y;
 };
 
-std::vector<Point> flightPath;
-bool drawing = false;
+Point vertices[MAX_VERTICES]; // Array to store the vertices of the polygon
+int vertexCount = 0;          // Counter to keep track of the number of vertices
+bool drawing = false;         // Flag to indicate whether drawing is in progress
 
-// Function to draw a polygon (rectangle in this example)
-void drawObject() {
-    glColor3f(1.0, 0.0, 0.0);  // Red color
+// Function to draw the initial square
+void drawInitialSquare() {
     glBegin(GL_POLYGON);
-    glVertex2f(-0.1, -0.1);
-    glVertex2f(0.1, -0.1);
-    glVertex2f(0.1, 0.1);
-    glVertex2f(-0.1, 0.1);
+    glVertex2f(-0.05, -0.05);
+    glVertex2f(0.05, -0.05);
+    glVertex2f(0.05, 0.05);
+    glVertex2f(-0.05, 0.05);
     glEnd();
 }
 
-// Function to convert screen coordinates to object coordinates
-Point screenToObject(int x, int y) {
-    Point objectPoint;
-    objectPoint.x = (float)x / glutGet(GLUT_WINDOW_WIDTH) * 2 - 1;
-    objectPoint.y = 1 - (float)y / glutGet(GLUT_WINDOW_HEIGHT) * 2;
-    return objectPoint;
+// Function to draw the user-drawn path
+void drawUserPath() {
+    glBegin(GL_LINE_STRIP);
+    for (int i = 0; i < vertexCount; ++i) {
+        glVertex2f(vertices[i].x, vertices[i].y);
+    }
+    glEnd();
 }
 
 // Function to handle mouse click events
 void mouseClick(int button, int state, int x, int y) {
     if (button == GLUT_LEFT_BUTTON) {
         if (state == GLUT_DOWN) {
-            // Start capturing the flight path when the left mouse button is pressed
-            flightPath.clear();
+            // Start drawing when the left mouse button is pressed
             drawing = true;
+            vertexCount = 0;
         } else if (state == GLUT_UP) {
-            // Stop capturing the flight path when the left mouse button is released
+            // Stop drawing when the left mouse button is released
             drawing = false;
         }
     }
@@ -44,37 +57,53 @@ void mouseClick(int button, int state, int x, int y) {
 
 // Function to handle mouse motion events
 void mouseMotion(int x, int y) {
-    if (drawing) {
+    if (drawing && vertexCount < MAX_VERTICES) {
         // Record the mouse position while drawing
-        Point objectPoint = screenToObject(x, y);
-        flightPath.push_back(objectPoint);
-        glutPostRedisplay();  // Trigger a redraw to update the display
+        vertices[vertexCount].x = (float)x / glutGet(GLUT_WINDOW_WIDTH) * 2 - 1;
+        vertices[vertexCount].y = 1 - (float)y / glutGet(GLUT_WINDOW_HEIGHT) * 2;
+        ++vertexCount;
+        glutPostRedisplay(); // Trigger a redraw to update the display
     }
 }
 
-// Function to animate the object along the captured path
-void animateObject() {
-    static int currentPointIndex = 0;
-    if (currentPointIndex < flightPath.size()) {
-        Point currentPoint = flightPath[currentPointIndex];
-        glPushMatrix();
-        glTranslatef(currentPoint.x, currentPoint.y, 0.0);
-        drawObject();
-        glPopMatrix();
+// Function to animate the polygon along the recorded path
+void movePolygon() {
+    if (vertexCount > 1) {
+        // Calculate elapsed time since the animation started
+        clock_t currentTime = clock();
+        double elapsedTime = (double)(currentTime - moveStartTime) / CLOCKS_PER_SEC;
 
-        currentPointIndex++;
+        // Calculate the current position along the path based on elapsed time
+        float t = fmin(1.0, elapsedTime / (MOVEMENT_DURATION / 1000.0)); // Ensure t does not exceed 1
+        float currentX = (1 - t) * vertices[0].x + t * vertices[vertexCount - 1].x;
+        float currentY = (1 - t) * vertices[0].y + t * vertices[vertexCount - 1].y;
+
+        // Draw the polygon at the current position
+        glBegin(GL_POLYGON);
+        glVertex2f(currentX - 0.05, currentY - 0.05); // Adjust the size of the drawn polygon
+        glVertex2f(currentX + 0.05, currentY - 0.05);
+        glVertex2f(currentX + 0.05, currentY + 0.05);
+        glVertex2f(currentX - 0.05, currentY + 0.05);
+        glEnd();
+
+        // Check if the animation is complete
+        if (t >= 1.0) {
+            drawing = false; // Stop drawing when the animation is complete
+        }
     }
 }
 
 // Function to display the scene
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
-    glColor3f(0.0, 0.0, 1.0);  // Blue color
+    glColor3f(0.0, 0.0, 1.0); // Set color
+
+    drawInitialSquare(); // Draw the initial square
 
     if (drawing) {
-        drawObject();  // Draw the object during drawing phase
+        drawUserPath(); // Draw the user-drawn path
     } else {
-        animateObject();  // Animate the object along the captured path
+        movePolygon(); // Move the polygon along the recorded path
     }
 
     glutSwapBuffers();
@@ -82,10 +111,10 @@ void display() {
 
 // Function to initialize OpenGL settings
 void init() {
-    glClearColor(1.0, 1.0, 1.0, 1.0);  // Set clear color to white
+    glClearColor(1.0, 1.0, 1.0, 1.0); // Set clear color to black
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(-1.0, 1.0, -1.0, 1.0);  // Set up an orthographic view
+    gluOrtho2D(-1.0, 1.0, -1.0, 1.0); // Set up an orthographic view
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
@@ -93,18 +122,7 @@ void init() {
 // Main function
 int main(int argc, char *argv[]) {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutCreateWindow("Flying Object");
-
-    // Register callback functions
-    glutDisplayFunc(display);
-    glutMouseFunc(mouseClick);
-    glutMotionFunc(mouseMotion);
-
-    init();
-
-    // Enter the GLUT event loop
-    glutMainLoop();
+    glutInitDisplayMode
 
     return 0;
 }
