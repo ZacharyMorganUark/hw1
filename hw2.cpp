@@ -6,7 +6,7 @@
 #else
 #include <GL/glut.h>
 #endif
-//hw2
+//sssssss
 
 #define MIN_X_VIEW -50
 #define MAX_X_VIEW 50
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
     glutInitWindowSize(MAX_Y_SCREEN, MAX_X_SCREEN);
     glutInitWindowPosition(MAX_Y_SCREEN / 2, MAX_X_SCREEN / 2);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-    glutCreateWindow("Building");
+    glutCreateWindow("Taco Bell");
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
