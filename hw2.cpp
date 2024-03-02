@@ -115,6 +115,9 @@ int main(int argc, char *argv[]) {
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
     glutKeyboardFunc(keyboard); // Register keyboard callback
+    printf("   'mouse down' - sets a point and the next mouse down action will connect the points\n");
+    printf("   hold 'm' - draw the sqaure and make it begin moving along the path\n");
+    
 
     init();
 
