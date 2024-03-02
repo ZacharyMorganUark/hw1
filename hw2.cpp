@@ -1,98 +1,66 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream>
-#ifdef MAC
+#ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
-//555
-const int MAX_VERTICES = 100;
+//dfdf
+#define LINE_COUNT 1000
 
-struct Point {
-    float x, y;
-};
+int curveResolution = 100;
+int pointCount = 0;
+float points[LINE_COUNT][2]; // x, y
 
-Point vertices[MAX_VERTICES];
-int vertexCount = 0;
-bool drawing = false;
-bool moving = false;
-clock_t moveStartTime;
-const int MOVEMENT_DURATION = 5000;
-
-void drawPolygon() {
-    glBegin(GL_POLYGON);
-    for (int i = 0; i < vertexCount; ++i) {
-        glVertex2f(vertices[i].x, vertices[i].y);
+void drawBezierCurve(float startX, float startY, float endX, float endY, float controlX, float controlY) {
+    glColor3f(1.0f, 0.0f, 0.0f); // Red color
+    glBegin(GL_LINE_STRIP);
+    for (int i = 0; i <= curveResolution; ++i) {
+        float t = static_cast<float>(i) / curveResolution;
+        float x = (1 - t) * (1 - t) * startX + 2 * (1 - t) * t * controlX + t * t * endX;
+        float y = (1 - t) * (1 - t) * startY + 2 * (1 - t) * t * controlY + t * t * endY;
+        glVertex2f(x, y);
     }
     glEnd();
 }
 
-void mouseClick(int button, int state, int x, int y) {
+void mouse(int button, int state, int x, int y) {
     float x_scale = 2.0 / glutGet(GLUT_WINDOW_WIDTH);
     float y_scale = -2.0 / glutGet(GLUT_WINDOW_HEIGHT);
 
     if (button == GLUT_LEFT_BUTTON) {
         if (state == GLUT_DOWN) {
-            if (!moving) {
-                drawing = true;
-                vertexCount = 0;
-            }
-        } else if (state == GLUT_UP) {
-            drawing = false;
-            if (!moving) {
-                vertices[vertexCount].x = (x - glutGet(GLUT_WINDOW_WIDTH) / 2) * x_scale;
-                vertices[vertexCount].y = (glutGet(GLUT_WINDOW_HEIGHT) / 2 - y) * y_scale;
-                vertexCount++;
-            } else {
-                moving = false;
-                moveStartTime = clock();
-            }
-        }
-    }
-}
-
-void mouseMotion(int x, int y) {
-    if (drawing && vertexCount < MAX_VERTICES) {
-        float x_scale = 2.0 / glutGet(GLUT_WINDOW_WIDTH);
-        float y_scale = -2.0 / glutGet(GLUT_WINDOW_HEIGHT);
-
-        vertices[vertexCount].x = (x - glutGet(GLUT_WINDOW_WIDTH) / 2) * x_scale;
-        vertices[vertexCount].y = (glutGet(GLUT_WINDOW_HEIGHT) / 2 - y) * y_scale;
-        ++vertexCount;
-        glutPostRedisplay();
-    }
-}
-
-void movePolygon() {
-    if (vertexCount > 1) {
-        clock_t currentTime = clock();
-        double elapsedTime = (double)(currentTime - moveStartTime) / CLOCKS_PER_SEC;
-
-        float t = fmin(1.0, elapsedTime / (MOVEMENT_DURATION / 1000.0));
-        float currentX = (1 - t) * vertices[0].x + t * vertices[vertexCount - 1].x;
-        float currentY = (1 - t) * vertices[0].y + t * vertices[vertexCount - 1].y;
-
-        glTranslatef(currentX, currentY, 0.0);
-        drawPolygon();
-
-        if (t >= 1.0) {
-            drawing = false;
-            moving = true;
+            points[pointCount][0] = x * x_scale - 1.0;
+            points[pointCount][1] = y * y_scale + 1.0;
+            pointCount++;
+            glutPostRedisplay();
         }
     }
 }
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
-    glColor3f(1.0, 1.0, 1.0);
 
-    if (drawing) {
-        drawPolygon();
-    } else {
-        movePolygon();
+    // Draw the existing points
+    glColor3f(0.0f, 1.0f, 0.0f); // Green color
+    glPointSize(5.0);
+
+    glBegin(GL_POINTS);
+    for (int i = 0; i < pointCount; ++i) {
+        glVertex2f(points[i][0], points[i][1]);
     }
+    glEnd();
+
+    // Draw Bezier curves between consecutive points
+    glColor3f(1.0f, 0.0f, 0.0f); // Red color
+    for (int i = 1; i < pointCount; i += 2) {
+        float controlX = (points[i - 1][0] + points[i + 1][0]) / 2.0;
+        float controlY = (points[i - 1][1] + points[i + 1][1]) / 2.0;
+        drawBezierCurve(points[i - 1][0], points[i - 1][1], points[i][0], points[i][1], controlX, controlY);
+    }
+
+    glPointSize(1.0);
 
     glutSwapBuffers();
 }
@@ -102,20 +70,15 @@ void init() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
 }
 
 int main(int argc, char *argv[]) {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutCreateWindow("Dr p");
+    glutInitWindowSize(500, 500);
+    glutCreateWindow("Bed");
     glutDisplayFunc(display);
-    glutMouseFunc(mouseClick);
-    glutMotionFunc(mouseMotion);
+    glutMouseFunc(mouse);
     init();
-
     glutMainLoop();
-
     return 0;
 }
