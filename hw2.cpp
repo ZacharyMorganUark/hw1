@@ -1,6 +1,6 @@
 //---------------------------------------
 // Program: building3.cpp used
-// Purpose: Demonstrate use of mouse callbacks to draw lines.
+// Purpose: Draw lines and have a polygon follow it
 // Author:  Zachary Morgan
 // Date:    3/1/2024
 //---------------------------------------
@@ -19,8 +19,8 @@ int pointCount = 0;
 float points[500][2]; // Array to store points
 bool isDrawing = false;
 bool moveSquare = false;
-float squarePosition[2] = {10.0f, 10.0f}; // Initial position of the red square
-float speed = 0.25f; // Adjust the speed of the square
+float squarePosition[2] = {10.0f, 10.0f}; // Initial position of square
+float speed = 0.25f; // speed of square
 
 void init() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -42,6 +42,7 @@ void drawLine() {
     glEnd();
 }
 
+//draw square at starting position in top corner
 void drawSquare() {
     glColor3f(1.0, 0.0, 0.0);
     glBegin(GL_QUADS);
@@ -52,6 +53,7 @@ void drawSquare() {
     glEnd();
 }
 
+//move square to user drawn path
 void moveSquareFunc() {
     static int currentPoint = 0;
 
@@ -105,6 +107,7 @@ void motion(int x, int y) {
     }
 }
 
+//user inputs for starting the square movement or starting over
 void keyboard(unsigned char key, int x, int y) {
     if (key == 27) { 
         isDrawing = false;
@@ -132,6 +135,7 @@ int main(int argc, char *argv[]) {
     init();
     printf("   'mouse down' - sets a point and the next mouse down action will connect the points\n");
     printf("   press 'm' - draw the sqaure and make it begin moving along the path\n");
+    printf("   press 'Esc' - clear screen to restart (sometimes works)\n");
     glutMainLoop();
     return 0;
 }
