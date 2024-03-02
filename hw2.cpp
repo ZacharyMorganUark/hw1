@@ -52,7 +52,7 @@ void drawSquare() {
     glEnd();
 }
 
-void moveSquare() {
+void moveSquareFunc() {
     static int currentPoint = 0;
 
     if (currentPoint < pointCount) {
@@ -80,7 +80,7 @@ void display() {
     drawLine();
 
     if (moveSquare) {
-        moveSquare();
+        moveSquareFunc();
         drawSquare();
     }
 
