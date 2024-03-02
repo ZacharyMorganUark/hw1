@@ -1,14 +1,14 @@
 #include <GL/glut.h>
 #include <cmath>
-//sammy
+//doggs
 int windowWidth = 500;
 int windowHeight = 500;
 int pointCount = 0;
 float points[500][2]; // Array to store points
-int curveResolution = 100;
 bool isDrawing = false;
 bool moveSquare = false;
 float redSquarePosition[2] = {10.0f, 10.0f}; // Initial position of the red square
+float speed = 2.0f; // Adjust the speed of the square
 
 void init() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -20,8 +20,8 @@ void drawLineWithCurves() {
     glColor3f(1.0, 1.0, 1.0);
     glBegin(GL_LINE_STRIP);
     for (int i = 0; i < pointCount - 1; ++i) {
-        for (int j = 0; j <= curveResolution; ++j) {
-            float t = static_cast<float>(j) / curveResolution;
+        for (int j = 0; j <= 100; ++j) {
+            float t = static_cast<float>(j) / 100;
             float x = (1 - t) * points[i][0] + t * points[i + 1][0];
             float y = (1 - t) * points[i][1] + t * points[i + 1][1];
             glVertex2f(x, y);
@@ -42,7 +42,6 @@ void drawRedSquare() {
 
 void moveSquareAlongPath() {
     static int currentPoint = 0;
-    static float speed = 2.0f; // Adjust the speed of the square
 
     if (currentPoint < pointCount) {
         float dx = points[currentPoint][0] - redSquarePosition[0];
@@ -59,6 +58,8 @@ void moveSquareAlongPath() {
             redSquarePosition[1] = points[currentPoint][1];
             currentPoint++;
         }
+
+        glutPostRedisplay();
     }
 }
 
@@ -115,9 +116,6 @@ int main(int argc, char *argv[]) {
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
     glutKeyboardFunc(keyboard); // Register keyboard callback
-    printf("   'mouse down' - sets a point and the next mouse down action will connect the points\n");
-    printf("   hold 'm' - draw the sqaure and make it begin moving along the path\n");
-    
 
     init();
 
