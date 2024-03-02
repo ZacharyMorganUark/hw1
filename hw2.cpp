@@ -1,6 +1,6 @@
 #include <GL/glut.h>
 #include <cmath>
-//4444
+//000
 int windowWidth = 500;
 int windowHeight = 500;
 int pointCount = 0;
@@ -82,7 +82,7 @@ void keyboard(unsigned char key, int x, int y) {
     } else if (key == 'm' && pointCount > 0) {
         moveSquare = true;
         currentPathIndex = 0; // Reset the index when 'm' is pressed
-        moveSquareTimer(0);
+        glutTimerFunc(16, moveSquareTimer, 0);
         glutPostRedisplay();
     }
 }
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
     glutInitWindowSize(windowWidth, windowHeight);
     glutInitWindowPosition(100, 100);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-    glutCreateWindow("bowling");
+    glutCreateWindow("Cursed");
 
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard); // Register keyboard callback
