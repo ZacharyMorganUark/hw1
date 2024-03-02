@@ -1,6 +1,6 @@
 #include <GL/glut.h>
 #include <cmath>
-//bustin
+//harps
 int windowWidth = 500;
 int windowHeight = 500;
 int pointCount = 0;
@@ -8,7 +8,9 @@ float points[500][2]; // Array to store points
 int curveResolution = 100;
 bool isDrawing = false;
 bool moveSquare = false;
+
 float redSquarePosition[2] = {10.0f, 10.0f}; // Initial position of the red square
+float moveSpeed = 1.0f;
 
 void init() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -40,37 +42,12 @@ void drawRedSquare() {
     glEnd();
 }
 
-void moveSquareAlongPath() {
-    static int currentPoint = 0;
-    static float speed = 2.0f; // Adjust the speed of the square
-
-    if (currentPoint < pointCount) {
-        float dx = points[currentPoint][0] - redSquarePosition[0];
-        float dy = points[currentPoint][1] - redSquarePosition[1];
-        float distance = std::sqrt(dx * dx + dy * dy);
-
-        if (distance > speed) {
-            float ratio = speed / distance;
-            redSquarePosition[0] += ratio * dx;
-            redSquarePosition[1] += ratio * dy;
-        } else {
-            // Move to the next point
-            redSquarePosition[0] = points[currentPoint][0];
-            redSquarePosition[1] = points[currentPoint][1];
-            currentPoint++;
-        }
-    }
-}
-
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
     drawLineWithCurves();
-
     if (moveSquare) {
-        moveSquareAlongPath();
         drawRedSquare();
     }
-
     glutSwapBuffers();
 }
 
@@ -92,6 +69,26 @@ void motion(int x, int y) {
     }
 }
 
+void moveSquareTimer(int value) {
+    if (moveSquare) {
+        if (pointCount > 0) {
+            float deltaX = points[0][0] - redSquarePosition[0];
+            float deltaY = points[0][1] - redSquarePosition[1];
+            float distance = sqrt(deltaX * deltaX + deltaY * deltaY);
+
+            if (distance > 1.0f) {
+                float directionX = deltaX / distance;
+                float directionY = deltaY / distance;
+
+                redSquarePosition[0] += moveSpeed * directionX;
+                redSquarePosition[1] += moveSpeed * directionY;
+            }
+        }
+        glutPostRedisplay();
+        glutTimerFunc(16, moveSquareTimer, 0); // Adjust the timer interval as needed
+    }
+}
+
 void keyboard(unsigned char key, int x, int y) {
     if (key == 27) { // ASCII code for the 'Esc' key
         isDrawing = false;
@@ -100,6 +97,7 @@ void keyboard(unsigned char key, int x, int y) {
         glutPostRedisplay();
     } else if (key == 'm' && pointCount > 0) {
         moveSquare = true;
+        moveSquareTimer(0);
         glutPostRedisplay();
     }
 }
@@ -109,7 +107,7 @@ int main(int argc, char *argv[]) {
     glutInitWindowSize(windowWidth, windowHeight);
     glutInitWindowPosition(100, 100);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-    glutCreateWindow("poker time");
+    glutCreateWindow("Salmost");
 
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
