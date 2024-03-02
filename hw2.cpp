@@ -1,10 +1,14 @@
 #include <GL/glut.h>
-//dogs
+
 int windowWidth = 500;
 int windowHeight = 500;
 int pointCount = 0;
 float points[500][2]; // Array to store points
 int curveResolution = 100;
+bool isDrawing = false;
+bool moveSquare = false;
+//sabdnab
+float redSquarePosition[2] = {10.0f, 10.0f}; // Initial position of the red square
 
 void init() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -26,9 +30,22 @@ void drawLineWithCurves() {
     glEnd();
 }
 
+void drawRedSquare() {
+    glColor3f(1.0, 0.0, 0.0);
+    glBegin(GL_QUADS);
+    glVertex2f(redSquarePosition[0], redSquarePosition[1]);
+    glVertex2f(redSquarePosition[0] + 20.0f, redSquarePosition[1]);
+    glVertex2f(redSquarePosition[0] + 20.0f, redSquarePosition[1] + 20.0f);
+    glVertex2f(redSquarePosition[0], redSquarePosition[1] + 20.0f);
+    glEnd();
+}
+
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
     drawLineWithCurves();
+    if (moveSquare) {
+        drawRedSquare();
+    }
     glutSwapBuffers();
 }
 
@@ -37,14 +54,29 @@ void mouse(int button, int state, int x, int y) {
         points[pointCount][0] = x;
         points[pointCount][1] = y;
         ++pointCount;
+        isDrawing = true;
         glutPostRedisplay();
     }
 }
 
 void motion(int x, int y) {
-    if (pointCount > 0) {
+    if (isDrawing && pointCount > 0) {
         points[pointCount][0] = x;
         points[pointCount][1] = y;
+        glutPostRedisplay();
+    }
+}
+
+void keyboard(unsigned char key, int x, int y) {
+    if (key == 27) { // ASCII code for the 'Esc' key
+        isDrawing = false;
+        pointCount = 0;
+        moveSquare = false;
+        glutPostRedisplay();
+    } else if (key == 'm' && pointCount > 0) {
+        moveSquare = true;
+        redSquarePosition[0] = points[0][0];
+        redSquarePosition[1] = points[0][1];
         glutPostRedisplay();
     }
 }
@@ -54,11 +86,12 @@ int main(int argc, char *argv[]) {
     glutInitWindowSize(windowWidth, windowHeight);
     glutInitWindowPosition(100, 100);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-    glutCreateWindow("Curved Lines");
+    glutCreateWindow("Cheese");
 
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
+    glutKeyboardFunc(keyboard); // Register keyboard callback
 
     init();
 
