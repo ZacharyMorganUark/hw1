@@ -1,10 +1,14 @@
 #include <GL/glut.h>
+#include <cmath>
 
 int windowWidth = 500;
 int windowHeight = 500;
 int pointCount = 0;
 float points[500][2]; // Array to store points
 int curveResolution = 100;
+bool isDrawing = false;
+bool moveSquare = false;
+float redSquarePosition[2] = {10.0f, 10.0f}; // Initial position of the red square
 
 void init() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -26,9 +30,47 @@ void drawLineWithCurves() {
     glEnd();
 }
 
+void drawRedSquare() {
+    glColor3f(1.0, 0.0, 0.0);
+    glBegin(GL_QUADS);
+    glVertex2f(redSquarePosition[0], redSquarePosition[1]);
+    glVertex2f(redSquarePosition[0] + 20.0f, redSquarePosition[1]);
+    glVertex2f(redSquarePosition[0] + 20.0f, redSquarePosition[1] + 20.0f);
+    glVertex2f(redSquarePosition[0], redSquarePosition[1] + 20.0f);
+    glEnd();
+}
+
+void moveSquareAlongPath() {
+    static int currentPoint = 0;
+    static float speed = 2.0f; // Adjust the speed of the square
+
+    if (currentPoint < pointCount) {
+        float dx = points[currentPoint][0] - redSquarePosition[0];
+        float dy = points[currentPoint][1] - redSquarePosition[1];
+        float distance = std::sqrt(dx * dx + dy * dy);
+
+        if (distance > speed) {
+            float ratio = speed / distance;
+            redSquarePosition[0] += ratio * dx;
+            redSquarePosition[1] += ratio * dy;
+        } else {
+            // Move to the next point
+            redSquarePosition[0] = points[currentPoint][0];
+            redSquarePosition[1] = points[currentPoint][1];
+            currentPoint++;
+        }
+    }
+}
+
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
     drawLineWithCurves();
+
+    if (moveSquare) {
+        moveSquareAlongPath();
+        drawRedSquare();
+    }
+
     glutSwapBuffers();
 }
 
@@ -37,14 +79,27 @@ void mouse(int button, int state, int x, int y) {
         points[pointCount][0] = x;
         points[pointCount][1] = y;
         ++pointCount;
+        isDrawing = true;
         glutPostRedisplay();
     }
 }
 
 void motion(int x, int y) {
-    if (pointCount > 0) {
+    if (isDrawing && pointCount > 0) {
         points[pointCount][0] = x;
         points[pointCount][1] = y;
+        glutPostRedisplay();
+    }
+}
+
+void keyboard(unsigned char key, int x, int y) {
+    if (key == 27) { // ASCII code for the 'Esc' key
+        isDrawing = false;
+        pointCount = 0;
+        moveSquare = false;
+        glutPostRedisplay();
+    } else if (key == 'm' && pointCount > 0) {
+        moveSquare = true;
         glutPostRedisplay();
     }
 }
@@ -59,6 +114,7 @@ int main(int argc, char *argv[]) {
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
+    glutKeyboardFunc(keyboard); // Register keyboard callback
 
     init();
 
