@@ -1,105 +1,115 @@
 #include <GL/glut.h>
 #include <cmath>
-//ggggggggggg
-#define LINE_COUNT 1000
+//111111
 
-int curveResolution = 100;
-int currentCurveIndex = -1;
-float lineStartX, lineStartY, lineEndX, lineEndY, controlPointX, controlPointY;
-float points[LINE_COUNT][3]; // 3 values for each point (x, y, isControlPoint)
+GLfloat squareSize = 50.0f;
+GLfloat squarePositionX = 0.0f;
+GLfloat squarePositionY = 0.0f;
+bool drawLine = false;
+GLfloat lineStartX, lineStartY, controlPointX, controlPointY, lineEndX, lineEndY;
 
-void drawBezierCurve(float startX, float startY, float endX, float endY, float controlX, float controlY) {
+// Animation properties
+bool animationStarted = false;
+GLfloat animationStartTime;
+
+int curveResolution = 100; // Number of points to approximate the curve
+
+void drawSquare() {
+    glColor3f(0.0f, 0.0f, 1.0f); // Blue color
+    glBegin(GL_QUADS);
+    glVertex2f(squarePositionX, squarePositionY);
+    glVertex2f(squarePositionX + squareSize, squarePositionY);
+    glVertex2f(squarePositionX + squareSize, squarePositionY + squareSize);
+    glVertex2f(squarePositionX, squarePositionY + squareSize);
+    glEnd();
+}
+
+void drawBezierCurve() {
     glColor3f(1.0f, 0.0f, 0.0f); // Red color
     glBegin(GL_LINE_STRIP);
     for (int i = 0; i <= curveResolution; ++i) {
         float t = static_cast<float>(i) / curveResolution;
-        float x = (1 - t) * (1 - t) * startX + 2 * (1 - t) * t * controlX + t * t * endX;
-        float y = (1 - t) * (1 - t) * startY + 2 * (1 - t) * t * controlY + t * t * endY;
+        float x = (1 - t) * (1 - t) * lineStartX + 2 * (1 - t) * t * controlPointX + t * t * lineEndX;
+        float y = (1 - t) * (1 - t) * lineStartY + 2 * (1 - t) * t * controlPointY + t * t * lineEndY;
         glVertex2f(x, y);
     }
     glEnd();
 }
 
-void mouse(int button, int state, int x, int y) {
-    float x_scale = 2.0 / glutGet(GLUT_WINDOW_WIDTH);
-    float y_scale = -2.0 / glutGet(GLUT_WINDOW_HEIGHT);
+void animateSquare(int value) {
+    if (animationStarted) {
+        float currentTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+        float elapsedTime = currentTime - animationStartTime;
 
-    if (button == GLUT_LEFT_BUTTON) {
-        if (state == GLUT_DOWN) {
-            lineStartX = x * x_scale - 1.0;
-            lineStartY = y * y_scale + 1.0;
-            controlPointX = lineStartX + 0.2; // Adjust as needed
-            controlPointY = lineStartY + 0.2; // Adjust as needed
-            currentCurveIndex++;
-            points[currentCurveIndex][0] = lineStartX;
-            points[currentCurveIndex][1] = lineStartY;
-            points[currentCurveIndex][2] = 1; // 1 indicates a control point
-        } else if (state == GLUT_UP) {
-            lineEndX = x * x_scale - 1.0;
-            lineEndY = y * y_scale + 1.0;
-            currentCurveIndex++;
-            points[currentCurveIndex][0] = controlPointX; // Store control point
-            points[currentCurveIndex][1] = controlPointY;
-            points[currentCurveIndex][2] = 1; // 1 indicates a control point
-            currentCurveIndex++;
-            points[currentCurveIndex][0] = lineEndX; // Store end point
-            points[currentCurveIndex][1] = lineEndY;
-            points[currentCurveIndex][2] = 0; // 0 indicates an end point
+        if (elapsedTime < 5.0f) {  // Adjust 5.0f to control animation duration
+            float t = elapsedTime / 5.0f;  // Adjust 5.0f to control animation speed
+            squarePositionX = (1 - t) * lineStartX + t * lineEndX;
+            squarePositionY = (1 - t) * lineStartY + t * lineEndY;
             glutPostRedisplay();
+            glutTimerFunc(16, animateSquare, 0);  // 60 FPS (1000 ms / 60 frames)
+        } else {
+            // Animation completed, reset square position
+            squarePositionX = lineEndX;
+            squarePositionY = lineEndY;
+            animationStarted = false;
         }
     }
-}
-
-void motion(int x, int y) {
-    float x_scale = 2.0 / glutGet(GLUT_WINDOW_WIDTH);
-    float y_scale = -2.0 / glutGet(GLUT_WINDOW_HEIGHT);
-
-    controlPointX = x * x_scale - 1.0;
-    controlPointY = y * y_scale + 1.0;
-
-    points[currentCurveIndex][0] = controlPointX;
-    points[currentCurveIndex][1] = controlPointY;
-    points[currentCurveIndex][2] = 1; // 1 indicates a control point
-
-    glutPostRedisplay();
 }
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    for (int i = 0; i < currentCurveIndex; i += 3) {
-        // Draw Bezier curve
-        drawBezierCurve(points[i][0], points[i][1], points[i + 1][0], points[i + 1][1],
-                        points[i + 2][0], points[i + 2][1]);
-    }
+    drawSquare();
 
-    glPointSize(5.0);
-    glBegin(GL_POINTS);
-    glColor3f(0.0f, 1.0f, 0.0f); // Green color
-    for (int i = 0; i <= currentCurveIndex; ++i) {
-        glVertex2f(points[i][0], points[i][1]);
+    if (drawLine) {
+        drawBezierCurve();
     }
-    glEnd();
-    glPointSize(1.0);
 
     glutSwapBuffers();
 }
 
-void init() {
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
+void mouse(int button, int state, int x, int y) {
+    if (button == GLUT_LEFT_BUTTON) {
+        if (state == GLUT_DOWN) {
+            // Record the starting point of the line
+            lineStartX = x;
+            lineStartY = glutGet(GLUT_WINDOW_HEIGHT) - y;
+            drawLine = true;
+        } else if (state == GLUT_UP) {
+            // Record the control point and ending point of the curve
+            controlPointX = x;
+            controlPointY = glutGet(GLUT_WINDOW_HEIGHT) - y;
+            lineEndX = squarePositionX;  // Store the current square position as the starting point
+            lineEndY = squarePositionY;
+            drawLine = false;
+            animationStarted = true;
+            animationStartTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+            glutTimerFunc(1000, animateSquare, 0);  // Wait for 1 second before starting animation
+        }
+    }
+    glutPostRedisplay();
 }
 
-int main(int argc, char *argv[]) {
+void reshape(int width, int height) {
+    glViewport(0, 0, width, height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, width, 0, height);
+    glMatrixMode(GL_MODELVIEW);
+}
+
+int main(int argc, char** argv) {
     glutInit(&argc, argv);
-    glutInitWindowSize(500, 500);
-    glutCreateWindow("car 9");
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutCreateWindow("Ope");
+    glutReshapeWindow(800, 600);
+
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
-    glutMotionFunc(motion);
-    init();
+    glutReshapeFunc(reshape);
+
     glutMainLoop();
     return 0;
 }
