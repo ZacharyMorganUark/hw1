@@ -1,6 +1,6 @@
 #include <GL/glut.h>
 #include <cmath>
-//harps
+//777777
 int windowWidth = 500;
 int windowHeight = 500;
 int pointCount = 0;
@@ -72,8 +72,8 @@ void motion(int x, int y) {
 void moveSquareTimer(int value) {
     if (moveSquare) {
         if (pointCount > 0) {
-            float deltaX = points[0][0] - redSquarePosition[0];
-            float deltaY = points[0][1] - redSquarePosition[1];
+            float deltaX = points[pointCount - 1][0] - redSquarePosition[0];
+            float deltaY = points[pointCount - 1][1] - redSquarePosition[1];
             float distance = sqrt(deltaX * deltaX + deltaY * deltaY);
 
             if (distance > 1.0f) {
@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
     glutInitWindowSize(windowWidth, windowHeight);
     glutInitWindowPosition(100, 100);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-    glutCreateWindow("Salmost");
+    glutCreateWindow("Cuarp");
 
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
