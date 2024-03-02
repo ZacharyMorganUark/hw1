@@ -1,6 +1,6 @@
 #include <GL/glut.h>
 #include <cmath>
-//777777
+//4444
 int windowWidth = 500;
 int windowHeight = 500;
 int pointCount = 0;
@@ -8,9 +8,10 @@ float points[500][2]; // Array to store points
 int curveResolution = 100;
 bool isDrawing = false;
 bool moveSquare = false;
+int currentPathIndex = 0; // Index to track the current position along the path
+float moveSpeed = 1.0f;
 
 float redSquarePosition[2] = {10.0f, 10.0f}; // Initial position of the red square
-float moveSpeed = 1.0f;
 
 void init() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -51,39 +52,22 @@ void display() {
     glutSwapBuffers();
 }
 
-void mouse(int button, int state, int x, int y) {
-    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-        points[pointCount][0] = x;
-        points[pointCount][1] = y;
-        ++pointCount;
-        isDrawing = true;
-        glutPostRedisplay();
-    }
-}
-
-void motion(int x, int y) {
-    if (isDrawing && pointCount > 0) {
-        points[pointCount][0] = x;
-        points[pointCount][1] = y;
-        glutPostRedisplay();
-    }
-}
-
 void moveSquareTimer(int value) {
-    if (moveSquare) {
-        if (pointCount > 0) {
-            float deltaX = points[pointCount - 1][0] - redSquarePosition[0];
-            float deltaY = points[pointCount - 1][1] - redSquarePosition[1];
-            float distance = sqrt(deltaX * deltaX + deltaY * deltaY);
+    if (moveSquare && currentPathIndex < pointCount - 1) {
+        float deltaX = points[currentPathIndex + 1][0] - redSquarePosition[0];
+        float deltaY = points[currentPathIndex + 1][1] - redSquarePosition[1];
+        float distance = sqrt(deltaX * deltaX + deltaY * deltaY);
 
-            if (distance > 1.0f) {
-                float directionX = deltaX / distance;
-                float directionY = deltaY / distance;
+        if (distance > 1.0f) {
+            float directionX = deltaX / distance;
+            float directionY = deltaY / distance;
 
-                redSquarePosition[0] += moveSpeed * directionX;
-                redSquarePosition[1] += moveSpeed * directionY;
-            }
+            redSquarePosition[0] += moveSpeed * directionX;
+            redSquarePosition[1] += moveSpeed * directionY;
+        } else {
+            currentPathIndex++;
         }
+
         glutPostRedisplay();
         glutTimerFunc(16, moveSquareTimer, 0); // Adjust the timer interval as needed
     }
@@ -97,6 +81,7 @@ void keyboard(unsigned char key, int x, int y) {
         glutPostRedisplay();
     } else if (key == 'm' && pointCount > 0) {
         moveSquare = true;
+        currentPathIndex = 0; // Reset the index when 'm' is pressed
         moveSquareTimer(0);
         glutPostRedisplay();
     }
@@ -107,11 +92,9 @@ int main(int argc, char *argv[]) {
     glutInitWindowSize(windowWidth, windowHeight);
     glutInitWindowPosition(100, 100);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-    glutCreateWindow("Cuarp");
+    glutCreateWindow("bowling");
 
     glutDisplayFunc(display);
-    glutMouseFunc(mouse);
-    glutMotionFunc(motion);
     glutKeyboardFunc(keyboard); // Register keyboard callback
 
     init();
