@@ -1,5 +1,17 @@
+//---------------------------------------
+// Program: building3.cpp used
+// Purpose: Demonstrate use of mouse callbacks to draw lines.
+// Author:  Zachary Morgan
+// Date:    3/1/2024
+//---------------------------------------
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#ifdef MAC
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
-#include <cmath>
+#endif
 //t
 int windowWidth = 500;
 int windowHeight = 500;
@@ -94,7 +106,7 @@ void motion(int x, int y) {
 }
 
 void keyboard(unsigned char key, int x, int y) {
-    if (key == 27) { // ASCII code for the 'Esc' key
+    if (key == 27) { 
         isDrawing = false;
         pointCount = 0;
         moveSquare = false;
