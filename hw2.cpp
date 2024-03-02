@@ -1,6 +1,6 @@
 #include <GL/glut.h>
 #include <cmath>
-//000
+//bob lee
 int windowWidth = 500;
 int windowHeight = 500;
 int pointCount = 0;
@@ -45,9 +45,9 @@ void drawSquare() {
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
-    drawLineWithCurves();
+    drawLine();
     if (moveSquare) {
-        drawRedSquare();
+        drawSquare();
     }
     glutSwapBuffers();
 }
