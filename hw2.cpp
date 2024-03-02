@@ -134,8 +134,8 @@ int main(int argc, char *argv[]) {
 
     init();
     printf("   'mouse down' - sets a point and the next mouse down action will connect the points\n");
-    printf("   press 'm' - draw the sqaure and make it begin moving along the path\n");
-    printf("   press 'Esc' - clear screen to restart (sometimes works)\n");
+    printf("   'm' - draw the sqaure and make it begin moving along the path\n");
+    printf("   'Esc' - clear screen to restart (sometimes works)\n");
     glutMainLoop();
     return 0;
 }
