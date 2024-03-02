@@ -1,14 +1,14 @@
 #include <GL/glut.h>
 #include <cmath>
-//doggs
+//t
 int windowWidth = 500;
 int windowHeight = 500;
 int pointCount = 0;
 float points[500][2]; // Array to store points
 bool isDrawing = false;
 bool moveSquare = false;
-float redSquarePosition[2] = {10.0f, 10.0f}; // Initial position of the red square
-float speed = 2.0f; // Adjust the speed of the square
+float squarePosition[2] = {10.0f, 10.0f}; // Initial position of the red square
+float speed = 1.0f; // Adjust the speed of the square
 
 void init() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -16,7 +16,7 @@ void init() {
     gluOrtho2D(0, windowWidth, windowHeight, 0);
 }
 
-void drawLineWithCurves() {
+void drawLine() {
     glColor3f(1.0, 1.0, 1.0);
     glBegin(GL_LINE_STRIP);
     for (int i = 0; i < pointCount - 1; ++i) {
@@ -30,32 +30,32 @@ void drawLineWithCurves() {
     glEnd();
 }
 
-void drawRedSquare() {
+void drawSquare() {
     glColor3f(1.0, 0.0, 0.0);
     glBegin(GL_QUADS);
-    glVertex2f(redSquarePosition[0], redSquarePosition[1]);
-    glVertex2f(redSquarePosition[0] + 20.0f, redSquarePosition[1]);
-    glVertex2f(redSquarePosition[0] + 20.0f, redSquarePosition[1] + 20.0f);
-    glVertex2f(redSquarePosition[0], redSquarePosition[1] + 20.0f);
+    glVertex2f(squarePosition[0], squarePosition[1]);
+    glVertex2f(squarePosition[0] + 20.0f, squarePosition[1]);
+    glVertex2f(squarePosition[0] + 20.0f, squarePosition[1] + 20.0f);
+    glVertex2f(squarePosition[0], squarePosition[1] + 20.0f);
     glEnd();
 }
 
-void moveSquareAlongPath() {
+void moveSquare() {
     static int currentPoint = 0;
 
     if (currentPoint < pointCount) {
-        float dx = points[currentPoint][0] - redSquarePosition[0];
-        float dy = points[currentPoint][1] - redSquarePosition[1];
+        float dx = points[currentPoint][0] - squarePosition[0];
+        float dy = points[currentPoint][1] - squarePosition[1];
         float distance = std::sqrt(dx * dx + dy * dy);
 
         if (distance > speed) {
             float ratio = speed / distance;
-            redSquarePosition[0] += ratio * dx;
-            redSquarePosition[1] += ratio * dy;
+            squarePosition[0] += ratio * dx;
+            squarePosition[1] += ratio * dy;
         } else {
             // Move to the next point
-            redSquarePosition[0] = points[currentPoint][0];
-            redSquarePosition[1] = points[currentPoint][1];
+            squarePosition[0] = points[currentPoint][0];
+            squarePosition[1] = points[currentPoint][1];
             currentPoint++;
         }
 
@@ -65,11 +65,11 @@ void moveSquareAlongPath() {
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
-    drawLineWithCurves();
+    drawLine();
 
     if (moveSquare) {
-        moveSquareAlongPath();
-        drawRedSquare();
+        moveSquare();
+        drawSquare();
     }
 
     glutSwapBuffers();
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
     glutInitWindowSize(windowWidth, windowHeight);
     glutInitWindowPosition(100, 100);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-    glutCreateWindow("Tacos");
+    glutCreateWindow("Homework 2");
 
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
@@ -118,7 +118,8 @@ int main(int argc, char *argv[]) {
     glutKeyboardFunc(keyboard); // Register keyboard callback
 
     init();
-
+    printf("   'mouse down' - sets a point and the next mouse down action will connect the points\n");
+    printf("   press 'm' - draw the sqaure and make it begin moving along the path\n");
     glutMainLoop();
     return 0;
 }
