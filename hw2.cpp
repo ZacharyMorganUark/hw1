@@ -20,7 +20,7 @@ float points[500][2]; // Array to store points
 bool isDrawing = false;
 bool moveSquare = false;
 float squarePosition[2] = {10.0f, 10.0f}; // Initial position of the red square
-float speed = 1.0f; // Adjust the speed of the square
+float speed = 0.25f; // Adjust the speed of the square
 
 void init() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
