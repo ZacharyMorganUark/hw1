@@ -1,5 +1,6 @@
 #include <GL/glut.h>
-
+#include <cmath>
+//bustin
 int windowWidth = 500;
 int windowHeight = 500;
 int pointCount = 0;
@@ -7,7 +8,6 @@ float points[500][2]; // Array to store points
 int curveResolution = 100;
 bool isDrawing = false;
 bool moveSquare = false;
-//sabdnab
 float redSquarePosition[2] = {10.0f, 10.0f}; // Initial position of the red square
 
 void init() {
@@ -40,12 +40,37 @@ void drawRedSquare() {
     glEnd();
 }
 
+void moveSquareAlongPath() {
+    static int currentPoint = 0;
+    static float speed = 2.0f; // Adjust the speed of the square
+
+    if (currentPoint < pointCount) {
+        float dx = points[currentPoint][0] - redSquarePosition[0];
+        float dy = points[currentPoint][1] - redSquarePosition[1];
+        float distance = std::sqrt(dx * dx + dy * dy);
+
+        if (distance > speed) {
+            float ratio = speed / distance;
+            redSquarePosition[0] += ratio * dx;
+            redSquarePosition[1] += ratio * dy;
+        } else {
+            // Move to the next point
+            redSquarePosition[0] = points[currentPoint][0];
+            redSquarePosition[1] = points[currentPoint][1];
+            currentPoint++;
+        }
+    }
+}
+
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
     drawLineWithCurves();
+
     if (moveSquare) {
+        moveSquareAlongPath();
         drawRedSquare();
     }
+
     glutSwapBuffers();
 }
 
@@ -75,8 +100,6 @@ void keyboard(unsigned char key, int x, int y) {
         glutPostRedisplay();
     } else if (key == 'm' && pointCount > 0) {
         moveSquare = true;
-        redSquarePosition[0] = points[0][0];
-        redSquarePosition[1] = points[0][1];
         glutPostRedisplay();
     }
 }
@@ -86,7 +109,7 @@ int main(int argc, char *argv[]) {
     glutInitWindowSize(windowWidth, windowHeight);
     glutInitWindowPosition(100, 100);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-    glutCreateWindow("Cheese");
+    glutCreateWindow("poker time");
 
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
