@@ -11,7 +11,7 @@ bool moveSquare = false;
 int currentPathIndex = 0; // Index to track the current position along the path
 float moveSpeed = 1.0f;
 
-float redSquarePosition[2] = {10.0f, 10.0f}; // Initial position of the red square
+float squarePosition[2] = {10.0f, 10.0f}; // Initial position of the red square
 
 void init() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -19,7 +19,7 @@ void init() {
     gluOrtho2D(0, windowWidth, windowHeight, 0);
 }
 
-void drawLineWithCurves() {
+void drawLine() {
     glColor3f(1.0, 1.0, 1.0);
     glBegin(GL_LINE_STRIP);
     for (int i = 0; i < pointCount - 1; ++i) {
@@ -33,13 +33,13 @@ void drawLineWithCurves() {
     glEnd();
 }
 
-void drawRedSquare() {
+void drawSquare() {
     glColor3f(1.0, 0.0, 0.0);
     glBegin(GL_QUADS);
-    glVertex2f(redSquarePosition[0], redSquarePosition[1]);
-    glVertex2f(redSquarePosition[0] + 20.0f, redSquarePosition[1]);
-    glVertex2f(redSquarePosition[0] + 20.0f, redSquarePosition[1] + 20.0f);
-    glVertex2f(redSquarePosition[0], redSquarePosition[1] + 20.0f);
+    glVertex2f(squarePosition[0], squarePosition[1]);
+    glVertex2f(squarePosition[0] + 20.0f, squarePosition[1]);
+    glVertex2f(squarePosition[0] + 20.0f, squarePosition[1] + 20.0f);
+    glVertex2f(squarePosition[0], squarePosition[1] + 20.0f);
     glEnd();
 }
 
@@ -54,16 +54,16 @@ void display() {
 
 void moveSquareTimer(int value) {
     if (moveSquare && currentPathIndex < pointCount - 1) {
-        float deltaX = points[currentPathIndex + 1][0] - redSquarePosition[0];
-        float deltaY = points[currentPathIndex + 1][1] - redSquarePosition[1];
+        float deltaX = points[currentPathIndex + 1][0] - squarePosition[0];
+        float deltaY = points[currentPathIndex + 1][1] - squarePosition[1];
         float distance = sqrt(deltaX * deltaX + deltaY * deltaY);
 
         if (distance > 1.0f) {
             float directionX = deltaX / distance;
             float directionY = deltaY / distance;
 
-            redSquarePosition[0] += moveSpeed * directionX;
-            redSquarePosition[1] += moveSpeed * directionY;
+            squarePosition[0] += moveSpeed * directionX;
+            squarePosition[1] += moveSpeed * directionY;
         } else {
             currentPathIndex++;
         }
