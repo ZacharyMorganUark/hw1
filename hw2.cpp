@@ -1,6 +1,6 @@
 #include <GL/glut.h>
 #include <cmath>
-//sarg
+//sammy
 int windowWidth = 500;
 int windowHeight = 500;
 int pointCount = 0;
