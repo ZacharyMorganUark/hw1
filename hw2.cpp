@@ -16,7 +16,9 @@ float squarePosition[2] = {10.0f, 10.0f}; // Initial position of the red square
 void init() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
     gluOrtho2D(0, windowWidth, windowHeight, 0);
+    glMatrixMode(GL_MODELVIEW);
 }
 
 void drawLine() {
