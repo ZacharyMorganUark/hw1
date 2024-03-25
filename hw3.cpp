@@ -6,6 +6,7 @@
 //---------------------------------------
 #include <iostream>
 #include <fstream>
+#include <limits>
 #include <cmath>
 #ifdef MAC
 #include <GLUT/glut.h>
