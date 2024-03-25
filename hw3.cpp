@@ -59,6 +59,11 @@ void display() {
     glBegin(GL_QUADS);
     for (int i = 0; i < WIDTH - 1; ++i) {
         for (int j = 0; j < HEIGHT - 1; ++j) {
+            // Calculate grayscale color based on depth value
+            float depthColor = depthValues[i][j] / 255.0; // Normalize depth value to range [0, 1]
+            glColor3f(depthColor, depthColor, depthColor);
+            
+            // Draw quad
             glVertex3f(i, j, depthValues[i][j]);
             glVertex3f(i + 1, j, depthValues[i + 1][j]);
             glVertex3f(i + 1, j + 1, depthValues[i + 1][j + 1]);
