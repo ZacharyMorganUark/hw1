@@ -57,17 +57,16 @@ void display() {
     glRotatef(y_angle, 0.0f, 1.0f, 0.0f);
     glRotatef(z_angle, 0.0f, 0.0f, 1.0f);
 
-    glBegin(GL_QUADS);
+    glColor3f(1.0, 1.0, 1.0); // Set color to white
+
+    // Loop over the polygons and display them using GL_LINE_LOOP
+    glBegin(GL_LINE_LOOP);
     for (int i = 0; i < WIDTH - 1; ++i) {
         for (int j = 0; j < HEIGHT - 1; ++j) {
-            // Map depth value to a range between 0.1 and 100
-            float z = depthValues[i][j] * 0.01f + 0.1f;
-
-            // Specify vertices with mapped depth value
-            glVertex3f(i, j, -z);
-            glVertex3f(i + 1, j, -z);
-            glVertex3f(i + 1, j + 1, -z);
-            glVertex3f(i, j + 1, -z);
+            glVertex3f(i, j, depthValues[i][j]);
+            glVertex3f(i + 1, j, depthValues[i + 1][j]);
+            glVertex3f(i + 1, j + 1, depthValues[i + 1][j + 1]);
+            glVertex3f(i, j + 1, depthValues[i][j + 1]);
         }
     }
     glEnd();
