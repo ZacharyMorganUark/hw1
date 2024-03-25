@@ -60,10 +60,14 @@ void display() {
     glBegin(GL_QUADS);
     for (int i = 0; i < WIDTH - 1; ++i) {
         for (int j = 0; j < HEIGHT - 1; ++j) {
-            glVertex3f(i, j, depthValues[i][j]);
-            glVertex3f(i + 1, j, depthValues[i + 1][j]);
-            glVertex3f(i + 1, j + 1, depthValues[i + 1][j + 1]);
-            glVertex3f(i, j + 1, depthValues[i][j + 1]);
+            // Map depth value to a range between 0.1 and 100
+            float z = depthValues[i][j] * 0.01f + 0.1f;
+
+            // Specify vertices with mapped depth value
+            glVertex3f(i, j, -z);
+            glVertex3f(i + 1, j, -z);
+            glVertex3f(i + 1, j + 1, -z);
+            glVertex3f(i, j + 1, -z);
         }
     }
     glEnd();
