@@ -28,6 +28,7 @@ void init() {
 void readDepthData() {
     std::ifstream file("penny-depth.txt");
     if (file.is_open()) {
+        std::cout << "Depth data file opened successfully." << std::endl;
         for (int i = 0; i < WIDTH; ++i) {
             for (int j = 0; j < HEIGHT; ++j) {
                 file >> depthValues[i][j];
@@ -35,6 +36,7 @@ void readDepthData() {
             }
         }
         file.close();
+        std::cout << "Depth data loaded successfully." << std::endl;
     } else {
         std::cerr << "Unable to open file." << std::endl;
     }
