@@ -34,12 +34,26 @@ void init() {
 void readDepthData() {
     std::ifstream file("penny-depth.txt");
     if (file.is_open()) {
+        float minDepth = std::numeric_limits<float>::max();
+        float maxDepth = std::numeric_limits<float>::min();
+
+        // Find the minimum and maximum depth values
         for (int i = 0; i < WIDTH; ++i) {
             for (int j = 0; j < HEIGHT; ++j) {
                 file >> depthValues[i][j];
-                // Scale depth values here if needed
+                minDepth = std::min(minDepth, depthValues[i][j]);
+                maxDepth = std::max(maxDepth, depthValues[i][j]);
             }
         }
+
+        // Scale depth values to [0, 1]
+        float depthRange = maxDepth - minDepth;
+        for (int i = 0; i < WIDTH; ++i) {
+            for (int j = 0; j < HEIGHT; ++j) {
+                depthValues[i][j] = (depthValues[i][j] - minDepth) / depthRange;
+            }
+        }
+
         file.close();
         std::cout << "Depth data loaded successfully." << std::endl;
     } else {
