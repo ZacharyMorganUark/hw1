@@ -6,7 +6,7 @@
 //---------------------------------------
 #include <iostream>
 #include <fstream>
-#include <limits>
+
 #include <cmath>
 #ifdef MAC
 #include <GLUT/glut.h>
@@ -35,26 +35,12 @@ void init() {
 void readDepthData() {
     std::ifstream file("penny-depth.txt");
     if (file.is_open()) {
-        float minDepth = std::numeric_limits<float>::max();
-        float maxDepth = std::numeric_limits<float>::min();
-
-        // Find the minimum and maximum depth values
         for (int i = 0; i < WIDTH; ++i) {
             for (int j = 0; j < HEIGHT; ++j) {
                 file >> depthValues[i][j];
-                minDepth = std::min(minDepth, depthValues[i][j]);
-                maxDepth = std::max(maxDepth, depthValues[i][j]);
+                depthValues[i][j] *= 0.01; // Scale down by multiplying with 0.01
             }
         }
-
-        // Scale depth values to [0, 1]
-        float depthRange = maxDepth - minDepth;
-        for (int i = 0; i < WIDTH; ++i) {
-            for (int j = 0; j < HEIGHT; ++j) {
-                depthValues[i][j] = (depthValues[i][j] - minDepth) / depthRange;
-            }
-        }
-
         file.close();
         std::cout << "Depth data loaded successfully." << std::endl;
     } else {
