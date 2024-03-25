@@ -1,13 +1,19 @@
-#include <math.h>
-#include <stdio.h>
-#include <fstream>
+
+//---------------------------------------
+// Program: penny_model.cpp using object.cpp
+// Purpose: Generate and display 3D model of a penny using depth data.
+// Author:  Zachary Morgan
+// Date:    25 March 2024
+//---------------------------------------
 #include <iostream>
-#include <stdlib.h>
+#include <fstream>
+#include <cmath>
 #ifdef MAC
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
+
 const int WIDTH = 500;
 const int HEIGHT = 500;
 float depthValues[WIDTH][HEIGHT];
@@ -28,7 +34,6 @@ void init() {
 void readDepthData() {
     std::ifstream file("penny-depth.txt");
     if (file.is_open()) {
-        std::cout << "Depth data file opened successfully." << std::endl;
         for (int i = 0; i < WIDTH; ++i) {
             for (int j = 0; j < HEIGHT; ++j) {
                 file >> depthValues[i][j];
@@ -101,7 +106,7 @@ int main(int argc, char** argv) {
     readDepthData();
 
     glutDisplayFunc(display);
-    glutKeyboardFunc(keyboard); // Register keyboard callback
+    glutKeyboardFunc(keyboard);
 
     glEnable(GL_DEPTH_TEST);
 
