@@ -14,8 +14,8 @@
 #include <GL/glut.h>
 #endif
 
-const int WIDTH = 500;
-const int HEIGHT = 500;
+const int WIDTH = 700;
+const int HEIGHT = 700;
 float depthValues[WIDTH][HEIGHT];
 
 float x_angle = 0.0f;
@@ -38,7 +38,7 @@ void readDepthData() {
         for (int i = 0; i < WIDTH; ++i) {
             for (int j = 0; j < HEIGHT; ++j) {
                 file >> depthValues[i][j];
-                depthValues[i][j] *= 0.001; // Scale down by multiplying with 0.01
+                depthValues[i][j] *= 0.0001; // Scale down
             }
         }
         file.close();
