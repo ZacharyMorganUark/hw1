@@ -38,7 +38,7 @@ void readDepthData() {
         for (int i = 0; i < WIDTH; ++i) {
             for (int j = 0; j < HEIGHT; ++j) {
                 file >> depthValues[i][j];
-                depthValues[i][j] *= 0.01; // Scale down by multiplying with 0.01
+                depthValues[i][j] *= 0.001; // Scale down by multiplying with 0.01
             }
         }
         file.close();
