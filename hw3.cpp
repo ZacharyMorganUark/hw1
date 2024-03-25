@@ -1,5 +1,7 @@
 #include <math.h>
 #include <stdio.h>
+#include <fstream>
+#include <iostream>
 #include <stdlib.h>
 #ifdef MAC
 #include <GLUT/glut.h>
