@@ -1,6 +1,11 @@
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#ifdef MAC
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
-#include <fstream>
-
+#endif
 const int WIDTH = 500;
 const int HEIGHT = 500;
 float depthValues[WIDTH][HEIGHT];
