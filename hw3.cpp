@@ -73,25 +73,20 @@ void display() {
     glRotatef(z_angle, 0.0f, 0.0f, 1.0f);
 
     if (useColorDisplay) {
-    for (int i = 0; i < WIDTH - 1; ++i) {
-        for (int j = 0; j < HEIGHT - 1; ++j) {
-            glBegin(GL_POLYGON);
-            // Scale RGB color values to the range [0, 1]
-            float r = R[i][j] / 255.0f;
-            float g = G[i][j] / 255.0f;
-            float b = B[i][j] / 255.0f;
-            glColor3f(r, g, b);
-            glVertex3f(i, j, depthValues[i][j]);
-            glVertex3f(i + 1, j, depthValues[i + 1][j]);
-            glVertex3f(i + 1, j + 1, depthValues[i + 1][j + 1]);
-            glVertex3f(i, j + 1, depthValues[i][j + 1]);
-            glEnd();
+        for (int i = 0; i < WIDTH - 1; ++i) {
+            for (int j = 0; j < HEIGHT - 1; ++j) {
+                glBegin(GL_POLYGON);
+                glColor3f(R[i][j] / 255.0f, G[i][j] / 255.0f, B[i][j] / 255.0f); // Scale RGB values to range [0, 1]
+                glVertex3f(i, j, depthValues[i][j]);
+                glVertex3f(i + 1, j, depthValues[i + 1][j]);
+                glVertex3f(i + 1, j + 1, depthValues[i + 1][j + 1]);
+                glVertex3f(i, j + 1, depthValues[i][j + 1]);
+                glEnd();
+            }
         }
-    }
-}
     } else {
-        for (int i = 0; i < WIDTH -1; ++i) {
-            for (int j = 0; j < HEIGHT -1; ++j) {
+        for (int i = 0; i < WIDTH - 1; ++i) {
+            for (int j = 0; j < HEIGHT - 1; ++j) {
                 glBegin(GL_LINE_LOOP);
                 glVertex3f(i, j, depthValues[i][j]);
                 glVertex3f(i + 1, j, depthValues[i + 1][j]);
