@@ -15,7 +15,6 @@ int R[WIDTH][HEIGHT], G[WIDTH][HEIGHT], B[WIDTH][HEIGHT];
 float x_angle = 0.0f;
 float y_angle = 0.0f;
 float z_angle = 0.0f;
-bool wireframeMode = true; // Flag to switch between wireframe and colored display
 
 void init() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -71,33 +70,18 @@ void display() {
     glRotatef(y_angle, 0.0f, 1.0f, 0.0f);
     glRotatef(z_angle, 0.0f, 0.0f, 1.0f);
 
-    if (wireframeMode) {
-        // Loop over polygons and display them with GL_LINE_LOOP
-        glColor3f(1.0, 1.0, 1.0);
-        glBegin(GL_LINE_LOOP);
-        for (int i = 0; i < WIDTH - 1; ++i) {
-            for (int j = 0; j < HEIGHT - 1; ++j) {
-                glVertex3f(i, j, depthValues[i][j]);
-                glVertex3f(i + 1, j, depthValues[i + 1][j]);
-                glVertex3f(i + 1, j + 1, depthValues[i + 1][j + 1]);
-                glVertex3f(i, j + 1, depthValues[i][j + 1]);
-            }
-        }
-        glEnd();
-    } else {
-        // Loop over polygons and display them with GL_POLYGON and specified RGB colors
-        for (int i = 0; i < WIDTH - 1; ++i) {
-            for (int j = 0; j < HEIGHT - 1; ++j) {
-                glBegin(GL_POLYGON);
-                glColor3f(R[i][j] / 1000.0f, G[i][j] / 1000.0f, B[i][j] / 1000.0f);
-                glVertex3f(i, j, depthValues[i][j]);
-                glVertex3f(i + 1, j, depthValues[i + 1][j]);
-                glVertex3f(i + 1, j + 1, depthValues[i + 1][j + 1]);
-                glVertex3f(i, j + 1, depthValues[i][j + 1]);
-                glEnd();
-            }
+    // Loop over polygons and display them with GL_LINE_LOOP
+    glColor3f(1.0, 1.0, 1.0);
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < WIDTH - 1; ++i) {
+        for (int j = 0; j < HEIGHT - 1; ++j) {
+            glVertex3f(i, j, depthValues[i][j]);
+            glVertex3f(i + 1, j, depthValues[i + 1][j]);
+            glVertex3f(i + 1, j + 1, depthValues[i + 1][j + 1]);
+            glVertex3f(i, j + 1, depthValues[i][j + 1]);
         }
     }
+    glEnd();
 
     glutSwapBuffers();
 }
@@ -136,6 +120,7 @@ int main(int argc, char** argv) {
 
     init();
     readDepthData();
+    readColorData(); // Load color data on startup
 
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
