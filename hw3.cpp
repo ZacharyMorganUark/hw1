@@ -67,7 +67,7 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    glTranslatef(0.0f, 0.0f, -10.0f); // Increased translation along z-axis for zooming out
+    glTranslatef(0.0f, 0.0f, -15.0f); // Increased translation along z-axis for zooming out
     glRotatef(x_angle, 1.0f, 0.0f, 0.0f);
     glRotatef(y_angle, 0.0f, 1.0f, 0.0f);
     glRotatef(z_angle, 0.0f, 0.0f, 1.0f);
