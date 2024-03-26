@@ -85,8 +85,8 @@ void display() {
             }
         }
     } else {
-        for (int i = 0; i < WIDTH; ++i) {
-            for (int j = 0; j < HEIGHT; ++j) {
+        for (int i = 0; i < WIDTH -1; ++i) {
+            for (int j = 0; j < HEIGHT -1; ++j) {
                 glBegin(GL_LINE_LOOP);
                 glVertex3f(i, j, depthValues[i][j]);
                 glVertex3f(i + 1, j, depthValues[i + 1][j]);
