@@ -10,11 +10,13 @@
 const int WIDTH = 500;
 const int HEIGHT = 500;
 float depthValues[WIDTH][HEIGHT];
-int R[WIDTH][HEIGHT], G[WIDTH][HEIGHT], B[WIDTH][HEIGHT];
+float R[WIDTH][HEIGHT], G[WIDTH][HEIGHT], B[WIDTH][HEIGHT];
 
 float x_angle = 0.0f;
 float y_angle = 0.0f;
 float z_angle = 0.0f;
+
+bool useColorDisplay = false;
 
 void init() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -26,35 +28,35 @@ void init() {
     glLoadIdentity();
 }
 
-void readDepthData() {
-    std::ifstream depth_file("penny-depth.txt");
-    if (depth_file.is_open()) {
+void readData() {
+    // Read depth values
+    std::ifstream depthFile("penny-depth.txt");
+    if (depthFile.is_open()) {
         for (int i = 0; i < WIDTH; ++i) {
             for (int j = 0; j < HEIGHT; ++j) {
-                depth_file >> depthValues[i][j];
-                depthValues[i][j] *= 0.001; // Scale down depth values if necessary
+                depthFile >> depthValues[i][j];
+                depthValues[i][j] *= 0.001; // Scale down depth values if needed
             }
         }
-        depth_file.close();
+        depthFile.close();
         std::cout << "Depth data loaded successfully." << std::endl;
     } else {
         std::cerr << "Unable to open depth file." << std::endl;
     }
-}
 
-void readColorData() {
-    std::ifstream color_file("penny-image.txt");
-    if (color_file.is_open()) {
+    // Read color values
+    std::ifstream colorFile("penny-image.txt");
+    if (colorFile.is_open()) {
         for (int i = 0; i < WIDTH; ++i) {
             for (int j = 0; j < HEIGHT; ++j) {
-                color_file >> R[i][j] >> G[i][j] >> B[i][j];
-                // Scale RGB values if necessary
-                R[i][j] = (int)(R[i][j] / 255.0f * 1000);
-                G[i][j] = (int)(G[i][j] / 255.0f * 1000);
-                B[i][j] = (int)(B[i][j] / 255.0f * 1000);
+                int r, g, b;
+                colorFile >> r >> g >> b;
+                R[i][j] = r / 255.0; // Scale RGB values to [0, 1]
+                G[i][j] = g / 255.0;
+                B[i][j] = b / 255.0;
             }
         }
-        color_file.close();
+        colorFile.close();
         std::cout << "Color data loaded successfully." << std::endl;
     } else {
         std::cerr << "Unable to open color file." << std::endl;
@@ -70,18 +72,30 @@ void display() {
     glRotatef(y_angle, 0.0f, 1.0f, 0.0f);
     glRotatef(z_angle, 0.0f, 0.0f, 1.0f);
 
-    // Loop over polygons and display them with GL_LINE_LOOP
-    glColor3f(1.0, 1.0, 1.0);
-    glBegin(GL_LINE_LOOP);
-    for (int i = 0; i < WIDTH - 1; ++i) {
-        for (int j = 0; j < HEIGHT - 1; ++j) {
-            glVertex3f(i, j, depthValues[i][j]);
-            glVertex3f(i + 1, j, depthValues[i + 1][j]);
-            glVertex3f(i + 1, j + 1, depthValues[i + 1][j + 1]);
-            glVertex3f(i, j + 1, depthValues[i][j + 1]);
+    if (useColorDisplay) {
+        for (int i = 0; i < WIDTH - 1; ++i) {
+            for (int j = 0; j < HEIGHT - 1; ++j) {
+                glBegin(GL_POLYGON);
+                glColor3f(R[i][j], G[i][j], B[i][j]); // Set color using RGB values
+                glVertex3f(i, j, depthValues[i][j]);
+                glVertex3f(i + 1, j, depthValues[i + 1][j]);
+                glVertex3f(i + 1, j + 1, depthValues[i + 1][j + 1]);
+                glVertex3f(i, j + 1, depthValues[i][j + 1]);
+                glEnd();
+            }
+        }
+    } else {
+        for (int i = 0; i < WIDTH; ++i) {
+            for (int j = 0; j < HEIGHT; ++j) {
+                glBegin(GL_LINE_LOOP);
+                glVertex3f(i, j, depthValues[i][j]);
+                glVertex3f(i + 1, j, depthValues[i + 1][j]);
+                glVertex3f(i + 1, j + 1, depthValues[i + 1][j + 1]);
+                glVertex3f(i, j + 1, depthValues[i][j + 1]);
+                glEnd();
+            }
         }
     }
-    glEnd();
 
     glutSwapBuffers();
 }
@@ -106,10 +120,13 @@ void keyboard(unsigned char key, int x, int y) {
         case 'Z':
             z_angle -= 5.0f;
             break;
+        case '2':
+            useColorDisplay = !useColorDisplay;
+            glutPostRedisplay(); // Redraw with color or depth display
+            break;
         default:
             break;
     }
-    glutPostRedisplay();
 }
 
 int main(int argc, char** argv) {
@@ -119,8 +136,7 @@ int main(int argc, char** argv) {
     glutCreateWindow("Penny Model");
 
     init();
-    readDepthData();
-    readColorData(); // Load color data on startup
+    readData();
 
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
