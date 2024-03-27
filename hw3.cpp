@@ -6,7 +6,7 @@
 
 #define ROWS 500
 #define COLS 500
-#define SCALE_FACTOR 0.005
+#define SCALE_FACTOR 0.001
 
 float Depth[ROWS][COLS];
 float x_angle = 0, y_angle = 0, z_angle = 0;
