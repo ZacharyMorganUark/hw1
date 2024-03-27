@@ -1,148 +1,102 @@
-#include <iostream>
-#include <fstream>
-#include <cmath>
-#ifdef MAC
-#include <GLUT/glut.h>
-#else
+
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <GL/glut.h>
-#endif
 
-const int WIDTH = 500;
-const int HEIGHT = 500;
-float depthValues[WIDTH][HEIGHT];
-float R[WIDTH][HEIGHT], G[WIDTH][HEIGHT], B[WIDTH][HEIGHT];
+#define ROWS 500
+#define COLS 500
+#define SCALE_FACTOR 0.005
 
-float x_angle = 0.0f;
-float y_angle = 0.0f;
-float z_angle = 0.0f;
+float Depth[ROWS][COLS];
+float x_angle = 0, y_angle = 0, z_angle = 0;
 
-bool useColorDisplay = false;
+void read_depth_data(const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        fprintf(stderr, "Error opening file %s\n", filename);
+        exit(1);
+    }
+
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
+            if (fscanf(file, "%f", &Depth[i][j]) != 1) {
+                fprintf(stderr, "Error reading data from file\n");
+                fclose(file);
+                exit(1);
+            }
+        }
+    }
+    fclose(file);
+}
 
 void init() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
+    glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
     glEnable(GL_DEPTH_TEST);
-    gluPerspective(45.0f, (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 100.0f);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-}
 
-void readData() {
-    // Read depth values
-    std::ifstream depthFile("penny-depth.txt");
-    if (depthFile.is_open()) {
-        for (int i = 0; i < WIDTH; ++i) {
-            for (int j = 0; j < HEIGHT; ++j) {
-                depthFile >> depthValues[i][j];
-                depthValues[i][j] *= 0.001; // Scale down depth values if needed
-            }
-        }
-        depthFile.close();
-        std::cout << "Depth data loaded successfully." << std::endl;
-    } else {
-        std::cerr << "Unable to open depth file." << std::endl;
-    }
-
-    // Read color values
-    std::ifstream colorFile("penny-image.txt");
-    if (colorFile.is_open()) {
-        for (int i = 0; i < WIDTH; ++i) {
-            for (int j = 0; j < HEIGHT; ++j) {
-                int r, g, b;
-                colorFile >> r >> g >> b;
-                R[i][j] = r / 255.0; // Scale RGB values to [0, 1]
-                G[i][j] = g / 255.0;
-                B[i][j] = b / 255.0;
-            }
-        }
-        colorFile.close();
-        std::cout << "Color data loaded successfully." << std::endl;
-    } else {
-        std::cerr << "Unable to open color file." << std::endl;
-    }
+    read_depth_data("penny-depth.txt");
 }
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    glRotatef(x_angle, 1, 0, 0);
+    glRotatef(y_angle, 0, 1, 0);
+    glRotatef(z_angle, 0, 0, 1);
 
-    glTranslatef(0.0f, 0.0f, -15.0f); // Increased translation along z-axis for zooming out
-    glRotatef(x_angle, 1.0f, 0.0f, 0.0f);
-    glRotatef(y_angle, 0.0f, 1.0f, 0.0f);
-    glRotatef(z_angle, 0.0f, 0.0f, 1.0f);
-
-    if (useColorDisplay) {
-        for (int i = 0; i < WIDTH - 1; ++i) {
-            for (int j = 0; j < HEIGHT - 1; ++j) {
-                glBegin(GL_POLYGON);
-                glColor3f(R[i][j] / 255.0f, G[i][j] / 255.0f, B[i][j] / 255.0f); // Scale RGB values to range [0, 1]
-                glVertex3f(i, j, depthValues[i][j]);
-                glVertex3f(i + 1, j, depthValues[i + 1][j]);
-                glVertex3f(i + 1, j + 1, depthValues[i + 1][j + 1]);
-                glVertex3f(i, j + 1, depthValues[i][j + 1]);
-                glEnd();
-            }
+    glColor3f(1.0, 1.0, 1.0);
+    for (int i = 0; i < ROWS - 1; i++) {
+        glBegin(GL_LINE_LOOP);
+        for (int j = 0; j < COLS - 1; j++) {
+            glVertex3f((float) j / COLS - 0.5, (float) i / ROWS - 0.5, Depth[i][j] * SCALE_FACTOR);
+            glVertex3f((float) (j + 1) / COLS - 0.5, (float) i / ROWS - 0.5, Depth[i][j + 1] * SCALE_FACTOR);
+            glVertex3f((float) (j + 1) / COLS - 0.5, (float) (i + 1) / ROWS - 0.5, Depth[i + 1][j + 1] * SCALE_FACTOR);
+            glVertex3f((float) j / COLS - 0.5, (float) (i + 1) / ROWS - 0.5, Depth[i + 1][j] * SCALE_FACTOR);
         }
-    } else {
-        for (int i = 0; i < WIDTH - 1; ++i) {
-            for (int j = 0; j < HEIGHT - 1; ++j) {
-                glBegin(GL_LINE_LOOP);
-                glVertex3f(i, j, depthValues[i][j]);
-                glVertex3f(i + 1, j, depthValues[i + 1][j]);
-                glVertex3f(i + 1, j + 1, depthValues[i + 1][j + 1]);
-                glVertex3f(i, j + 1, depthValues[i][j + 1]);
-                glEnd();
-            }
-        }
+        glEnd();
     }
 
+    glFlush();
     glutSwapBuffers();
 }
 
 void keyboard(unsigned char key, int x, int y) {
     switch (key) {
         case 'x':
-            x_angle += 5.0f;
+            x_angle += 5;
             break;
         case 'X':
-            x_angle -= 5.0f;
+            x_angle -= 5;
             break;
         case 'y':
-            y_angle += 5.0f;
+            y_angle += 5;
             break;
         case 'Y':
-            y_angle -= 5.0f;
+            y_angle -= 5;
             break;
         case 'z':
-            z_angle += 5.0f;
+            z_angle += 5;
             break;
         case 'Z':
-            z_angle -= 5.0f;
-            break;
-        case '2':
-            useColorDisplay = !useColorDisplay;
-            glutPostRedisplay(); // Redraw with color or depth display
-            break;
-        default:
+            z_angle -= 5;
             break;
     }
+    glutPostRedisplay();
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char *argv[]) {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(WIDTH, HEIGHT);
-    glutCreateWindow("Penny Model");
-
-    init();
-    readData();
-
+    glutInitWindowSize(500, 500);
+    glutInitWindowPosition(250, 250);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+    glutCreateWindow("Penny Depth Model");
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
-
-    glEnable(GL_DEPTH_TEST);
-
+    init();
     glutMainLoop();
     return 0;
 }
