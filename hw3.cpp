@@ -1,4 +1,3 @@
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,7 +5,7 @@
 
 #define ROWS 500
 #define COLS 500
-#define SCALE_FACTOR 0.00005
+#define SCALE_FACTOR 0.0005
 
 float Depth[ROWS][COLS];
 float R[ROWS][COLS], G[ROWS][COLS], B[ROWS][COLS];
@@ -94,17 +93,17 @@ void color_display() {
     glRotatef(y_angle, 0, 1, 0);
     glRotatef(z_angle, 0, 0, 1);
 
-    for (int i = ROWS - 2; i >= 0; i--) {  // Start from the last row and move upwards
+    for (int i = 0; i < ROWS - 1; i++) {
         glBegin(GL_POLYGON);
         for (int j = 0; j < COLS - 1; j++) {
             glColor3f(R[i][j] / 255.0, G[i][j] / 255.0, B[i][j] / 255.0);
-            glVertex3f((float) j / COLS - 0.5, 1.0 - (float) i / ROWS - 0.5, Depth[i][j] * SCALE_FACTOR);
+            glVertex3f((float) j / COLS - 0.5, (float) i / ROWS - 0.5, Depth[i][j] * SCALE_FACTOR);
             glColor3f(R[i][j + 1] / 255.0, G[i][j + 1] / 255.0, B[i][j + 1] / 255.0);
-            glVertex3f((float) (j + 1) / COLS - 0.5, 1.0 - (float) i / ROWS - 0.5, Depth[i][j + 1] * SCALE_FACTOR);
+            glVertex3f((float) (j + 1) / COLS - 0.5, (float) i / ROWS - 0.5, Depth[i][j + 1] * SCALE_FACTOR);
             glColor3f(R[i + 1][j + 1] / 255.0, G[i + 1][j + 1] / 255.0, B[i + 1][j + 1] / 255.0);
-            glVertex3f((float) (j + 1) / COLS - 0.5, 1.0 - (float) (i + 1) / ROWS - 0.5, Depth[i + 1][j + 1] * SCALE_FACTOR);
+            glVertex3f((float) (j + 1) / COLS - 0.5, (float) (i + 1) / ROWS - 0.5, Depth[i + 1][j + 1] * SCALE_FACTOR);
             glColor3f(R[i + 1][j] / 255.0, G[i + 1][j] / 255.0, B[i + 1][j] / 255.0);
-            glVertex3f((float) j / COLS - 0.5, 1.0 - (float) (i + 1) / ROWS - 0.5, Depth[i + 1][j] * SCALE_FACTOR);
+            glVertex3f((float) j / COLS - 0.5, (float) (i + 1) / ROWS - 0.5, Depth[i + 1][j] * SCALE_FACTOR);
         }
         glEnd();
     }
