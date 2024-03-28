@@ -19,7 +19,7 @@ void read_depth_data(const char *filename) {
         exit(1);
     }
 
-    for (int i = 0; i < ROWS; i++) {
+    for (int i = ROWS - 1; i >= 0; i--) {  // Read rows in reverse order
         for (int j = 0; j < COLS; j++) {
             if (fscanf(file, "%f", &Depth[i][j]) != 1) {
                 fprintf(stderr, "Error reading depth data from file\n");
@@ -38,7 +38,7 @@ void read_color_data(const char *filename) {
         exit(1);
     }
 
-    for (int i = 0; i < ROWS; i++) {
+    for (int i = ROWS - 1; i >= 0; i--) {  // Read rows in reverse order
         for (int j = 0; j < COLS; j++) {
             if (fscanf(file, "%f %f %f", &R[i][j], &G[i][j], &B[i][j]) != 3) {
                 fprintf(stderr, "Error reading color data from file\n");
