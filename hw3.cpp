@@ -201,9 +201,9 @@ void keyboard(unsigned char key, int x, int y) {
             else
                 glutDisplayFunc(display);
             break;
-        case '3':
-            glutDisplayFunc(phong_display);
-            break;
+        //case '3':
+            //glutDisplayFunc(phong_display);
+            //break;
     }
     glutPostRedisplay();
 }
