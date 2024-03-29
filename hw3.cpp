@@ -52,6 +52,28 @@ void read_color_data(const char *filename) {
     fclose(file);
 }
 
+void get_surface_normal(int i, int j, float& normal_x, float& normal_y, float& normal_z) {
+    // Calculate the surface normal using cross product of vectors formed by adjacent vertices
+    float vertex1[3] = {(float)j / COLS - 0.5, (float)i / ROWS - 0.5, Depth[i][j] * SCALE_FACTOR};
+    float vertex2[3] = {(float)(j + 1) / COLS - 0.5, (float)i / ROWS - 0.5, Depth[i][j + 1] * SCALE_FACTOR};
+    float vertex3[3] = {(float)(j + 1) / COLS - 0.5, (float)(i + 1) / ROWS - 0.5, Depth[i + 1][j + 1] * SCALE_FACTOR};
+
+    // Calculate vectors from vertex1 to vertex2 and vertex3
+    float vector1[3] = {vertex2[0] - vertex1[0], vertex2[1] - vertex1[1], vertex2[2] - vertex1[2]};
+    float vector2[3] = {vertex3[0] - vertex1[0], vertex3[1] - vertex1[1], vertex3[2] - vertex1[2]};
+
+    // Calculate the cross product of the two vectors to get the surface normal
+    normal_x = vector1[1] * vector2[2] - vector1[2] * vector2[1];
+    normal_y = vector1[2] * vector2[0] - vector1[0] * vector2[2];
+    normal_z = vector1[0] * vector2[1] - vector1[1] * vector2[0];
+
+    // Normalize the surface normal
+    float length = sqrt(normal_x * normal_x + normal_y * normal_y + normal_z * normal_z);
+    normal_x /= length;
+    normal_y /= length;
+    normal_z /= length;
+}
+
 void init() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glMatrixMode(GL_PROJECTION);
@@ -72,7 +94,7 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    nit_material(Ka, Kd, Ks, 100 * Kp, 0.8, 0.6, 0.4);
+    //init_material(Ka, Kd, Ks, 100 * Kp, 0.8, 0.6, 0.4);
     glRotatef(x_angle, 1, 0, 0);
     glRotatef(y_angle, 0, 1, 0);
     glRotatef(z_angle, 0, 0, 1);
@@ -120,6 +142,38 @@ void color_display() {
     glutSwapBuffers();
 }
 
+void phong_display() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    init_material(Ka, Kd, Ks, 100 * Kp, 0.8, 0.6, 0.4);
+    glRotatef(x_angle, 1, 0, 0);
+    glRotatef(y_angle, 0, 1, 0);
+    glRotatef(z_angle, 0, 0, 1);
+
+    for (int i = 0; i < ROWS - 1; i++) {
+        glBegin(GL_POLYGON);
+        for (int j = 0; j < COLS - 1; j++) {
+            float normal_x, normal_y, normal_z;
+            get_surface_normal(i, j, normal_x, normal_y, normal_z);
+            glNormal3f(normal_x, normal_y, normal_z);
+
+            // Set vertex colors
+            glColor3f(R[i][j] / 255.0, G[i][j] / 255.0, B[i][j] / 255.0);
+
+            // Specify vertex positions
+            glVertex3f((float) j / COLS - 0.5, (float) i / ROWS - 0.5, Depth[i][j] * SCALE_FACTOR);
+            glVertex3f((float) (j + 1) / COLS - 0.5, (float) i / ROWS - 0.5, Depth[i][j + 1] * SCALE_FACTOR);
+            glVertex3f((float) (j + 1) / COLS - 0.5, (float) (i + 1) / ROWS - 0.5, Depth[i + 1][j + 1] * SCALE_FACTOR);
+            glVertex3f((float) j / COLS - 0.5, (float) (i + 1) / ROWS - 0.5, Depth[i + 1][j] * SCALE_FACTOR);
+        }
+        glEnd();
+    }
+
+    glFlush();
+    glutSwapBuffers();
+}
+
 void keyboard(unsigned char key, int x, int y) {
     switch (key) {
         case 'x':
@@ -146,6 +200,9 @@ void keyboard(unsigned char key, int x, int y) {
                 glutDisplayFunc(color_display);
             else
                 glutDisplayFunc(display);
+            break;
+        case '3':
+            glutDisplayFunc(phong_display);
             break;
     }
     glutPostRedisplay();
