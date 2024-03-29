@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <GL/glut.h>
 
+#include "shading.cpp"
+
 #define ROWS 500
 #define COLS 500
 #define SCALE_FACTOR 0.0005
@@ -56,6 +58,11 @@ void init() {
     glLoadIdentity();
     glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
     glEnable(GL_DEPTH_TEST);
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_NORMALIZE);
+    init_light(GL_LIGHT0, 0, 1, 1, 0.5, 0.5, 0.5);
+    init_light(GL_LIGHT1, 0, 0, 1, 0.5, 0.5, 0.5);
+    init_light(GL_LIGHT2, 0, 1, 0, 0.5, 0.5, 0.5);
 
     read_depth_data("penny-depth.txt");
     read_color_data("penny-image.txt");
@@ -65,6 +72,7 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    nit_material(Ka, Kd, Ks, 100 * Kp, 0.8, 0.6, 0.4);
     glRotatef(x_angle, 1, 0, 0);
     glRotatef(y_angle, 0, 1, 0);
     glRotatef(z_angle, 0, 0, 1);
