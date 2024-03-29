@@ -53,7 +53,7 @@ void read_color_data(const char *filename) {
     fclose(file);
 }
 
-/*void get_surface_normal(int i, int j, float& normal_x, float& normal_y, float& normal_z) {
+void get_surface_normal(int i, int j, float& normal_x, float& normal_y, float& normal_z) {
     // Calculate the surface normal using cross product of vectors formed by adjacent vertices
     float vertex1[3] = {(float)j / COLS - 0.5, (float)i / ROWS - 0.5, Depth[i][j] * SCALE_FACTOR};
     float vertex2[3] = {(float)(j + 1) / COLS - 0.5, (float)i / ROWS - 0.5, Depth[i][j + 1] * SCALE_FACTOR};
@@ -73,7 +73,7 @@ void read_color_data(const char *filename) {
     normal_x /= length;
     normal_y /= length;
     normal_z /= length;
-} */
+} 
 
 void init() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -95,7 +95,7 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    //init_material(Ka, Kd, Ks, 100 * Kp, 0.8, 0.6, 0.4);
+    init_material(Ka, Kd, Ks, 100 * Kp, 0.8, 0.6, 0.4);
     glRotatef(x_angle, 1, 0, 0);
     glRotatef(y_angle, 0, 1, 0);
     glRotatef(z_angle, 0, 0, 1);
@@ -144,14 +144,14 @@ void color_display() {
     glutSwapBuffers();
 }
 
-/*void phong_display() {
+void phong_display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
     glEnable(GL_LIGHTING);
     
-    init_material(Ka, Kd, Ks, 100 * Kp, 0.8, 0.6, 0.4);
+    //init_material(Ka, Kd, Ks, 100 * Kp, 0.8, 0.6, 0.4);
     glRotatef(x_angle, 1, 0, 0);
     glRotatef(y_angle, 0, 1, 0);
     glRotatef(z_angle, 0, 0, 1);
@@ -206,10 +206,10 @@ void keyboard(unsigned char key, int x, int y) {
             else
                 glutDisplayFunc(display);
             break;
-        //case '3':
-            //phong_display_mode = !phong_display_mode;
-            //glutDisplayFunc(phong_display);
-            //break;
+        case '3':
+            phong_display_mode = !phong_display_mode;
+            glutDisplayFunc(phong_display);
+            break;
     }
     glutPostRedisplay();
 }
