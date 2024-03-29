@@ -80,8 +80,8 @@ void init() {
     glLoadIdentity();
     glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
     glEnable(GL_DEPTH_TEST);
-    glShadeModel(GL_SMOOTH);
-    glEnable(GL_NORMALIZE);
+    //glShadeModel(GL_SMOOTH);
+   // glEnable(GL_NORMALIZE);
     init_light(GL_LIGHT0, 0, 1, 1, 0.5, 0.5, 0.5);
     init_light(GL_LIGHT1, 0, 0, 1, 0.5, 0.5, 0.5);
     init_light(GL_LIGHT2, 0, 1, 0, 0.5, 0.5, 0.5);
