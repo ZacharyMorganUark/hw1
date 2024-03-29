@@ -7,12 +7,13 @@
 
 #define ROWS 500
 #define COLS 500
-#define SCALE_FACTOR 0.0005
+#define SCALE_FACTOR 0.0002
 
 float Depth[ROWS][COLS];
 float R[ROWS][COLS], G[ROWS][COLS], B[ROWS][COLS];
 float x_angle = 0, y_angle = 0, z_angle = 0;
 bool color_display_mode = false;
+bool phong_display_mode = false;
 
 void read_depth_data(const char *filename) {
     FILE *file = fopen(filename, "r");
@@ -80,11 +81,11 @@ void init() {
     glLoadIdentity();
     glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
     glEnable(GL_DEPTH_TEST);
-    //glShadeModel(GL_SMOOTH);
-   // glEnable(GL_NORMALIZE);
-    //init_light(GL_LIGHT0, 0, 1, 1, 0.5, 0.5, 0.5);
-    //init_light(GL_LIGHT1, 0, 0, 1, 0.5, 0.5, 0.5);
-    //init_light(GL_LIGHT2, 0, 1, 0, 0.5, 0.5, 0.5);
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_NORMALIZE);
+    init_light(GL_LIGHT0, 0, 1, 1, 0.5, 0.5, 0.5);
+    init_light(GL_LIGHT1, 0, 0, 1, 0.5, 0.5, 0.5);
+    init_light(GL_LIGHT2, 0, 1, 0, 0.5, 0.5, 0.5);
 
     read_depth_data("penny-depth.txt");
     read_color_data("penny-image.txt");
@@ -119,6 +120,7 @@ void color_display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    glDisable(GL_LIGHTING);
     glRotatef(x_angle, 1, 0, 0);
     glRotatef(y_angle, 0, 1, 0);
     glRotatef(z_angle, 0, 0, 1);
@@ -146,6 +148,9 @@ void color_display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+
+    glEnable(GL_LIGHTING);
+    
     init_material(Ka, Kd, Ks, 100 * Kp, 0.8, 0.6, 0.4);
     glRotatef(x_angle, 1, 0, 0);
     glRotatef(y_angle, 0, 1, 0);
@@ -202,6 +207,7 @@ void keyboard(unsigned char key, int x, int y) {
                 glutDisplayFunc(display);
             break;
         //case '3':
+            //phong_display_mode = !phong_display_mode;
             //glutDisplayFunc(phong_display);
             //break;
     }
