@@ -102,6 +102,7 @@ void display() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glDisable(GL_LIGHTING);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
     init_material(Ka, Kd, Ks, 100 * Kp, 0.8, 0.6, 0.4);
     glRotatef(x_angle, 1, 0, 0);
     glRotatef(y_angle, 0, 1, 0);
@@ -215,7 +216,11 @@ void keyboard(unsigned char key, int x, int y) {
             break;
         case '3':
             phong_display_mode = !phong_display_mode;
-            glutDisplayFunc(phong_display);
+            if (phong_display_mode)
+                glutDisplayFunc(phong_display);
+            else
+                glutDisplayFunc(display);
+            
             break;
     }
     glutPostRedisplay();
