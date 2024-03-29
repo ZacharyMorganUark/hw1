@@ -177,7 +177,7 @@ void phong_display() {
 
     glFlush();
     glutSwapBuffers();
-} */
+} 
 
 void keyboard(unsigned char key, int x, int y) {
     switch (key) {
