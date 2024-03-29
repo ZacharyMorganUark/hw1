@@ -101,6 +101,7 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    glDisable(GL_LIGHTING);
     init_material(Ka, Kd, Ks, 100 * Kp, 0.8, 0.6, 0.4);
     glRotatef(x_angle, 1, 0, 0);
     glRotatef(y_angle, 0, 1, 0);
