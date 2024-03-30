@@ -102,27 +102,30 @@ void display() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glDisable(GL_LIGHTING);
-    glClearColor(0.0, 0.0, 0.0, 1.0);
     init_material(Ka, Kd, Ks, 100 * Kp, 0.8, 0.6, 0.4);
     glRotatef(x_angle, 1, 0, 0);
     glRotatef(y_angle, 0, 1, 0);
     glRotatef(z_angle, 0, 0, 1);
 
-
-    //glColor3f(0.0, 0.0, 0.0); // Outline color (black)
-    //glLineWidth(2.0); // Set the line width for the outline
-
-    glColor3f(0.0, 0.0, 0.0);
+    // Draw the penny geometry with lines
+    glColor3f(0.0, 0.0, 0.0); // Set line color to black
+    glBegin(GL_LINE_LOOP);
     for (int i = 0; i < ROWS - 1; i++) {
-        glBegin(GL_LINE_LOOP);
         for (int j = 0; j < COLS - 1; j++) {
             glVertex3f((float) j / COLS - 0.5, (float) i / ROWS - 0.5, Depth[i][j] * SCALE_FACTOR);
-            glVertex3f((float) (j + 1) / COLS - 0.5, (float) i / ROWS - 0.5, Depth[i][j + 1] * SCALE_FACTOR);
-            glVertex3f((float) (j + 1) / COLS - 0.5, (float) (i + 1) / ROWS - 0.5, Depth[i + 1][j + 1] * SCALE_FACTOR);
-            glVertex3f((float) j / COLS - 0.5, (float) (i + 1) / ROWS - 0.5, Depth[i + 1][j] * SCALE_FACTOR);
         }
-        glEnd();
     }
+    glEnd();
+
+    // Draw the penny geometry filled
+    glColor3f(1.0, 1.0, 1.0); // Set fill color to white
+    glBegin(GL_POLYGON);
+    for (int i = 0; i < ROWS - 1; i++) {
+        for (int j = 0; j < COLS - 1; j++) {
+            glVertex3f((float) j / COLS - 0.5, (float) i / ROWS - 0.5, Depth[i][j] * SCALE_FACTOR);
+        }
+    }
+    glEnd();
 
     glFlush();
     glutSwapBuffers();
