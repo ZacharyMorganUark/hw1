@@ -47,7 +47,7 @@ void read_color_data(const char *filename) {
         exit(1);
     }
 
-    for (int i = ROWS - 1; i >= 0; i--) {  // Read rows in reverse order
+    for (int i = ROWS - 1; i >= 0; i--) {  // 
         for (int j = 0; j < COLS; j++) {
             if (fscanf(file, "%f %f %f", &R[i][j], &G[i][j], &B[i][j]) != 3) {
                 fprintf(stderr, "Error reading color data from file\n");
@@ -107,8 +107,8 @@ void display() {
     glRotatef(y_angle, 0, 1, 0);
     glRotatef(z_angle, 0, 0, 1);
 
-    // Draw the penny geometry with lines
-    glColor3f(0.0, 0.0, 0.0); // Set line color to black
+    
+    glColor3f(0.0, 0.0, 0.0); //black
     glBegin(GL_LINE_LOOP);
     for (int i = 0; i < ROWS - 1; i++) {
         for (int j = 0; j < COLS - 1; j++) {
@@ -117,8 +117,8 @@ void display() {
     }
     glEnd();
 
-    // Draw the penny geometry filled
-    glColor3f(1.0, 1.0, 1.0); // Set fill color to white
+    // Draw the penny
+    glColor3f(1.0, 1.0, 1.0); //white
     glBegin(GL_POLYGON);
     for (int i = 0; i < ROWS - 1; i++) {
         for (int j = 0; j < COLS - 1; j++) {
@@ -181,7 +181,7 @@ void phong_display() {
             // Set vertex colors
             glColor3f(R[i][j] / 255.0, G[i][j] / 255.0, B[i][j] / 255.0);
 
-            // Specify vertex positions
+            // vertex positions
             glVertex3f((float) j / COLS - 0.5, (float) i / ROWS - 0.5, Depth[i][j] * SCALE_FACTOR);
             glVertex3f((float) (j + 1) / COLS - 0.5, (float) i / ROWS - 0.5, Depth[i][j + 1] * SCALE_FACTOR);
             glVertex3f((float) (j + 1) / COLS - 0.5, (float) (i + 1) / ROWS - 0.5, Depth[i + 1][j + 1] * SCALE_FACTOR);
