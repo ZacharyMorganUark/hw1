@@ -109,10 +109,10 @@ void display() {
     glRotatef(z_angle, 0, 0, 1);
 
 
-    glColor3f(0.0, 0.0, 0.0); // Outline color (black)
-    glLineWidth(2.0); // Set the line width for the outline
+    //glColor3f(0.0, 0.0, 0.0); // Outline color (black)
+    //glLineWidth(2.0); // Set the line width for the outline
 
-    glColor3f(1.0, 1.0, 1.0);
+    glColor3f(0.0, 0.0, 0.0);
     for (int i = 0; i < ROWS - 1; i++) {
         glBegin(GL_LINE_LOOP);
         for (int j = 0; j < COLS - 1; j++) {
