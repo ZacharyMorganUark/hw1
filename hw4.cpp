@@ -1,227 +1,194 @@
 //---------------------------------------
 // Program: hw3.cpp using balls.cpp as skeleton
-// Purpose: Penny model with Phong shading
+// Purpose: 
 // Author: Zachary Morgan
-// Date: 29 March 2024
+// Date: 10 April 2024
 //---------------------------------------
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <iostream>
+#include <fstream>
+#include <vector>
 #include <GL/glut.h>
-#include "shading.cpp"
-#define ROWS 500
-#define COLS 500
-#define SCALE_FACTOR 0.0002 //penny depth size
-float Depth[ROWS][COLS];
-float R[ROWS][COLS], G[ROWS][COLS], B[ROWS][COLS];
-float x_angle = 0, y_angle = 0, z_angle = 0;
-bool color_display_mode = false;
-bool phong_display_mode = false;
-void read_depth_data(const char *filename) {
- FILE *file = fopen(filename, "r");
- if (file == NULL) {
- fprintf(stderr, "Error opening file %s\n", filename);
- exit(1);
- }
- for (int i = ROWS - 1; i >= 0; i--) { //reverse order ?
- for (int j = 0; j < COLS; j++) {
- if (fscanf(file, "%f", &Depth[i][j]) != 1) {
- fprintf(stderr, "Error reading depth data from file\n");
- fclose(file);
- exit(1);
- }
- }
- }
- fclose(file);
-}
-void read_color_data(const char *filename) {
- FILE *file = fopen(filename, "r");
- if (file == NULL) {
- fprintf(stderr, "Error opening file %s\n", filename);
- exit(1);
- }
- for (int i = ROWS - 1; i >= 0; i--) { // 
- for (int j = 0; j < COLS; j++) {
- if (fscanf(file, "%f %f %f", &R[i][j], &G[i][j], &B[i][j]) != 3) {
- fprintf(stderr, "Error reading color data from file\n");
- fclose(file);
- exit(1);
- }
- }
- }
- fclose(file);
-}
-void get_surface_normal(int i, int j, float& normal_x, float& normal_y, float& normal_z) {
- // calculate with cross product
- float vertex1[3] = {(float)j / COLS - 0.5, (float)i / ROWS - 0.5, Depth[i][j] * SCALE_FACTOR};
- float vertex2[3] = {(float)(j + 1) / COLS - 0.5, (float)i / ROWS - 0.5, Depth[i][j + 1] * SCALE_FACTOR};
- float vertex3[3] = {(float)(j + 1) / COLS - 0.5, (float)(i + 1) / ROWS - 0.5, Depth[i + 1][j + 1] * SCALE_FACTOR};
- // get vectors
- float vector1[3] = {vertex2[0] - vertex1[0], vertex2[1] - vertex1[1], vertex2[2] - vertex1[2]};
- float vector2[3] = {vertex3[0] - vertex1[0], vertex3[1] - vertex1[1], vertex3[2] - vertex1[2]};
- // calculate vector cross product
- normal_x = vector1[1] * vector2[2] - vector1[2] * vector2[1];
- normal_y = vector1[2] * vector2[0] - vector1[0] * vector2[2];
- normal_z = vector1[0] * vector2[1] - vector1[1] * vector2[0];
- // convert normals
- float length = sqrt(normal_x * normal_x + normal_y * normal_y + normal_z * normal_z);
- normal_x /= length;
- normal_y /= length;
- normal_z /= length;
-} 
-void init() {
- glClearColor(0.0, 0.0, 0.0, 1.0);
- glMatrixMode(GL_PROJECTION);
- glLoadIdentity();
- glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
- glEnable(GL_DEPTH_TEST);
- glShadeModel(GL_SMOOTH);
- glEnable(GL_NORMALIZE);
- init_light(GL_LIGHT0, 0, 1, 1, 0.5, 0.5, 0.5);
- init_light(GL_LIGHT1, 0, 0, 1, 0.5, 0.5, 0.5);
- init_light(GL_LIGHT2, 0, 1, 0, 0.5, 0.5, 0.5);
- read_depth_data("penny-depth.txt");
- read_color_data("penny-image.txt");
-}
-void display() {
- glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
- glMatrixMode(GL_MODELVIEW);
- glLoadIdentity();
- glDisable(GL_LIGHTING);
- init_material(Ka, Kd, Ks, 100 * Kp, 0.8, 0.6, 0.4);
- glRotatef(x_angle, 1, 0, 0);
- glRotatef(y_angle, 0, 1, 0);
- glRotatef(z_angle, 0, 0, 1);
- 
- glColor3f(0.0, 0.0, 0.0); //black
- glBegin(GL_LINE_LOOP);
- for (int i = 0; i < ROWS - 1; i++) {
- for (int j = 0; j < COLS - 1; j++) {
- glVertex3f((float) j / COLS - 0.5, (float) i / ROWS - 0.5, Depth[i][j] * SCALE_FACTOR);
- }
- }
- glEnd();
- // Draw the penny
- glColor3f(1.0, 1.0, 1.0); //white
- glBegin(GL_POLYGON);
- for (int i = 0; i < ROWS - 1; i++) {
- for (int j = 0; j < COLS - 1; j++) {
- glVertex3f((float) j / COLS - 0.5, (float) i / ROWS - 0.5, Depth[i][j] * SCALE_FACTOR);
- }
- }
- glEnd();
- glFlush();
- glutSwapBuffers();
-}
-void color_display() {
- glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
- glMatrixMode(GL_MODELVIEW);
- glLoadIdentity();
- glDisable(GL_LIGHTING);
- glRotatef(x_angle, 1, 0, 0);
- glRotatef(y_angle, 0, 1, 0);
- glRotatef(z_angle, 0, 0, 1);
- for (int i = 0; i < ROWS - 1; i++) {
- glBegin(GL_POLYGON);
- for (int j = 0; j < COLS - 1; j++) {
- glColor3f(R[i][j] / 255.0, G[i][j] / 255.0, B[i][j] / 255.0);
- glVertex3f((float) j / COLS - 0.5, (float) i / ROWS - 0.5, Depth[i][j] * SCALE_FACTOR);
- glColor3f(R[i][j + 1] / 255.0, G[i][j + 1] / 255.0, B[i][j + 1] / 255.0);
- glVertex3f((float) (j + 1) / COLS - 0.5, (float) i / ROWS - 0.5, Depth[i][j + 1] * SCALE_FACTOR);
- glColor3f(R[i + 1][j + 1] / 255.0, G[i + 1][j + 1] / 255.0, B[i + 1][j + 1] / 255.0);
- glVertex3f((float) (j + 1) / COLS - 0.5, (float) (i + 1) / ROWS - 0.5, Depth[i + 1][j + 1] * SCALE_FACTOR);
- glColor3f(R[i + 1][j] / 255.0, G[i + 1][j] / 255.0, B[i + 1][j] / 255.0);
- glVertex3f((float) j / COLS - 0.5, (float) (i + 1) / ROWS - 0.5, Depth[i + 1][j] * SCALE_FACTOR);
- }
- glEnd();
- }
- glFlush();
- glutSwapBuffers();
-}
-void phong_display() {
- glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
- glMatrixMode(GL_MODELVIEW);
- glLoadIdentity();
- glEnable(GL_LIGHTING);
- 
- //init_material(Ka, Kd, Ks, 100 * Kp, 0.8, 0.6, 0.4);
- glRotatef(x_angle, 1, 0, 0);
- glRotatef(y_angle, 0, 1, 0);
- glRotatef(z_angle, 0, 0, 1);
- for (int i = 0; i < ROWS - 1; i++) {
- glBegin(GL_POLYGON);
- for (int j = 0; j < COLS - 1; j++) {
- float normal_x, normal_y, normal_z;
- get_surface_normal(i, j, normal_x, normal_y, normal_z);
- glNormal3f(normal_x, normal_y, normal_z);
- // Set vertex colors
- glColor3f(R[i][j] / 255.0, G[i][j] / 255.0, B[i][j] / 255.0);
- // vertex positions
- glVertex3f((float) j / COLS - 0.5, (float) i / ROWS - 0.5, Depth[i][j] * SCALE_FACTOR);
- glVertex3f((float) (j + 1) / COLS - 0.5, (float) i / ROWS - 0.5, Depth[i][j + 1] * SCALE_FACTOR);
- glVertex3f((float) (j + 1) / COLS - 0.5, (float) (i + 1) / ROWS - 0.5, Depth[i + 1][j + 1] * SCALE_FACTOR);
- glVertex3f((float) j / COLS - 0.5, (float) (i + 1) / ROWS - 0.5, Depth[i + 1][j] * SCALE_FACTOR);
- }
- glEnd();
- }
- glFlush();
- glutSwapBuffers();
-} 
-void keyboard(unsigned char key, int x, int y) {
- switch (key) {
- case 'x':
- x_angle += 5;
- break;
- case 'X':
- x_angle -= 5;
- break;
- case 'y':
- y_angle += 5;
- break;
- case 'Y':
- y_angle -= 5;
- break;
- case 'z':
- z_angle += 5;
- break;
- case 'Z':
- z_angle -= 5;
- break;
- case '2':
- color_display_mode = !color_display_mode;
- if (color_display_mode)
- glutDisplayFunc(color_display);
- else
- glutDisplayFunc(display);
- break;
- case '3':
- phong_display_mode = !phong_display_mode;
- if (phong_display_mode)
- glutDisplayFunc(phong_display);
- else
- glutDisplayFunc(display);
- 
- break;
- }
- glutPostRedisplay();
-}
-int main(int argc, char *argv[]) {
- glutInit(&argc, argv);
- glutInitWindowSize(500, 500);
- glutInitWindowPosition(250, 250);
- glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
- glutCreateWindow("Penny Model");
- glutDisplayFunc(display);
- glutKeyboardFunc(keyboard);
- printf(" 'x' = decrease X translation/rotation\n");
- printf(" 'X' = increase X translation/rotation\n");
- printf(" 'y' = decrease Y translation/rotation\n");
- printf(" 'Y' = increase Y translation/rotation\n");
- printf(" 'z' = decrease Z translation/rotation\n");
- printf(" 'Z' = increase Z translation/rotation\n");
- printf(" '2' = change to color display mode\n");
- printf(" '3' = change to phong shading mode\n");
- init();
- glutMainLoop();
- return 0;
+#include <SOIL/SOIL.h>
 
+// Define maze dimensions
+int R, C;
+int SR, SC; // Starting row and column
+
+// Define the maze array
+std::vector<std::vector<char>> maze;
+
+// Define texture IDs
+GLuint rockTexture, brickTexture, woodTexture, floorTexture;
+
+// Define rotation angles
+float xRot = 0.0, yRot = 0.0, zRot = 0.0;
+
+// Function to read the maze file
+void readMazeFile(const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Error opening file: " << filename << std::endl;
+        exit(1);
+    }
+
+    // Read maze dimensions and starting location
+    file >> R >> C >> SR >> SC;
+
+    // Resize maze array
+    maze.resize(R, std::vector<char>(C));
+
+    // Read maze layout
+    for (int i = 0; i < R; ++i) {
+        for (int j = 0; j < C; ++j) {
+            file >> maze[i][j];
+        }
+    }
+
+    file.close();
+}
+
+// Function to load texture images
+GLuint loadTexture(const char* filename) {
+    GLuint textureID;
+    textureID = SOIL_load_OGL_texture(filename, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_INVERT_Y);
+    if (textureID == 0) {
+        std::cerr << "Error loading texture: " << SOIL_last_result() << std::endl;
+    }
+    return textureID;
+}
+
+// Function to initialize OpenGL
+void initOpenGL() {
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_DEPTH_TEST);
+
+    // Load texture images
+    rockTexture = loadTexture("rock.jpg");
+    brickTexture = loadTexture("brick.jpg");
+    woodTexture = loadTexture("wood.jpg");
+    floorTexture = loadTexture("grass.jpg");
+}
+
+// Function to draw the maze
+void drawMaze() {
+    glPushMatrix();
+
+    // Apply rotations
+    glRotatef(xRot, 1.0, 0.0, 0.0);
+    glRotatef(yRot, 0.0, 1.0, 0.0);
+    glRotatef(zRot, 0.0, 0.0, 1.0);
+
+    // Draw floor
+    glBindTexture(GL_TEXTURE_2D, floorTexture);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0, 0.0); glVertex3f(-0.5 * C, 0.0, -0.5 * R);
+    glTexCoord2f(1.0, 0.0); glVertex3f(0.5 * C, 0.0, -0.5 * R);
+    glTexCoord2f(1.0, 1.0); glVertex3f(0.5 * C, 0.0, 0.5 * R);
+    glTexCoord2f(0.0, 1.0); glVertex3f(-0.5 * C, 0.0, 0.5 * R);
+    glEnd();
+
+    // Draw walls
+    for (int i = 0; i < R; ++i) {
+        for (int j = 0; j < C; ++j) {
+            if (maze[i][j] != ' ') {
+                glPushMatrix();
+                glTranslatef(j - 0.5 * C, 0.5, i - 0.5 * R);
+
+                switch (maze[i][j]) {
+                    case 'r':
+                        glBindTexture(GL_TEXTURE_2D, rockTexture);
+                        break;
+                    case 'b':
+                        glBindTexture(GL_TEXTURE_2D, brickTexture);
+                        break;
+                    case 'w':
+                        glBindTexture(GL_TEXTURE_2D, woodTexture);
+                        break;
+                }
+
+                glBegin(GL_QUADS);
+                glTexCoord2f(0.0, 0.0); glVertex3f(-0.5, 0.0, -0.5);
+                glTexCoord2f(1.0, 0.0); glVertex3f(0.5, 0.0, -0.5);
+                glTexCoord2f(1.0, 1.0); glVertex3f(0.5, 1.0, -0.5);
+                glTexCoord2f(0.0, 1.0); glVertex3f(-0.5, 1.0, -0.5);
+
+                glTexCoord2f(0.0, 0.0); glVertex3f(-0.5, 0.0, 0.5);
+                glTexCoord2f(1.0, 0.0); glVertex3f(0.5, 0.0, 0.5);
+                glTexCoord2f(1.0, 1.0); glVertex3f(0.5, 1.0, 0.5);
+                glTexCoord2f(0.0, 1.0); glVertex3f(-0.5, 1.0, 0.5);
+
+                glTexCoord2f(0.0, 0.0); glVertex3f(-0.5, 0.0, -0.5);
+                glTexCoord2f(1.0, 0.0); glVertex3f(-0.5, 0.0, 0.5);
+                glTexCoord2f(1.0, 1.0); glVertex3f(-0.5, 1.0, 0.5);
+                glTexCoord2f(0.0, 1.0); glVertex3f(-0.5, 1.0, -0.5);
+
+                glTexCoord2f(0.0, 0.0); glVertex3f(0.5, 0.0, -0.5);
+                glTexCoord2f(1.0, 0.0); glVertex3f(0.5, 0.0, 0.5);
+                glTexCoord2f(1.0, 1.0); glVertex3f(0.5, 1.0, 0.5);
+                glTexCoord2f(0.0, 1.0); glVertex3f(0.5, 1.0, -0.5);
+
+                glTexCoord2f(0.0, 0.0); glVertex3f(-0.5, 0.0, -0.5);
+                glTexCoord2f(1.0, 0.0); glVertex3f(-0.5, 0.0, 0.5);
+                glTexCoord2f(1.0, 1.0); glVertex3f(0.5, 0.0, 0.5);
+                glTexCoord2f(0.0, 1.0); glVertex3f(0.5, 0.0, -0.5);
+                glEnd();
+
+                glPopMatrix();
+            }
+        }
+    }
+
+    glPopMatrix();
+}
+
+// Function to display
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
+    gluLookAt(0.0, 3.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+
+    drawMaze();
+
+    glutSwapBuffers();
+}
+
+// Function to handle keyboard input
+void keyboard(unsigned char key, int x, int y) {
+    switch (key) {
+        case 'x':
+            xRot -= 5.0;
+            break;
+        case 'X':
+            xRot += 5.0;
+            break;
+        case 'y':
+            yRot -= 5.0;
+            break;
+        case 'Y':
+            yRot += 5.0;
+            break;
+        case 'z':
+            zRot -= 5.0;
+            break;
+        case 'Z':
+            zRot += 5.0;
+            break;
+    }
+    glutPostRedisplay();
+}
+
+int main(int argc, char** argv) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(800, 600);
+    glutCreateWindow("Maze Viewer");
+
+    initOpenGL();
+    readMazeFile("maze.txt");
+
+    glutDisplayFunc(display);
+    glutKeyboardFunc(keyboard);
+
+    glutMainLoop();
+    return 0;
+}
