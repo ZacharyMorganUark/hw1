@@ -1,12 +1,13 @@
 //---------------------------------------
-// Program: maze_viewer.cpp
-// Purpose: Displaying a maze with texture mapped walls and floor
-// Author: [Your Name]
-// Date: [Current Date]
+// Program: texture3.cpp
+// Purpose: Texture map brick photograph
+//          onto a cube model.
+// Author:  John Gauch
+// Date:    April 2011
 //---------------------------------------
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #ifdef MAC
 #include <GLUT/glut.h>
 #else
