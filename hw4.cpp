@@ -34,6 +34,7 @@ GLuint textures[4]; // Texture IDs for walls and floor
 void init_textures() {
     // Read and initialize textures for walls and floor
     const char* textureFiles[4] = {"textures/rock.jpg", "textures/brick.jpg", "textures/wood.jpg", "textures/grass.jpg"};
+    glGenTextures(4, textures); // Generate texture IDs for all textures
     for (int i = 0; i < 4; ++i) {
         im_color image;
         image.ReadJpg(textureFiles[i]);
@@ -52,7 +53,6 @@ void init_textures() {
             }
         }
         
-        glGenTextures(1, &textures[i]);
         glBindTexture(GL_TEXTURE_2D, textures[i]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -61,22 +61,6 @@ void init_textures() {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, xdim, ydim, 0, GL_RGB, GL_UNSIGNED_BYTE, texture);
         free(texture);
     }
-}
-
-//---------------------------------------
-// Init function for OpenGL
-//---------------------------------------
-void init()
-{
-   // Init view
-   glClearColor(0.0, 0.0, 0.0, 1.0);
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   glOrtho(-2.0, 2.0, -2.0, 2.0, -2.0, 2.0);
-   glEnable(GL_DEPTH_TEST);
-
-   // Init texture
-   init_textures();
 }
 
 //---------------------------------------
@@ -138,6 +122,23 @@ void draw_textured_cube(float xmin, float ymin, float zmin,
 }
 
 //---------------------------------------
+// Init function for OpenGL
+//---------------------------------------
+void init()
+{
+   // Init view
+   glClearColor(0.0, 0.0, 0.0, 1.0);
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   glOrtho(-2.0, 2.0, -2.0, 2.0, -2.0, 2.0);
+   glEnable(GL_DEPTH_TEST);
+
+   // Init texture
+   init_textures();
+   glEnable(GL_TEXTURE_2D);
+}
+
+//---------------------------------------
 // Display callback for OpenGL
 //---------------------------------------
 void display() {
@@ -148,9 +149,6 @@ void display() {
     glRotatef(xangle, 1.0, 0.0, 0.0);
     glRotatef(yangle, 0.0, 1.0, 0.0);
     glRotatef(zangle, 0.0, 0.0, 1.0);
-
-    // Initialize textures
-    init_textures();
 
     // Draw floor
     draw_textured_cube(-1, -1, -1, 1, 1, -1.01, 3);
@@ -172,7 +170,6 @@ void display() {
                 default:
                     continue;
             }
-            glBindTexture(GL_TEXTURE_2D, textures[textureIndex]);
             draw_textured_cube(xmin, ymin, zmin, xmax, ymax, zmax, textureIndex);
         }
     }
@@ -254,7 +251,6 @@ void mouse(int button, int state, int x, int y) {
         glutPostRedisplay();
     }
 }
-
 
 //---------------------------------------
 // Main program
