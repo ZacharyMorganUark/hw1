@@ -58,9 +58,25 @@ void init_textures() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, xdim, ydim, 0, GL_RGB, GL_UNSIGNED_BYTE, texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, xdim, ydim, 0, GL_RGB, GL_UNSIGNED_BYTE, texture);
         free(texture);
     }
+}
+
+//---------------------------------------
+// Init function for OpenGL
+//---------------------------------------
+void init()
+{
+   // Init view
+   glClearColor(0.0, 0.0, 0.0, 1.0);
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   glOrtho(-2.0, 2.0, -2.0, 2.0, -2.0, 2.0);
+   glEnable(GL_DEPTH_TEST);
+
+   // Init texture
+   init_textures();
 }
 
 //---------------------------------------
@@ -244,21 +260,6 @@ void mouse(int button, int state, int x, int y) {
     }
 }
 
-//---------------------------------------
-// Init function for OpenGL
-//---------------------------------------
-void init() {
-    // Init view
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-2.0, 2.0, -2.0, 2.0, -2.0, 2.0);
-    glEnable(GL_DEPTH_TEST);
-
-    // Initialize textures
-    init_textures();
-    glEnable(GL_TEXTURE_2D);
-}
 
 //---------------------------------------
 // Main program
