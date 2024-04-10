@@ -34,7 +34,7 @@ GLuint textures[4]; // Texture IDs for walls and floor
 //---------------------------------------
 void init_textures() {
     // Read and initialize textures for walls and floor
-    const char* textureFiles[4] = {"rock.jpg", "brick.jpg", "wood.jpg", "grass.jpg"};
+    const char* textureFiles[4] = {"textures/rock.jpg", "textures/brick.jpg", "textures/wood.jpg", "textures/grass.jpg"};
     for (int i = 0; i < 4; ++i) {
         im_color image;
         image.ReadJpg(textureFiles[i]);
