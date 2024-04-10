@@ -136,7 +136,7 @@ void display() {
     // Load texture data here
     int xdim, ydim;
     unsigned char *texture;
-    init_texture((char *)"textures/brick0.jpg", texture, xdim, ydim);
+    init_textures((char *)"textures/brick0.jpg", texture, xdim, ydim);
     glBindTexture(GL_TEXTURE_2D, textures[0]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, xdim, ydim, 0, GL_RGB, GL_UNSIGNED_BYTE, texture);
     free(texture);
