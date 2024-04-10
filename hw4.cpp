@@ -149,13 +149,8 @@ void display() {
     glRotatef(yangle, 0.0, 1.0, 0.0);
     glRotatef(zangle, 0.0, 0.0, 1.0);
 
-    // Load texture data here
-    int xdim, ydim;
-    unsigned char *texture;
-    init_textures((char *)"textures/brick0.jpg", texture, xdim, ydim);
-    glBindTexture(GL_TEXTURE_2D, textures[0]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, xdim, ydim, 0, GL_RGB, GL_UNSIGNED_BYTE, texture);
-    free(texture);
+    // Initialize textures
+    init_textures();
 
     // Draw floor
     draw_textured_cube(-1, -1, -1, 1, 1, -1.01, 3);
