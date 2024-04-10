@@ -1,13 +1,12 @@
 //---------------------------------------
 // Program: texture3.cpp
-// Purpose: Texture map brick photograph
-//          onto a cube model.
-// Author:  John Gauch
-// Date:    April 2011
+// Purpose: Displaying a maze with texture mapped walls and floor
+// Author: [Your Name]
+// Date: [Current Date]
 //---------------------------------------
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #ifdef MAC
 #include <GLUT/glut.h>
 #else
@@ -34,7 +33,7 @@ GLuint textures[4]; // Texture IDs for walls and floor
 //---------------------------------------
 void init_textures() {
     // Read and initialize textures for walls and floor
-    const char* textureFiles[4] = {"textures/rock.jpg", "textures/brick.jpg", "textures/wood.jpg", "textures/grass.jpg"};
+    const char* textureFiles[4] = {"rock.jpg", "brick.jpg", "wood.jpg", "grass.jpg"};
     for (int i = 0; i < 4; ++i) {
         im_color image;
         image.ReadJpg(textureFiles[i]);
@@ -59,7 +58,7 @@ void init_textures() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, xdim, ydim, 0, GL_RGB, GL_UNSIGNED_BYTE, texture);
+        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, xdim, ydim, 0, GL_RGB, GL_UNSIGNED_BYTE, texture);
         free(texture);
     }
 }
@@ -134,6 +133,14 @@ void display() {
     glRotatef(yangle, 0.0, 1.0, 0.0);
     glRotatef(zangle, 0.0, 0.0, 1.0);
 
+    // Load texture data here
+    int xdim, ydim;
+    unsigned char *texture;
+    init_texture((char *)"textures/brick0.jpg", texture, xdim, ydim);
+    glBindTexture(GL_TEXTURE_2D, textures[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, xdim, ydim, 0, GL_RGB, GL_UNSIGNED_BYTE, texture);
+    free(texture);
+
     // Draw floor
     draw_textured_cube(-1, -1, -1, 1, 1, -1.01, 3);
 
@@ -154,6 +161,7 @@ void display() {
                 default:
                     continue;
             }
+            glBindTexture(GL_TEXTURE_2D, textures[textureIndex]);
             draw_textured_cube(xmin, ymin, zmin, xmax, ymax, zmax, textureIndex);
         }
     }
@@ -237,6 +245,22 @@ void mouse(int button, int state, int x, int y) {
 }
 
 //---------------------------------------
+// Init function for OpenGL
+//---------------------------------------
+void init() {
+    // Init view
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-2.0, 2.0, -2.0, 2.0, -2.0, 2.0);
+    glEnable(GL_DEPTH_TEST);
+
+    // Initialize textures
+    init_textures();
+    glEnable(GL_TEXTURE_2D);
+}
+
+//---------------------------------------
 // Main program
 //---------------------------------------
 int main(int argc, char *argv[]) {
@@ -252,12 +276,11 @@ int main(int argc, char *argv[]) {
     glutInitWindowSize(500, 500);
     glutInitWindowPosition(250, 250);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-    glutCreateWindow("Maze");
+    glutCreateWindow("Maze Viewer");
+    init();
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse);
-    glEnable(GL_DEPTH_TEST);
-    init_textures();
     glutMainLoop();
 
     // Free memory
