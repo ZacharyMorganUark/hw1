@@ -72,11 +72,18 @@ void read_maze(const char *filename) {
         fprintf(stderr, "Error opening file %s\n", filename);
         exit(1);
     }
-    fscanf(file, "%d %d", &ROWS, &COLS); // Read number of rows and columns
+    int result = fscanf(file, "%d %d", &ROWS, &COLS); // Read number of rows and columns
+    if (result != 2) {
+        fprintf(stderr, "Error reading maze dimensions from file %s\n", filename);
+        exit(1);
+    }
     maze = (char **)malloc(ROWS * sizeof(char *));
     for (int i = 0; i < ROWS; ++i) {
-        maze[i] = (char *)malloc((COLS + 1) * sizeof(char));
-        fscanf(file, "%s", maze[i]);
+        result = fscanf(file, "%s", maze[i]);
+        if (result != 1) {
+            fprintf(stderr, "Error reading maze row %d from file %s\n", i, filename);
+            exit(1);
+        }
     }
     fclose(file);
 }
