@@ -139,7 +139,7 @@ void init()
    glClearColor(0.0, 0.0, 0.0, 1.0);
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
-   glOrtho(-20.0, 20.0, -20.0, 20.0, -20.0, 20.0);
+   glOrtho(-10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
    glEnable(GL_DEPTH_TEST);
 
    // Init texture
@@ -176,6 +176,8 @@ void display() {
                     textureIndex = 1; break;
                 case 'w':
                     textureIndex = 2; break;
+                case 'g':
+                    textureIndex = 3; break;
                 default:
                     continue;
             }
