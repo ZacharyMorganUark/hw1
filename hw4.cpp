@@ -130,7 +130,7 @@ void init()
    glClearColor(0.0, 0.0, 0.0, 1.0);
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
-   glOrtho(-2.0, 2.0, -2.0, 2.0, -2.0, 2.0);
+   glOrtho(-5.0, 5.0, -5.0, 5.0, -5.0, 5.0);
    glEnable(GL_DEPTH_TEST);
 
    // Init texture
