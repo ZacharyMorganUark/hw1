@@ -279,7 +279,7 @@ int main(int argc, char *argv[]) {
     glutInitWindowSize(500, 500);
     glutInitWindowPosition(250, 250);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-    glutCreateWindow("Maze Viewer");
+    glutCreateWindow("HW4 Maze");
     init();
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
