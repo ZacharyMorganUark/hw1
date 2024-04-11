@@ -1,8 +1,8 @@
 //---------------------------------------
-// Program: texture3.cpp
-// Purpose: Displaying a maze with texture mapped walls and floor
-// Author: [Your Name]
-// Date: [Current Date]
+// Program: texture3.cpp used as skelton
+// Purpose: Maze for Assignment 4
+// Author: Zachary Morgan   
+// Date: 10 April 2024
 //---------------------------------------
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,7 +14,7 @@
 #endif
 #include "libim/im_color.h"
 
-// Global variables
+// Globals
 #define ROTATE 1
 #define TRANSLATE 2
 int xangle = 10;
@@ -34,7 +34,7 @@ GLuint textures[4]; // Texture IDs for walls and floor
 void init_textures() {
     // Read and initialize textures for walls and floor
     const char* textureFiles[4] = {"textures/rock.jpg", "textures/brick.jpg", "textures/wood.jpg", "textures/grass.jpg"};
-    glGenTextures(4, textures); // Generate texture IDs for all textures
+    glGenTextures(4, textures); 
     for (int i = 0; i < 4; ++i) {
         im_color image;
         image.ReadJpg(textureFiles[i]);
@@ -192,7 +192,7 @@ void display() {
 // Keyboard callback for OpenGL
 //---------------------------------------
 void keyboard(unsigned char key, int x, int y) {
-    // Determine if we are in ROTATE or TRANSLATE mode
+    // Check mode
     if ((key == 'r') || (key == 'R')) {
         printf("Type x y z to decrease or X Y Z to increase ROTATION angles.\n");
         mode = ROTATE;
@@ -201,7 +201,7 @@ void keyboard(unsigned char key, int x, int y) {
         mode = TRANSLATE;
     }
 
-    // Handle ROTATE
+    // Handle R
     if (mode == ROTATE) {
         if (key == 'x')
             xangle -= 5;
@@ -218,7 +218,7 @@ void keyboard(unsigned char key, int x, int y) {
         glutPostRedisplay();
     }
 
-    // Handle TRANSLATE
+    // Handle T
     if (mode == TRANSLATE) {
         if (key == 'x')
             xpos -= 5;
@@ -247,7 +247,7 @@ void mouse(int button, int state, int x, int y) {
         ydown = y;
     }
 
-    // Handle ROTATE
+    // Handle R
     if ((mode == ROTATE) && (state == GLUT_UP)) {
         xangle += (y - ydown);
         yangle -= (x - xdown);
@@ -255,7 +255,7 @@ void mouse(int button, int state, int x, int y) {
         glutPostRedisplay();
     }
 
-    // Handle TRANSLATE
+    // Handle T
     if ((mode == TRANSLATE) && (state == GLUT_UP)) {
         xpos += (x - xdown);
         ypos -= (y - ydown);
@@ -286,7 +286,7 @@ int main(int argc, char *argv[]) {
     glutMouseFunc(mouse);
     glutMainLoop();
 
-    // Free memory
+    // Free memory because of malloc use
     for (int i = 0; i < ROWS; ++i)
         free(maze[i]);
     free(maze);
