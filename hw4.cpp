@@ -79,11 +79,13 @@ void read_maze(const char *filename) {
     }
     maze = (char **)malloc(ROWS * sizeof(char *));
     for (int i = 0; i < ROWS; ++i) {
+        maze[i] = (char *)malloc((COLS + 1) * sizeof(char)); // Allocate memory for the row
         result = fscanf(file, "%s", maze[i]);
         if (result != 1) {
             fprintf(stderr, "Error reading maze row %d from file %s\n", i, filename);
             exit(1);
         }
+        maze[i][COLS] = '\0'; // Null-terminate the string
     }
     fclose(file);
 }
