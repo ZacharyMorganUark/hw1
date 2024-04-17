@@ -1,14 +1,12 @@
 //---------------------------------------
-// Program: texture3.cpp used as skeleton
+// Program: texture3.cpp used as skelton
 // Purpose: Maze for Assignment 4
-// Author: Zachary Morgan
+// Author: Zachary Morgan   
 // Date: 10 April 2024
 //---------------------------------------
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <time.h> // Include time.h for random number generation
-#include <string> // Include string for file path concatenation
 #ifdef MAC
 #include <GLUT/glut.h>
 #else
@@ -19,8 +17,6 @@
 // Globals
 #define ROTATE 1
 #define TRANSLATE 2
-#define SR 0 // Initial position of the player
-#define SC 8
 int xangle = 10;
 int yangle = 10;
 int zangle = 10;
@@ -30,32 +26,24 @@ int zpos = 0;
 int mode = ROTATE;
 int ROWS, COLS;
 char **maze;
-GLuint textures[7]; // Texture IDs for walls, floor, player, gold, and gems
+GLuint textures[4]; // Texture IDs for walls and floor
 
 //---------------------------------------
 // Initialize texture images
 //---------------------------------------
 void init_textures() {
-    // Read and initialize textures
-    const char* textureFiles[7] = {
-        "textures/rock.jpg", "textures/brick.jpg", "textures/wood.jpg", "textures/grass.jpg",
-        "gold.jpg", "gems.jpg", "yellow.jpg"
+    // Read and initialize textures 
+    const char* textureFiles[4] = {
+        "textures/rock.jpg", "textures/brick.jpg", "textures/wood.jpg", "textures/grass.jpg"
     };
 
     // Generate texture ID
-    glGenTextures(7, textures);
+    glGenTextures(4, textures);
 
     // Load and initialize textures
-    for (int i = 0; i < 7; ++i) {
+    for (int i = 0; i < 4; ++i) {
         im_color image;
-        if (i < 4) {
-            // textures file path
-            image.ReadJpg(("textures/" + std::string(textureFiles[i])).c_str());
-        } else {
-            // direct file path since they were not included in original src file
-            image.ReadJpg(textureFiles[i]);
-        }
-
+        image.ReadJpg(textureFiles[i]);
         int xdim = 1, ydim = 1;
         while (xdim < image.R.Xdim) xdim *= 2;
         while (ydim < image.R.Ydim) ydim *= 2;
@@ -149,31 +137,24 @@ void draw_textured_cube(float xmin, float ymin, float zmin,
 }
 
 //---------------------------------------
-// Randomly position treasures
+// Init function for OpenGL
 //---------------------------------------
-void randomly_position_treasures() {
-    // Seed the random number generator with the current time
-    srand(time(NULL));
+void init()
+{
+   // Init view
+   glClearColor(0.0, 0.0, 0.0, 1.0);
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   glOrtho(-10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+   glEnable(GL_DEPTH_TEST);
 
-    // Decide how many treasures to add to the maze
-    int num_treasures = 10; // Adjust this as needed
-
-    for (int i = 0; i < num_treasures; ++i) {
-        // Generate random (r, c) coordinates
-        int r = rand() % ROWS;
-        int c = rand() % COLS;
-
-        // Check if the location is a grass block
-        if (maze[r][c] == 'g') {
-            // Randomly choose between gold ('g') and gems ('G')
-            char treasure = (rand() % 2 == 0) ? 'g' : 'G';
-            maze[r][c] = treasure;
-        }
-    }
+   // Init texture
+   init_textures();
+   glEnable(GL_TEXTURE_2D);
 }
 
 //---------------------------------------
-// Display the maze, treasures, and player
+// Display callback for OpenGL
 //---------------------------------------
 void display() {
     // Clear the screen
@@ -188,7 +169,7 @@ void display() {
     // Draw floor
     draw_textured_cube(-1, -1, -1, 1, 1, -1.01, 3);
 
-    // Draw walls, treasures, and player based on maze data
+    // Draw walls based on maze data
     for (int r = 0; r < ROWS; ++r) {
         for (int c = 0; c < COLS; ++c) {
             float xmin = c - 0.5, xmax = c + 0.5;
@@ -202,10 +183,6 @@ void display() {
                     textureIndex = 1; break;
                 case 'w':
                     textureIndex = 2; break;
-                case 'g':
-                    textureIndex = 4; break; // Texture index for gold
-                case 'G':
-                    textureIndex = 5; break; // Texture index for gems
                 default:
                     continue;
             }
@@ -213,14 +190,83 @@ void display() {
         }
     }
 
-    // Draw the player cube at initial position
-    float player_x = SR - 0.5; // Adjust SR and SC based on initial player position
-    float player_y = SC - 0.5;
-    float player_z = -1.01;
-    draw_textured_cube(player_x, player_y, player_z, player_x + 1, player_y + 1, player_z + 1, 6); // Texture index for player
-
     // Swap buffers
     glutSwapBuffers();
+}
+
+//---------------------------------------
+// Keyboard callback for OpenGL
+//---------------------------------------
+void keyboard(unsigned char key, int x, int y) {
+    // Check mode
+    if ((key == 'r') || (key == 'R')) {
+        printf("Type x y z to decrease or X Y Z to increase ROTATION angles.\n");
+        mode = ROTATE;
+    } else if ((key == 't') || (key == 'T')) {
+        printf("Type x y z to decrease or X Y Z to increase TRANSLATION distance.\n");
+        mode = TRANSLATE;
+    }
+
+    // Handle R
+    if (mode == ROTATE) {
+        if (key == 'x')
+            xangle -= 5;
+        else if (key == 'y')
+            yangle -= 5;
+        else if (key == 'z')
+            zangle -= 5;
+        else if (key == 'X')
+            xangle += 5;
+        else if (key == 'Y')
+            yangle += 5;
+        else if (key == 'Z')
+            zangle += 5;
+        glutPostRedisplay();
+    }
+
+    // Handle T
+    if (mode == TRANSLATE) {
+        if (key == 'x')
+            xpos -= 5;
+        else if (key == 'y')
+            ypos -= 5;
+        else if (key == 'z')
+            zpos -= 5;
+        else if (key == 'X')
+            xpos += 5;
+        else if (key == 'Y')
+            ypos += 5;
+        else if (key == 'Z')
+            zpos += 5;
+        glutPostRedisplay();
+    }
+}
+
+//---------------------------------------
+// Mouse callback for OpenGL
+//---------------------------------------
+void mouse(int button, int state, int x, int y) {
+    // Handle mouse down
+    static int xdown, ydown;
+    if (state == GLUT_DOWN) {
+        xdown = x;
+        ydown = y;
+    }
+
+    // Handle R
+    if ((mode == ROTATE) && (state == GLUT_UP)) {
+        xangle += (y - ydown);
+        yangle -= (x - xdown);
+        zangle = 0;
+        glutPostRedisplay();
+    }
+
+    // Handle T
+    if ((mode == TRANSLATE) && (state == GLUT_UP)) {
+        xpos += (x - xdown);
+        ypos -= (y - ydown);
+        glutPostRedisplay();
+    }
 }
 
 //---------------------------------------
@@ -234,9 +280,6 @@ int main(int argc, char *argv[]) {
     }
     read_maze(argv[1]);
 
-    // Randomly position treasures
-    randomly_position_treasures();
-
     // Initialize OpenGL window
     glutInit(&argc, argv);
     glutInitWindowSize(500, 500);
@@ -245,6 +288,8 @@ int main(int argc, char *argv[]) {
     glutCreateWindow("HW4 Maze");
     init();
     glutDisplayFunc(display);
+    glutKeyboardFunc(keyboard);
+    glutMouseFunc(mouse);
     glutMainLoop();
 
     // Free memory because of malloc use
