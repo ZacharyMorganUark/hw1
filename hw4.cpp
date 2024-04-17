@@ -13,6 +13,7 @@
 #include <GL/glut.h>
 #endif
 #include "libim/im_color.h"
+#include "libim_all.h"
 
 // Globals
 #define ROTATE 1
