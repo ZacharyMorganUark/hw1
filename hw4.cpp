@@ -21,7 +21,7 @@
 #include "im_float_3d.h"
 #include "im_pixel.h"
 #include "im_short.h"
-#include "im_short3d.h"
+#include "im_short_3d.h"
 
 // Globals
 #define ROTATE 1
