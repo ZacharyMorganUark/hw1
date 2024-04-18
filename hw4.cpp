@@ -69,6 +69,8 @@ int ROWS, COLS;
 char **maze;
 GLuint textures[4]; // Texture IDs for walls and floor
 
+#endif // TEXTURE3_H
+
 //---------------------------------------
 // Initialize texture images
 //---------------------------------------
