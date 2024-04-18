@@ -27,7 +27,7 @@ int zpos = 0;
 int mode = ROTATE;
 int ROWS, COLS;
 char **maze;
-GLuint textures[7]; // Texture IDs for walls, floor, gold, gems, and player
+GLuint textures[7]; // Texture IDs for walls, floor, gold, gems, player, and empty space
 
 //---------------------------------------
 // Initialize texture images
@@ -219,6 +219,17 @@ void display() {
         }
     }
 
+    // Draw the player
+    glPushMatrix();
+    glBindTexture(GL_TEXTURE_2D, textures[6]); // Yellow texture for player
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0, 0.0); glVertex3f(xpos - 0.25, ypos - 0.25, -1.0); // Lower-left corner
+    glTexCoord2f(1.0, 0.0); glVertex3f(xpos + 0.25, ypos - 0.25, -1.0); // Lower-right corner
+    glTexCoord2f(1.0, 1.0); glVertex3f(xpos + 0.25, ypos + 0.25, -1.0); // Upper-right corner
+    glTexCoord2f(0.0, 1.0); glVertex3f(xpos - 0.25, ypos + 0.25, -1.0); // Upper-left corner
+    glEnd();
+    glPopMatrix();
+
     // Swap buffers
     glutSwapBuffers();
 }
@@ -227,48 +238,40 @@ void display() {
 // Keyboard callback for OpenGL
 //---------------------------------------
 void keyboard(unsigned char key, int x, int y) {
-    // Check mode
-    if ((key == 'r') || (key == 'R')) {
-        printf("Type x y z to decrease or X Y Z to increase ROTATION angles.\n");
-        mode = ROTATE;
-    } else if ((key == 't') || (key == 'T')) {
-        printf("Type x y z to decrease or X Y Z to increase TRANSLATION distance.\n");
-        mode = TRANSLATE;
+    int newxpos = xpos, newypos = ypos;
+
+    // Update player position based on keyboard input
+    switch (key) {
+        case 'w': // Move up
+            newypos += 1;
+            break;
+        case 's': // Move down
+            newypos -= 1;
+            break;
+        case 'a': // Move left
+            newxpos -= 1;
+            break;
+        case 'd': // Move right
+            newxpos += 1;
+            break;
+        default:
+            return;
     }
 
-    // Handle R
-    if (mode == ROTATE) {
-        if (key == 'x')
-            xangle -= 5;
-        else if (key == 'y')
-            yangle -= 5;
-        else if (key == 'z')
-            zangle -= 5;
-        else if (key == 'X')
-            xangle += 5;
-        else if (key == 'Y')
-            yangle += 5;
-        else if (key == 'Z')
-            zangle += 5;
-        glutPostRedisplay();
+    // Check if the new position is valid (not a wall)
+    if (maze[newypos][newxpos] != 'r') {
+        xpos = newxpos;
+        ypos = newypos;
+
+        // Check for treasure pickup
+        if (maze[ypos][xpos] == 'o' || maze[ypos][xpos] == 'e') {
+            // Remove treasure from the maze
+            maze[ypos][xpos] = 'g'; // Change the tile to grass
+            printf("Treasure collected!\n");
+        }
     }
 
-    // Handle T
-    if (mode == TRANSLATE) {
-        if (key == 'x')
-            xpos -= 5;
-        else if (key == 'y')
-            ypos -= 5;
-        else if (key == 'z')
-            zpos -= 5;
-        else if (key == 'X')
-            xpos += 5;
-        else if (key == 'Y')
-            ypos += 5;
-        else if (key == 'Z')
-            zpos += 5;
-        glutPostRedisplay();
-    }
+    glutPostRedisplay();
 }
 
 //---------------------------------------
