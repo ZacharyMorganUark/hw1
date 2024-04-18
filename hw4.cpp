@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <time.h> // Include for srand and rand
+#include <time.h> 
 #ifdef MAC
 #include <GLUT/glut.h>
 #else
@@ -27,7 +27,7 @@ int zpos = 0;
 int mode = ROTATE;
 int ROWS, COLS;
 char **maze;
-GLuint textures[7]; // Texture IDs for walls, floor, gold, gems, player, and empty space
+GLuint textures[7]; // Texture ID's
 
 //---------------------------------------
 // Initialize texture images
@@ -39,7 +39,7 @@ void init_textures() {
         "textures/yellow.jpg"
     };
 
-    glGenTextures(7, textures); // Assuming you have 7 textures in total
+    glGenTextures(7, textures); 
 
     for (int i = 0; i < 7; ++i) {
         im_color image;
@@ -91,7 +91,7 @@ void read_maze(const char *filename) {
             fprintf(stderr, "Error reading maze row %d from file %s\n", i, filename);
             exit(1);
         }
-        maze[i][COLS] = '\0'; // Null-terminate the string
+        maze[i][COLS] = '\0'; // Null
     }
     fclose(file);
 }
@@ -223,10 +223,10 @@ void display() {
     glPushMatrix();
     glBindTexture(GL_TEXTURE_2D, textures[6]); // Yellow texture for player
     glBegin(GL_QUADS);
-    glVertex3f(xpos - 0.25, ypos - 0.25, -1.5); // Lower-left corner
-    glVertex3f(xpos + 0.25, ypos - 0.25, -1.5); // Lower-right corner
-    glVertex3f(xpos + 0.25, ypos + 0.25, -1.5); // Upper-right corner
-    glVertex3f(xpos - 0.25, ypos + 0.25, -1.5); // Upper-left corner
+    glVertex3f(xpos - 0.25, ypos - 0.25, -1.5); 
+    glVertex3f(xpos + 0.25, ypos - 0.25, -1.5); 
+    glVertex3f(xpos + 0.25, ypos + 0.25, -1.5); 
+    glVertex3f(xpos - 0.25, ypos + 0.25, -1.5); 
     glEnd();
     glPopMatrix();
 
