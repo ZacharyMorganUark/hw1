@@ -136,27 +136,24 @@ void draw_textured_cube(float xmin, float ymin, float zmin,
     glEnd();
 }
 
-void place_treasures(int numGold, int numGems) {
+//---------------------------------------
+// Place gems and gold function
+//---------------------------------------
+void place_treasures() {
     srand(time(NULL)); // Seed the random number generator
-    int placedGold = 0, placedGems = 0;
-    int emptySpaces = ROWS * COLS;
+    bool goldPlaced = false, gemPlaced = false;
 
-    while ((placedGold < numGold || placedGems < numGems) && emptySpaces > 0) {
+    while (!goldPlaced || !gemPlaced) {
         int r = rand() % ROWS;
         int c = rand() % COLS;
-        if (maze[r][c] == ' ') {
-            if (placedGold < numGold) {
-                maze[r][c] = 'g';
-                placedGold++;
-                emptySpaces--;
-            } else if (placedGems < numGems) {
-                maze[r][c] = 'G';
-                placedGems++;
-                emptySpaces--;
-            }
+        if (maze[r][c] == 'g' && !goldPlaced) {
+            maze[r][c] = 'o'; // Place gold on grass tile
+            goldPlaced = true;
+        } else if (maze[r][c] == 'g' && !gemPlaced) {
+            maze[r][c] = 'e'; // Place gem on grass tile
+            gemPlaced = true;
         }
     }
-    printf("Placed %d gold and %d gems\n", placedGold, placedGems); // Debugging print statement
 }
 
 //---------------------------------------
