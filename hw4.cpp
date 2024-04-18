@@ -136,26 +136,27 @@ void draw_textured_cube(float xmin, float ymin, float zmin,
     glEnd();
 }
 
-//---------------------------------------
-// Place treasures randomly in the maze
-//---------------------------------------
 void place_treasures(int numGold, int numGems) {
     srand(time(NULL)); // Seed the random number generator
     int placedGold = 0, placedGems = 0;
+    int emptySpaces = ROWS * COLS;
 
-    while (placedGold < numGold || placedGems < numGems) {
+    while ((placedGold < numGold || placedGems < numGems) && emptySpaces > 0) {
         int r = rand() % ROWS;
         int c = rand() % COLS;
         if (maze[r][c] == ' ') {
             if (placedGold < numGold) {
                 maze[r][c] = 'g';
                 placedGold++;
+                emptySpaces--;
             } else if (placedGems < numGems) {
                 maze[r][c] = 'G';
                 placedGems++;
+                emptySpaces--;
             }
         }
     }
+    printf("Placed %d gold and %d gems\n", placedGold, placedGems); // Debugging print statement
 }
 
 //---------------------------------------
@@ -175,12 +176,9 @@ void init()
    glEnable(GL_TEXTURE_2D);
 
    // Place treasures randomly
-   place_treasures(5, 3); // Adjust the number of treasures as needed
+   place_treasures(2, 3); // Adjust the number of treasures as needed
 }
 
-//---------------------------------------
-// Display callback for OpenGL
-//---------------------------------------
 //---------------------------------------
 // Display callback for OpenGL
 //---------------------------------------
