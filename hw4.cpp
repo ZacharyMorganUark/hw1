@@ -173,7 +173,7 @@ void init()
    glEnable(GL_TEXTURE_2D);
 
    // Place treasures randomly
-   place_treasures(2, 3); // Adjust the number of treasures as needed
+   place_treasures(); // Adjust the number of treasures as needed
 }
 
 //---------------------------------------
