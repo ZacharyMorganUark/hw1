@@ -26,22 +26,22 @@ int zpos = 0;
 int mode = ROTATE;
 int ROWS, COLS;
 char **maze;
-GLuint textures[4]; // Texture IDs for walls and floor
+GLuint textures[5]; // Texture IDs for walls, floor, gold, gems, and player
 
 //---------------------------------------
 // Initialize texture images
 //---------------------------------------
 void init_textures() {
     // Read and initialize textures 
-    const char* textureFiles[4] = {
-        "textures/rock.jpg", "textures/brick.jpg", "textures/wood.jpg", "textures/grass.jpg"
+    const char* textureFiles[5] = {
+        "rock.jpg", "brick.jpg", "wood.jpg", "grass.jpg", "yellow.jpg"
     };
 
     // Generate texture ID
-    glGenTextures(4, textures);
+    glGenTextures(5, textures);
 
     // Load and initialize textures
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 5; ++i) {
         im_color image;
         image.ReadJpg(textureFiles[i]);
         int xdim = 1, ydim = 1;
@@ -141,16 +141,16 @@ void draw_textured_cube(float xmin, float ymin, float zmin,
 //---------------------------------------
 void init()
 {
-   // Init view
-   glClearColor(0.0, 0.0, 0.0, 1.0);
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   glOrtho(-10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
-   glEnable(GL_DEPTH_TEST);
+    // Init view
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+    glEnable(GL_DEPTH_TEST);
 
-   // Init texture
-   init_textures();
-   glEnable(GL_TEXTURE_2D);
+    // Init texture
+    init_textures();
+    glEnable(GL_TEXTURE_2D);
 }
 
 //---------------------------------------
@@ -183,6 +183,10 @@ void display() {
                     textureIndex = 1; break;
                 case 'w':
                     textureIndex = 2; break;
+                case 'g':
+                    textureIndex = 3; break;
+                case 'G':
+                    textureIndex = 4; break;
                 default:
                     continue;
             }
