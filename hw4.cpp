@@ -181,6 +181,9 @@ void init()
 //---------------------------------------
 // Display callback for OpenGL
 //---------------------------------------
+//---------------------------------------
+// Display callback for OpenGL
+//---------------------------------------
 void display() {
     // Clear the screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -209,8 +212,10 @@ void display() {
                 case 'w':
                     textureIndex = 2; break;
                 case 'g':
+                    textureIndex = 3; break; // Grass texture
+                case 'o':
                     textureIndex = 4; break; // Gold texture
-                case 'G':
+                case 'e':
                     textureIndex = 5; break; // Gems texture
                 default:
                     continue;
