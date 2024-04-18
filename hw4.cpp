@@ -1,8 +1,8 @@
 //---------------------------------------
 // Program: texture3.cpp used as skelton
-// Purpose: Maze for Assignment 4
+// Purpose: Updated Maze for Assignment 5
 // Author: Zachary Morgan   
-// Date: 10 April 2024
+// Date: 17 April 2024
 //---------------------------------------
 #include <stdio.h>
 #include <stdlib.h>
@@ -189,7 +189,7 @@ void display() {
     glRotatef(yangle, 0.0, 1.0, 0.0);
     glRotatef(zangle, 0.0, 0.0, 1.0);
 
-    // Flip the maze horizontally around the y-axis
+    // rotate 
     glRotatef(180.0, 0.0, 0.0, 1.0);
 
     // Draw floor
@@ -223,15 +223,14 @@ void display() {
     }
 
     // Draw the player
-    glColor3f(1.0, 1.0, 0.0); // Yellow color
+    glColor3f(1.0, 1.0, 0.0); // Yellow 
     glBegin(GL_QUADS);
-    glVertex3f(xpos - 0.25, ypos - 0.25, -1.5); // Lower-left corner
-    glVertex3f(xpos + 0.25, ypos - 0.25, -1.5); // Lower-right corner
-    glVertex3f(xpos + 0.25, ypos + 0.25, -1.5); // Upper-right corner
-    glVertex3f(xpos - 0.25, ypos + 0.25, -1.5); // Upper-left corner
+    glVertex3f(xpos - 0.25, ypos - 0.25, -1.5); 
+    glVertex3f(xpos + 0.25, ypos - 0.25, -1.5); 
+    glVertex3f(xpos + 0.25, ypos + 0.25, -1.5); 
+    glVertex3f(xpos - 0.25, ypos + 0.25, -1.5); 
     glEnd();
 
-    // Swap buffers
     glutSwapBuffers();
 }
 
