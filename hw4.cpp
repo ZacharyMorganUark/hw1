@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h> // Include for srand and rand
 #ifdef MAC
 #include <GLUT/glut.h>
 #else
@@ -26,22 +27,21 @@ int zpos = 0;
 int mode = ROTATE;
 int ROWS, COLS;
 char **maze;
-GLuint textures[5]; // Texture IDs for walls, floor, gold, gems, and player
+GLuint textures[7]; // Texture IDs for walls, floor, gold, gems, and player
 
 //---------------------------------------
 // Initialize texture images
 //---------------------------------------
 void init_textures() {
-    // Read and initialize textures 
-    const char* textureFiles[5] = {
-        "rock.jpg", "brick.jpg", "wood.jpg", "grass.jpg", "yellow.jpg"
+    const char* textureFiles[7] = {
+        "textures/rock.jpg", "textures/brick.jpg", "textures/wood.jpg", 
+        "textures/grass.jpg", "textures/gold.jpg", "textures/gems.jpg", 
+        "textures/yellow.jpg"
     };
 
-    // Generate texture ID
-    glGenTextures(5, textures);
+    glGenTextures(7, textures); // Assuming you have 7 textures in total
 
-    // Load and initialize textures
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 7; ++i) {
         im_color image;
         image.ReadJpg(textureFiles[i]);
         int xdim = 1, ydim = 1;
@@ -137,20 +137,45 @@ void draw_textured_cube(float xmin, float ymin, float zmin,
 }
 
 //---------------------------------------
+// Place treasures randomly in the maze
+//---------------------------------------
+void place_treasures(int numGold, int numGems) {
+    srand(time(NULL)); // Seed the random number generator
+    int placedGold = 0, placedGems = 0;
+
+    while (placedGold < numGold || placedGems < numGems) {
+        int r = rand() % ROWS;
+        int c = rand() % COLS;
+        if (maze[r][c] == ' ') {
+            if (placedGold < numGold) {
+                maze[r][c] = 'g';
+                placedGold++;
+            } else if (placedGems < numGems) {
+                maze[r][c] = 'G';
+                placedGems++;
+            }
+        }
+    }
+}
+
+//---------------------------------------
 // Init function for OpenGL
 //---------------------------------------
 void init()
 {
-    // Init view
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
-    glEnable(GL_DEPTH_TEST);
+   // Init view
+   glClearColor(0.0, 0.0, 0.0, 1.0);
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   glOrtho(-10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+   glEnable(GL_DEPTH_TEST);
 
-    // Init texture
-    init_textures();
-    glEnable(GL_TEXTURE_2D);
+   // Init texture
+   init_textures();
+   glEnable(GL_TEXTURE_2D);
+
+   // Place treasures randomly
+   place_treasures(5, 3); // Adjust the number of treasures as needed
 }
 
 //---------------------------------------
@@ -184,9 +209,9 @@ void display() {
                 case 'w':
                     textureIndex = 2; break;
                 case 'g':
-                    textureIndex = 3; break;
+                    textureIndex = 4; break; // Gold texture
                 case 'G':
-                    textureIndex = 4; break;
+                    textureIndex = 5; break; // Gems texture
                 default:
                     continue;
             }
