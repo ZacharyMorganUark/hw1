@@ -140,17 +140,17 @@ void draw_textured_cube(float xmin, float ymin, float zmin,
 // Place gems and gold function
 //---------------------------------------
 void place_treasures() {
-    srand(time(NULL)); // Seed the random number generator
+    srand(time(NULL)); // random
     bool goldPlaced = false, gemPlaced = false;
 
     while (!goldPlaced || !gemPlaced) {
         int r = rand() % ROWS;
         int c = rand() % COLS;
         if (maze[r][c] == 'g' && !goldPlaced) {
-            maze[r][c] = 'o'; // Place gold on grass tile
+            maze[r][c] = 'o'; // Place gold 
             goldPlaced = true;
         } else if (maze[r][c] == 'g' && !gemPlaced) {
-            maze[r][c] = 'e'; // Place gem on grass tile
+            maze[r][c] = 'e'; // Place gem 
             gemPlaced = true;
         }
     }
@@ -173,7 +173,7 @@ void init()
    glEnable(GL_TEXTURE_2D);
 
    // Place treasures randomly
-   place_treasures(); // Adjust the number of treasures as needed
+   place_treasures(); 
 }
 
 //---------------------------------------
@@ -223,10 +223,10 @@ void display() {
     glPushMatrix();
     glBindTexture(GL_TEXTURE_2D, textures[6]); // Yellow texture for player
     glBegin(GL_QUADS);
-    glTexCoord2f(0.0, 0.0); glVertex3f(xpos - 0.25, ypos - 0.25, -1.0); // Lower-left corner
-    glTexCoord2f(1.0, 0.0); glVertex3f(xpos + 0.25, ypos - 0.25, -1.0); // Lower-right corner
-    glTexCoord2f(1.0, 1.0); glVertex3f(xpos + 0.25, ypos + 0.25, -1.0); // Upper-right corner
-    glTexCoord2f(0.0, 1.0); glVertex3f(xpos - 0.25, ypos + 0.25, -1.0); // Upper-left corner
+    glVertex3f(xpos - 0.25, ypos - 0.25, -1.5); // Lower-left corner
+    glVertex3f(xpos + 0.25, ypos - 0.25, -1.5); // Lower-right corner
+    glVertex3f(xpos + 0.25, ypos + 0.25, -1.5); // Upper-right corner
+    glVertex3f(xpos - 0.25, ypos + 0.25, -1.5); // Upper-left corner
     glEnd();
     glPopMatrix();
 
@@ -263,7 +263,7 @@ void keyboard(unsigned char key, int x, int y) {
         xpos = newxpos;
         ypos = newypos;
 
-        // Check for treasure pickup
+        // Check for treasure 
         if (maze[ypos][xpos] == 'o' || maze[ypos][xpos] == 'e') {
             // Remove treasure from the maze
             maze[ypos][xpos] = 'g'; // Change the tile to grass
