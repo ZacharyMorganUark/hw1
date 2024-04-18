@@ -1,9 +1,12 @@
 //---------------------------------------
-// Program: texture3.cpp used as skelton
+// Program: texture3.cpp used as skeleton
 // Purpose: Maze for Assignment 4
-// Author: Zachary Morgan   
+// Author: Zachary Morgan
 // Date: 10 April 2024
 //---------------------------------------
+#ifndef TEXTURE3_H
+#define TEXTURE3_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -12,16 +15,45 @@
 #else
 #include <GL/glut.h>
 #endif
+
 #ifdef IM_TYPE
 #undef IM_TYPE
 #endif
+
+#ifndef IM_COLOR_H
+#define IM_COLOR_H
 #include "im_color.h"
+#endif
+
+#ifndef IM_COMPLEX_H
+#define IM_COMPLEX_H
 #include "im_complex.h"
+#endif
+
+#ifndef IM_FLOAT_H
+#define IM_FLOAT_H
 #include "im_float.h"
+#endif
+
+#ifndef IM_FLOAT_3D_H
+#define IM_FLOAT_3D_H
 #include "im_float_3d.h"
+#endif
+
+#ifndef IM_PIXEL_H
+#define IM_PIXEL_H
 #include "im_pixel.h"
+#endif
+
+#ifndef IM_SHORT_H
+#define IM_SHORT_H
 #include "im_short.h"
+#endif
+
+#ifndef IM_SHORT_3D_H
+#define IM_SHORT_3D_H
 #include "im_short_3d.h"
+#endif
 
 // Globals
 #define ROTATE 1
