@@ -18,7 +18,7 @@
 #include "libim/im_float_3d.h"
 #include "libim/im_pixel.h"
 #include "libim/im_short.h"
-#include "libim/im_short3d.h"
+#include "libim/im_short_3d.h"
 
 // Globals
 #define ROTATE 1
