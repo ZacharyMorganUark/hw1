@@ -190,7 +190,7 @@ void display() {
     glRotatef(zangle, 0.0, 0.0, 1.0);
 
     // Flip the maze horizontally around the y-axis
-    glScalef(-1.0, 1.0, 1.0);
+    glScalef(1.0, -1.0, 1.0);
 
     // Draw floor
     draw_textured_cube(-1, -1, -1, 1, 1, -1.01, 3);
