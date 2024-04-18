@@ -189,6 +189,9 @@ void display() {
     glRotatef(yangle, 0.0, 1.0, 0.0);
     glRotatef(zangle, 0.0, 0.0, 1.0);
 
+    // Flip the maze horizontally around the y-axis
+    glScalef(-1.0, 1.0, 1.0);
+
     // Draw floor
     draw_textured_cube(-1, -1, -1, 1, 1, -1.01, 3);
 
@@ -220,15 +223,13 @@ void display() {
     }
 
     // Draw the player
-    glPushMatrix();
-    glBindTexture(GL_TEXTURE_2D, textures[6]); // Yellow texture for player
+    glColor3f(1.0, 1.0, 0.0); // Yellow color
     glBegin(GL_QUADS);
-    glVertex3f(xpos - 0.25, ypos - 0.25, -1.5); 
-    glVertex3f(xpos + 0.25, ypos - 0.25, -1.5); 
-    glVertex3f(xpos + 0.25, ypos + 0.25, -1.5); 
-    glVertex3f(xpos - 0.25, ypos + 0.25, -1.5); 
+    glVertex3f(xpos - 0.25, ypos - 0.25, -1.5); // Lower-left corner
+    glVertex3f(xpos + 0.25, ypos - 0.25, -1.5); // Lower-right corner
+    glVertex3f(xpos + 0.25, ypos + 0.25, -1.5); // Upper-right corner
+    glVertex3f(xpos - 0.25, ypos + 0.25, -1.5); // Upper-left corner
     glEnd();
-    glPopMatrix();
 
     // Swap buffers
     glutSwapBuffers();
