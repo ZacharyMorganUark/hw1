@@ -12,13 +12,16 @@
 #else
 #include <GL/glut.h>
 #endif
-#include "libim/im_color.h"
-#include "libim/im_complex.h"
-#include "libim/im_float.h"
-#include "libim/im_float_3d.h"
-#include "libim/im_pixel.h"
-#include "libim/im_short.h"
-#include "libim/im_short_3d.h"
+#ifdef IM_TYPE
+#undef IM_TYPE
+#endif
+#include "im_color.h"
+#include "im_complex.h"
+#include "im_float.h"
+#include "im_float_3d.h"
+#include "im_pixel.h"
+#include "im_short.h"
+#include "im_short3d.h"
 
 // Globals
 #define ROTATE 1
