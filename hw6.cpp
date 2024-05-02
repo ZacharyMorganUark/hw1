@@ -25,7 +25,6 @@ using namespace std;
 unsigned char image[YDIM][XDIM][3];
 float position = -5;
 string mode = "phong";
-float Bounce = -1;
 const float RADIUS = 2.0;
 const int SPHERES = 2; // Only two spheres - one static, one rotating
 Sphere3D sphere[SPHERES];
@@ -69,18 +68,12 @@ bool in_shadow(Point3D pt, Vector3D dir, int current, Sphere3D sphere[], int cou
 void ray_trace()
 {
    // Define camera point
-   Point3D camera;
-   camera.set(0, 0, position);
+   Point3D camera(0, 0, position);
 
    // Define light sources
    const int NUM_LIGHTS = 2;
-   Point3D light_positions[NUM_LIGHTS];
-   light_positions[0].set(-5.0f, 5.0f, 5.0f);
-   light_positions[1].set(5.0f, 5.0f, -5.0f);
-   
-   ColorRGB light_colors[NUM_LIGHTS];
-   light_colors[0].set(250.0f, 250.0f, 250.0f);
-   light_colors[1].set(250.0f, 250.0f, 250.0f);
+   Point3D light_positions[NUM_LIGHTS] = {Point3D(-5.0f, 5.0f, 5.0f), Point3D(5.0f, 5.0f, -5.0f)};
+   ColorRGB light_colors[NUM_LIGHTS] = {ColorRGB(250.0f, 250.0f, 250.0f), ColorRGB(250.0f, 250.0f, 250.0f)};
 
    // Define shader
    Phong shader;
@@ -98,8 +91,7 @@ void ray_trace()
          // Define sample point on image plane
          float xpos = (x - XDIM / 2) * 2.0 / XDIM;
          float ypos = (y - YDIM / 2) * 2.0 / YDIM;
-         Point3D point;
-         point.set(xpos, ypos, 0);
+         Point3D point(xpos, ypos, 0);
 
          // Define ray from camera through image
          Ray3D ray;
@@ -157,91 +149,49 @@ void ray_trace()
             }
          }
       }
-}
 
-//---------------------------------------
-// Init function for OpenGL
-//---------------------------------------
-void init()
-{
-   // Initialize OpenGL
-   glClearColor(0.0, 0.0, 0.0, 1.0);
-
-   // Print command menu
-   cout << "Program commands:\n"
-        << "   '+' - increase camera distance\n"
-        << "   '-' - decrease camera distance\n"
-        << "   'p' - show Phong shading\n"
-        << "   'n' - show surface normals\n"
-        << "   'q' - quit program\n";
-
-   // Define static sphere
-   sphere[0].set(Point3D(0.0f, 0.0f, RADIUS / 2.0f), Vector3D(0.0f, 0.0f, 0.0f), RADIUS / 4.0f);
-
-   // Perform ray tracing
-   cout << "camera: 0,0," << position << endl;
-   ray_trace();
-}
-
-//---------------------------------------
-// Display callback for OpenGL
-//---------------------------------------
-void display()
-{
-   // Display image
-   glClear(GL_COLOR_BUFFER_BIT);
-   glDrawPixels(XDIM, YDIM, GL_RGB, GL_UNSIGNED_BYTE, image);
-   glFlush();
-}
-
-//---------------------------------------
-// Keyboard callback for OpenGL
-//---------------------------------------
-void keyboard(unsigned char key, int x, int y)
-{
-   // End program
-   if (key == 'q')
-      exit(0);
-
-   // Move camera position
-   else if (key == '+' && position > -10)
-   {
-      position = position - 0.5;
-      cout << "camera: 0,0," << position << endl;
-   }
-   else if (key == '-' && position < -5)
-   {
-      position = position + 0.5;
-      cout << "camera: 0,0," << position << endl;
-   }
-
-   // Change display mode
-   else if (key == 'n')
-      mode = "normal";
-   else if (key == 'p')
-      mode = "phong";
-
-   // Perform ray tracing
-   ray_trace();
+   // Update display
    glutPostRedisplay();
 }
 
 //---------------------------------------
-// Main program
+// Initialize the scene
+//---------------------------------------
+void init()
+{
+   // Define sphere and color
+   sphere[0].set(Point3D(0.0f, 0.0f, RADIUS / 2.0f), Vector3D(0.0f, 0.0f, 0.0f), RADIUS / 4.0f);
+   color[0].set(255.0f, 0.0f, 0.0f);
+   sphere[1].set(Point3D(ROTATION_RADIUS * cos(rotation_angle), ROTATION_RADIUS * sin(rotation_angle), RADIUS / 2.0f), Vector3D(0.0f, 0.0f, 0.0f), RADIUS / 4.0f);
+   color[1].set(0.0f, 0.0f, 255.0f);
+
+   // Set up background color
+   glClearColor(0, 0, 0, 0);
+}
+
+//---------------------------------------
+// Main program to create window
 //---------------------------------------
 int main(int argc, char *argv[])
 {
-   // Create OpenGL window
+   // Initialize random seed
+   srand(time(NULL));
+
+   // Initialize OpenGL
    glutInit(&argc, argv);
+   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
    glutInitWindowSize(XDIM, YDIM);
-   glutInitWindowPosition(0, 0);
-   glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
-   glutCreateWindow("Ray Trace");
+   glutInitWindowPosition(100, 100);
+   glutCreateWindow("Ray Tracing");
+
+   // Set OpenGL callback functions
+   glutDisplayFunc(ray_trace);
+   glutIdleFunc(ray_trace);
+
+   // Initialize scene
    init();
 
-   // Specify callback function
-   glutDisplayFunc(display);
-   glutKeyboardFunc(keyboard);
+   // Enter main OpenGL loop
    glutMainLoop();
    return 0;
 }
