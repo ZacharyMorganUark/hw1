@@ -4,7 +4,6 @@ LIB = -DMAC -framework OPENGL -framework GLUT
 else
 LIB = -lGL -lGLU -lglut
 endif
-LIB2 = libim/libim.a jpeg/libjpeg.a
 
 # define makefile targets
 CC = g++ -Wall -Wno-deprecated-declarations
@@ -24,5 +23,5 @@ ray_trace2: ray_trace2.cpp ray_classes.cpp
 ray_trace3: ray_trace3.cpp ray_classes.cpp
 	$(CC) -o ray_trace3 ray_trace3.cpp ray_classes.cpp $(LIB)
 
-hw6: hw6.cpp
-	$(CC) -o hw6 hw6.cpp $(LIB) $(LIB2)
+hw6: hw6.cpp ray_classes.cpp
+	$(CC) -o hw6 hw6.cpp ray_classes.cpp $(LIB)
