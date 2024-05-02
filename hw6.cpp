@@ -74,8 +74,13 @@ void ray_trace()
 
    // Define light sources
    const int NUM_LIGHTS = 2;
-   Point3D light_positions[NUM_LIGHTS] = {Point3D(-5.0f, 5.0f, 5.0f), Point3D(5.0f, 5.0f, -5.0f)};
-   ColorRGB light_colors[NUM_LIGHTS] = {ColorRGB(250.0f, 250.0f, 250.0f), ColorRGB(250.0f, 250.0f, 250.0f)};
+   Point3D light_positions[NUM_LIGHTS];
+   light_positions[0].set(-5.0f, 5.0f, 5.0f);
+   light_positions[1].set(5.0f, 5.0f, -5.0f);
+   
+   ColorRGB light_colors[NUM_LIGHTS];
+   light_colors[0].set(250.0f, 250.0f, 250.0f);
+   light_colors[1].set(250.0f, 250.0f, 250.0f);
 
    // Define shader
    Phong shader;
@@ -134,7 +139,7 @@ void ray_trace()
                for (int l = 0; l < NUM_LIGHTS; l++)
                {
                   // Check if in shadow
-                  if (in_shadow(closest_p, (Vector3D(light_positions[l]) - closest_p).normalize(), closest, sphere, SPHERES))
+                  if (in_shadow(closest_p, (light_positions[l] - closest_p).normalize(), closest, sphere, SPHERES))
                      shader.SetObject(color[closest], 0.4, 0.0, 0.0, 1);
                   else
                      shader.SetObject(color[closest], 0.4, 0.4, 0.4, 10);
