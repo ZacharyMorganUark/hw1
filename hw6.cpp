@@ -134,7 +134,7 @@ void ray_trace()
                for (int l = 0; l < NUM_LIGHTS; l++)
                {
                   // Check if in shadow
-                  if (in_shadow(closest_p, (light_positions[l] - closest_p).normalize(), closest, sphere, SPHERES))
+                  if (in_shadow(closest_p, (Vector3D(light_positions[l]) - closest_p).normalize(), closest, sphere, SPHERES))
                      shader.SetObject(color[closest], 0.4, 0.0, 0.0, 1);
                   else
                      shader.SetObject(color[closest], 0.4, 0.4, 0.4, 10);
