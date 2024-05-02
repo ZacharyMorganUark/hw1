@@ -32,6 +32,11 @@ class ColorRGB
    public:
       float R, G, B;
 
+      // Constructors
+      ColorRGB() : R(0), G(0), B(0) {} // Default constructor
+      ColorRGB(float r, float g, float b) : R(r), G(g), B(b) {} // Constructor with three float arguments
+
+      // Methods
       void set(float r, float g, float b);
       string print();
       void mult(float c);
