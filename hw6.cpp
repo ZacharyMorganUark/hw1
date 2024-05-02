@@ -1,6 +1,6 @@
 //---------------------------------------
 // Program: hw6.cpp
-// Purpose: Demonstrate ray tracing with one sphere rotating around another.
+// Purpose: Demonstrate ray tracing with multiple light sources.
 // Author:  [Your Name]
 // Date:    [Current Date]
 //---------------------------------------
@@ -72,18 +72,15 @@ void ray_trace()
    Point3D camera;
    camera.set(0, 0, position);
 
-   // Define light source
-   ColorRGB light_color;
-   light_color.set(250, 250, 250);
-   Vector3D light_dir;
-   light_dir.set(-1, -1, -1);
-   light_dir.normalize();
+   // Define light sources
+   const int NUM_LIGHTS = 2;
+   Point3D light_positions[NUM_LIGHTS] = {Point3D(-5, 5, 5), Point3D(5, 5, -5)};
+   ColorRGB light_colors[NUM_LIGHTS] = {ColorRGB(250, 250, 250), ColorRGB(250, 250, 250)};
 
    // Define shader
    Phong shader;
    shader.SetCamera(camera);
-   shader.SetLight(light_color, light_dir);
-
+   
    // Perform ray tracing
    for (int y = 0; y < YDIM; y++)
       for (int x = 0; x < XDIM; x++)
@@ -129,38 +126,32 @@ void ray_trace()
                image[y][x][2] = 127 + closest_n.vz * 127;
             }
 
-            // Calculate Phong shade
+            // Calculate Phong shading
             if (mode == "phong")
             {
-               // Check to see if in shadow
-               if (in_shadow(closest_p, light_dir, closest, sphere, SPHERES))
-                  shader.SetObject(color[closest], 0.4, 0.0, 0.0, 1);
-               else
-                  shader.SetObject(color[closest], 0.4, 0.4, 0.4, 10);
-
-               // Calculate pixel color
+               // Accumulate color from each light source
                ColorRGB pixel;
-               shader.GetShade(closest_p, closest_n, pixel);
+               for (int l = 0; l < NUM_LIGHTS; l++)
+               {
+                  // Check if in shadow
+                  if (in_shadow(closest_p, (light_positions[l] - closest_p).normalize(), closest, sphere, SPHERES))
+                     shader.SetObject(color[closest], 0.4, 0.0, 0.0, 1);
+                  else
+                     shader.SetObject(color[closest], 0.4, 0.4, 0.4, 10);
+
+                  // Calculate pixel color from this light source
+                  ColorRGB light_contribution;
+                  shader.GetShade(closest_p, closest_n, light_contribution);
+
+                  // Add light contribution to pixel color
+                  pixel.add(light_contribution);
+               }
                image[y][x][0] = pixel.R;
                image[y][x][1] = pixel.G;
                image[y][x][2] = pixel.B;
             }
          }
       }
-}
-
-//---------------------------------------
-// Rotate sphere around another
-//---------------------------------------
-void rotateSphere() {
-   // Calculate new position of rotating sphere
-   sphere[1].center.px = sphere[0].center.px + ROTATION_RADIUS * cos(rotation_angle);
-   sphere[1].center.py = sphere[0].center.py + ROTATION_RADIUS * sin(rotation_angle);
-   // Assuming both spheres have the same z-coordinate
-   sphere[1].center.pz = sphere[0].center.pz;
-
-   // Update rotation angle
-   rotation_angle += ANGULAR_SPEED;
 }
 
 //---------------------------------------
@@ -181,10 +172,6 @@ void init()
 
    // Define static sphere
    sphere[0].set(Point3D(0.0f, 0.0f, RADIUS / 2.0f), Vector3D(0.0f, 0.0f, 0.0f), RADIUS / 4.0f);
-   sphere[1].set(Point3D(ROTATION_RADIUS, 0.0f, 0.0f), RADIUS / 4.0f);
-
-   // Perform initial rotation of rotating sphere
-   rotateSphere();
 
    // Perform ray tracing
    cout << "camera: 0,0," << position << endl;
@@ -235,20 +222,6 @@ void keyboard(unsigned char key, int x, int y)
 }
 
 //---------------------------------------
-// Timer callback for OpenGL
-//---------------------------------------
-void timer(int value)
-{
-   // Rotate the sphere
-   rotateSphere();
-
-   // Calculate and display image
-   ray_trace();
-   glutPostRedisplay();
-   glutTimerFunc(10, timer, 0);
-}
-
-//---------------------------------------
 // Main program
 //---------------------------------------
 int main(int argc, char *argv[])
@@ -264,7 +237,6 @@ int main(int argc, char *argv[])
    // Specify callback function
    glutDisplayFunc(display);
    glutKeyboardFunc(keyboard);
-   glutTimerFunc(10, timer, 0);
    glutMainLoop();
    return 0;
 }
