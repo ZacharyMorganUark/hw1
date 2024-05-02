@@ -1,12 +1,13 @@
 //---------------------------------------
-// Program: ray_trace.cpp
-// Purpose: Demonstrate ray tracing.
-// Author:  John Gauch
-// Date:    Spring 2019
+// Program: hw6.cpp
+// Purpose: Demonstrate ray tracing with moving spheres.
+// Author:  [Your Name]
+// Date:    [Current Date]
 //---------------------------------------
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <ctime>
 #ifdef MAC
 #include <GLUT/glut.h>
 #else
@@ -47,10 +48,10 @@ bool in_shadow(Point3D pt, Vector3D dir, int current, Sphere3D sphere[], int cou
    Ray3D shadow_ray;
    shadow_ray.set(pt, dir);
 
-   // Check to see ray intersects any sphere
+   // Check to see if ray intersects any sphere
    Point3D point;
    Vector3D normal;
-   for (int index=0; index<count; index++)
+   for (int index = 0; index < count; index++)
       if ((index != current) && 
          (sphere[index].get_intersection(shadow_ray, point, normal)))
          return true;
@@ -64,13 +65,13 @@ void ray_trace()
 {
    // Define camera point
    Point3D camera;
-   camera.set(0,0,position);
+   camera.set(0, 0, position);
 
    // Define light source
    ColorRGB light_color;
-   light_color.set(250,250,250);
+   light_color.set(250, 250, 250);
    Vector3D light_dir;
-   light_dir.set(-1,-1,-1);
+   light_dir.set(-1, -1, -1);
    light_dir.normalize();
 
    // Define shader
@@ -80,70 +81,107 @@ void ray_trace()
 
    // Perform ray tracing
    for (int y = 0; y < YDIM; y++)
-   for (int x = 0; x < XDIM; x++)
-   {
-      // Clear image
-      image[y][x][0] = 0;
-      image[y][x][1] = 0;
-      image[y][x][2] = 0;
-
-      // Define sample point on image plane
-      float xpos = (x - XDIM/2) * 2.0 / XDIM;
-      float ypos = (y - YDIM/2) * 2.0 / YDIM;
-      Point3D point;
-      point.set(xpos, ypos, 0);
-   
-      // Define ray from camera through image
-      Ray3D ray;
-      ray.set(camera, point);
-
-      // Perform sphere intersection
-      int closest = -1;
-      Point3D p, closest_p;
-      Vector3D n, closest_n;
-      closest_p.set(0,0,ZDIM);
-      for (int s=0; s<SPHERES; s++)
+      for (int x = 0; x < XDIM; x++)
       {
-         if ((sphere[s].get_intersection(ray, p, n)) && (p.pz < closest_p.pz))
+         // Clear image
+         image[y][x][0] = 0;
+         image[y][x][1] = 0;
+         image[y][x][2] = 0;
+
+         // Define sample point on image plane
+         float xpos = (x - XDIM / 2) * 2.0 / XDIM;
+         float ypos = (y - YDIM / 2) * 2.0 / YDIM;
+         Point3D point;
+         point.set(xpos, ypos, 0);
+
+         // Define ray from camera through image
+         Ray3D ray;
+         ray.set(camera, point);
+
+         // Perform sphere intersection
+         int closest = -1;
+         Point3D p, closest_p;
+         Vector3D n, closest_n;
+         closest_p.set(0, 0, ZDIM);
+         for (int s = 0; s < SPHERES; s++)
          {
-            closest = s;
-            closest_p = p;
-            closest_n = n;
+            if ((sphere[s].get_intersection(ray, p, n)) && (p.pz < closest_p.pz))
+            {
+               closest = s;
+               closest_p = p;
+               closest_n = n;
+            }
+         }
+
+         // Calculate pixel color
+         if (closest >= 0)
+         {
+            // Display surface normal
+            if (mode == "normal")
+            {
+               image[y][x][0] = 127 + closest_n.vx * 127;
+               image[y][x][1] = 127 + closest_n.vy * 127;
+               image[y][x][2] = 127 + closest_n.vz * 127;
+            }
+
+            // Calculate Phong shade
+            if (mode == "phong")
+            {
+               // Check to see if in shadow
+               if (in_shadow(closest_p, light_dir, closest, sphere, SPHERES))
+                  shader.SetObject(color[closest], 0.4, 0.0, 0.0, 1);
+               else
+                  shader.SetObject(color[closest], 0.4, 0.4, 0.4, 10);
+
+               // Calculate pixel color
+               ColorRGB pixel;
+               shader.GetShade(closest_p, closest_n, pixel);
+               image[y][x][0] = pixel.R;
+               image[y][x][1] = pixel.G;
+               image[y][x][2] = pixel.B;
+            }
          }
       }
+}
 
-      // Calculate pixel color
-      if (closest >= 0)
-      {
-         // Display surface normal
-         if (mode == "normal")
-         {
-            image[y][x][0] = 127 + closest_n.vx * 127;
-            image[y][x][1] = 127 + closest_n.vy * 127;
-            image[y][x][2] = 127 + closest_n.vz * 127;
-         }
+//---------------------------------------
+// Move spheres along circular path
+//---------------------------------------
+void moveSpheres() {
+   for (int i = 0; i < SPHERES; i++) {
+      // Update sphere position
+      sphere[i].center.px += sphere[i].motion.vx;
+      sphere[i].center.py += sphere[i].motion.vy;
+      sphere[i].center.pz += sphere[i].motion.vz;
 
-         // Calculate Phong shade
-         if (mode == "phong")
-         {
-            // Check to see if in shadow 
-            if (in_shadow(closest_p, light_dir, closest, sphere, SPHERES))
-               shader.SetObject(color[closest], 0.4, 0.0, 0.0, 1);
-            else
-               shader.SetObject(color[closest], 0.4, 0.4, 0.4, 10);
-
-      
-            // Calculate pixel color
-            ColorRGB pixel;
-            shader.GetShade(closest_p, closest_n, pixel);
-            image[y][x][0] = pixel.R;
-            image[y][x][1] = pixel.G;
-            image[y][x][2] = pixel.B;
-         }
+      // Bounce off walls
+      if (sphere[i].center.px > RADIUS / 2 - sphere[i].radius) {
+         sphere[i].center.px = RADIUS / 2 - sphere[i].radius;
+         sphere[i].motion.vx *= Bounce;
+      }
+      if (sphere[i].center.py > RADIUS / 2 - sphere[i].radius) {
+         sphere[i].center.py = RADIUS / 2 - sphere[i].radius;
+         sphere[i].motion.vy *= Bounce;
+      }
+      if (sphere[i].center.pz > RADIUS / 2 - sphere[i].radius) {
+         sphere[i].center.pz = RADIUS / 2 - sphere[i].radius;
+         sphere[i].motion.vz *= Bounce;
+      }
+      if (sphere[i].center.px < -RADIUS / 2 + sphere[i].radius) {
+         sphere[i].center.px = -RADIUS / 2 + sphere[i].radius;
+         sphere[i].motion.vx *= Bounce;
+      }
+      if (sphere[i].center.py < -RADIUS / 2 + sphere[i].radius) {
+         sphere[i].center.py = -RADIUS / 2 + sphere[i].radius;
+         sphere[i].motion.vy *= Bounce;
+      }
+      if (sphere[i].center.pz < -RADIUS / 2 + sphere[i].radius) {
+         sphere[i].center.pz = -RADIUS / 2 + sphere[i].radius;
+         sphere[i].motion.vz *= Bounce;
       }
    }
 }
- 
+
 //---------------------------------------
 // Init function for OpenGL
 //---------------------------------------
@@ -162,25 +200,25 @@ void init()
 
    // Define array of spheres
    srand(time(NULL));
-   for (int s=0; s<SPHERES; s++)
+   for (int s = 0; s < SPHERES; s++)
    {
-      float cx = myrand(-RADIUS/2, RADIUS/2);
-      float cy = myrand(-RADIUS/2, RADIUS/2);
-      float cz = myrand(0, RADIUS/2);
+      float cx = myrand(-RADIUS / 2, RADIUS / 2);
+      float cy = myrand(-RADIUS / 2, RADIUS / 2);
+      float cz = myrand(0, RADIUS / 2);
       Point3D center;
-      center.set(cx,cy,cz);
+      center.set(cx, cy, cz);
 
-      float mx = myrand(-RADIUS/100, RADIUS/200);
-      float my = myrand(-RADIUS/100, RADIUS/200);
-      float mz = myrand(-RADIUS/100, RADIUS/200);
+      float mx = myrand(-RADIUS / 100, RADIUS / 200);
+      float my = myrand(-RADIUS / 100, RADIUS / 200);
+      float mz = myrand(-RADIUS / 100, RADIUS / 200);
       Vector3D motion;
-      motion.set(mx,my,mz);
-      float radius = myrand(RADIUS/20, RADIUS/10);
+      motion.set(mx, my, mz);
+      float radius = myrand(RADIUS / 20, RADIUS / 10);
       sphere[s].set(center, motion, radius);
       int R = rand() % 255;
       int G = rand() % 255;
       int B = rand() % 255;
-      color[s].set(R,G,B);
+      color[s].set(R, G, B);
    }
 
    // Perform ray tracing
@@ -236,43 +274,14 @@ void keyboard(unsigned char key, int x, int y)
 //---------------------------------------
 void timer(int value)
 {
-   // Move bouncing balls
-   int i;
-   for (i = 0; i < SPHERES; i++)
-   {
-      // Update ball position
-      sphere[i].center.px += sphere[i].motion.vx;
-      sphere[i].center.py += sphere[i].motion.vy;
-      sphere[i].center.pz += sphere[i].motion.vz;
-
-      // Bounce off walls
-      if (sphere[i].center.px > RADIUS/2 - sphere[i].radius) 
-         {sphere[i].center.px = RADIUS/2 - sphere[i].radius; 
-          sphere[i].motion.vx *= Bounce; }
-      if (sphere[i].center.py > RADIUS/2 - sphere[i].radius) 
-         {sphere[i].center.py = RADIUS/2 - sphere[i].radius; 
-          sphere[i].motion.vy *= Bounce; }
-      if (sphere[i].center.pz > RADIUS/2 - sphere[i].radius) 
-         {sphere[i].center.pz = RADIUS/2 - sphere[i].radius; 
-          sphere[i].motion.vz *= Bounce; }
-      if (sphere[i].center.px < -RADIUS/2 + sphere[i].radius) 
-         {sphere[i].center.px = -RADIUS/2 + sphere[i].radius; 
-          sphere[i].motion.vx *= Bounce; }
-      if (sphere[i].center.py < -RADIUS/2 + sphere[i].radius) 
-         {sphere[i].center.py = -RADIUS/2 + sphere[i].radius; 
-          sphere[i].motion.vy *= Bounce; }
-      if (sphere[i].center.pz < -RADIUS/2 + sphere[i].radius) 
-         {sphere[i].center.pz = -RADIUS/2 + sphere[i].radius; 
-          sphere[i].motion.vz *= Bounce; }
-
-   }
+   // Move spheres
+   moveSpheres();
 
    // Calculate and display image
    ray_trace();
    glutPostRedisplay();
    glutTimerFunc(10, timer, 0);
 }
-
 
 //---------------------------------------
 // Main program
