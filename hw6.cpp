@@ -74,8 +74,8 @@ void ray_trace()
 
    // Define light sources
    const int NUM_LIGHTS = 2;
-   Point3D light_positions[NUM_LIGHTS] = {Point3D(-5, 5, 5), Point3D(5, 5, -5)};
-   ColorRGB light_colors[NUM_LIGHTS] = {ColorRGB(250, 250, 250), ColorRGB(250, 250, 250)};
+   Point3D light_positions[NUM_LIGHTS] = {Point3D(-5.0f, 5.0f, 5.0f), Point3D(5.0f, 5.0f, -5.0f)};
+   ColorRGB light_colors[NUM_LIGHTS] = {ColorRGB(250.0f, 250.0f, 250.0f), ColorRGB(250.0f, 250.0f, 250.0f)};
 
    // Define shader
    Phong shader;
