@@ -180,7 +180,7 @@ void init()
         << "   'q' - quit program\n";
 
    // Define static sphere
-   sphere[0].set(Point3D(0.0, 0.0, RADIUS / 2.0), Vector3D(0.0, 0.0, 0.0), RADIUS / 4.0); // Static sphere
+   sphere[0].set(Point3D(0, 0, static_cast<int>(RADIUS / 2)), Vector3D(0, 0, 0), static_cast<int>(RADIUS / 4)); // Static sphere
 
    // Perform initial rotation of rotating sphere
    rotateSphere();
