@@ -1,6 +1,6 @@
 //---------------------------------------
 // Program: hw6.cpp
-// Purpose: Demonstrate ray tracing with moving spheres.
+// Purpose: Demonstrate ray tracing with one sphere rotating around another.
 // Author:  [Your Name]
 // Date:    [Current Date]
 //---------------------------------------
@@ -27,9 +27,14 @@ float position = -5;
 string mode = "phong";
 float Bounce = -1;
 const float RADIUS = 2.0;
-const int SPHERES = 10;
+const int SPHERES = 2; // Only two spheres - one static, one rotating
 Sphere3D sphere[SPHERES];
 ColorRGB color[SPHERES];
+
+// Parameters for rotating sphere
+const float ROTATION_RADIUS = 4.0;
+const float ANGULAR_SPEED = 0.05; // Adjust as needed
+float rotation_angle = 0.0;
 
 //---------------------------------------
 // Calculate random value between [min..max]
@@ -145,41 +150,17 @@ void ray_trace()
 }
 
 //---------------------------------------
-// Move spheres along circular path
+// Rotate sphere around another
 //---------------------------------------
-void moveSpheres() {
-   for (int i = 0; i < SPHERES; i++) {
-      // Update sphere position
-      sphere[i].center.px += sphere[i].motion.vx;
-      sphere[i].center.py += sphere[i].motion.vy;
-      sphere[i].center.pz += sphere[i].motion.vz;
+void rotateSphere() {
+   // Calculate new position of rotating sphere
+   sphere[1].center.px = sphere[0].center.px + ROTATION_RADIUS * cos(rotation_angle);
+   sphere[1].center.py = sphere[0].center.py + ROTATION_RADIUS * sin(rotation_angle);
+   // Assuming both spheres have the same z-coordinate
+   sphere[1].center.pz = sphere[0].center.pz;
 
-      // Bounce off walls
-      if (sphere[i].center.px > RADIUS / 2 - sphere[i].radius) {
-         sphere[i].center.px = RADIUS / 2 - sphere[i].radius;
-         sphere[i].motion.vx *= Bounce;
-      }
-      if (sphere[i].center.py > RADIUS / 2 - sphere[i].radius) {
-         sphere[i].center.py = RADIUS / 2 - sphere[i].radius;
-         sphere[i].motion.vy *= Bounce;
-      }
-      if (sphere[i].center.pz > RADIUS / 2 - sphere[i].radius) {
-         sphere[i].center.pz = RADIUS / 2 - sphere[i].radius;
-         sphere[i].motion.vz *= Bounce;
-      }
-      if (sphere[i].center.px < -RADIUS / 2 + sphere[i].radius) {
-         sphere[i].center.px = -RADIUS / 2 + sphere[i].radius;
-         sphere[i].motion.vx *= Bounce;
-      }
-      if (sphere[i].center.py < -RADIUS / 2 + sphere[i].radius) {
-         sphere[i].center.py = -RADIUS / 2 + sphere[i].radius;
-         sphere[i].motion.vy *= Bounce;
-      }
-      if (sphere[i].center.pz < -RADIUS / 2 + sphere[i].radius) {
-         sphere[i].center.pz = -RADIUS / 2 + sphere[i].radius;
-         sphere[i].motion.vz *= Bounce;
-      }
-   }
+   // Update rotation angle
+   rotation_angle += ANGULAR_SPEED;
 }
 
 //---------------------------------------
@@ -198,28 +179,11 @@ void init()
         << "   'n' - show surface normals\n"
         << "   'q' - quit program\n";
 
-   // Define array of spheres
-   srand(time(NULL));
-   for (int s = 0; s < SPHERES; s++)
-   {
-      float cx = myrand(-RADIUS / 2, RADIUS / 2);
-      float cy = myrand(-RADIUS / 2, RADIUS / 2);
-      float cz = myrand(0, RADIUS / 2);
-      Point3D center;
-      center.set(cx, cy, cz);
+   // Define static sphere
+   sphere[0].set(Point3D(0, 0, RADIUS / 2), Vector3D(0, 0, 0), RADIUS / 4); // Static sphere
 
-      float mx = myrand(-RADIUS / 100, RADIUS / 200);
-      float my = myrand(-RADIUS / 100, RADIUS / 200);
-      float mz = myrand(-RADIUS / 100, RADIUS / 200);
-      Vector3D motion;
-      motion.set(mx, my, mz);
-      float radius = myrand(RADIUS / 20, RADIUS / 10);
-      sphere[s].set(center, motion, radius);
-      int R = rand() % 255;
-      int G = rand() % 255;
-      int B = rand() % 255;
-      color[s].set(R, G, B);
-   }
+   // Perform initial rotation of rotating sphere
+   rotateSphere();
 
    // Perform ray tracing
    cout << "camera: 0,0," << position << endl;
@@ -274,8 +238,8 @@ void keyboard(unsigned char key, int x, int y)
 //---------------------------------------
 void timer(int value)
 {
-   // Move spheres
-   moveSpheres();
+   // Rotate the sphere
+   rotateSphere();
 
    // Calculate and display image
    ray_trace();
