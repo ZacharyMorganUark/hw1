@@ -47,9 +47,21 @@ class Point3D
    public:
       float px, py, pz;
 
+      Point3D() {}
+      Point3D(float x, float y, float z) : px(x), py(y), pz(z) {}
+
       void set(float x, float y, float z);
       string print();
       float distance(Point3D p);
+
+      // Subtraction operator
+      Point3D operator-(const Point3D& other) const {
+         Point3D result;
+         result.px = px - other.px;
+         result.py = py - other.py;
+         result.pz = pz - other.pz;
+         return result;
+      }
 };
 
 //----------------------------------------------
@@ -57,6 +69,9 @@ class Vector3D
 {
    public:
       float vx, vy, vz;
+
+      Vector3D() {}
+      Vector3D(float x, float y, float z) : vx(x), vy(y), vz(z) {}
 
       void set(float x, float y, float z);
       string print();
