@@ -177,6 +177,75 @@ void init()
 }
 
 //---------------------------------------
+// Keyboard function
+//---------------------------------------
+void keyboard(unsigned char key, int x, int y)
+{
+    if (key == 'n') // Toggle mode between normal and phong
+    {
+        mode = (mode == "normal") ? "phong" : "normal";
+        glutPostRedisplay(); // Request redisplay
+    }
+}
+
+//---------------------------------------
+// Display function
+//---------------------------------------
+void display()
+{
+    // Clear color buffer
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // Draw image
+    glDrawPixels(XDIM, YDIM, GL_RGB, GL_UNSIGNED_BYTE, image);
+
+    // Swap buffers
+    glutSwapBuffers();
+}
+
+//---------------------------------------
+// Timer callback for OpenGL
+//---------------------------------------
+void timer(int value)
+{
+   // Move bouncing balls
+   int i;
+   for (i = 0; i < SPHERES; i++)
+   {
+      // Update ball position
+      sphere[i].center.px += sphere[i].motion.vx;
+      sphere[i].center.py += sphere[i].motion.vy;
+      sphere[i].center.pz += sphere[i].motion.vz;
+
+      // Bounce off walls
+      if (sphere[i].center.px > RADIUS/2 - sphere[i].radius) 
+         {sphere[i].center.px = RADIUS/2 - sphere[i].radius; 
+          sphere[i].motion.vx *= Bounce; }
+      if (sphere[i].center.py > RADIUS/2 - sphere[i].radius) 
+         {sphere[i].center.py = RADIUS/2 - sphere[i].radius; 
+          sphere[i].motion.vy *= Bounce; }
+      if (sphere[i].center.pz > RADIUS/2 - sphere[i].radius) 
+         {sphere[i].center.pz = RADIUS/2 - sphere[i].radius; 
+          sphere[i].motion.vz *= Bounce; }
+      if (sphere[i].center.px < -RADIUS/2 + sphere[i].radius) 
+         {sphere[i].center.px = -RADIUS/2 + sphere[i].radius; 
+          sphere[i].motion.vx *= Bounce; }
+      if (sphere[i].center.py < -RADIUS/2 + sphere[i].radius) 
+         {sphere[i].center.py = -RADIUS/2 + sphere[i].radius; 
+          sphere[i].motion.vy *= Bounce; }
+      if (sphere[i].center.pz < -RADIUS/2 + sphere[i].radius) 
+         {sphere[i].center.pz = -RADIUS/2 + sphere[i].radius; 
+          sphere[i].motion.vz *= Bounce; }
+
+   }
+
+   // Calculate and display image
+   ray_trace();
+   glutPostRedisplay();
+   glutTimerFunc(10, timer, 0);
+}
+
+//---------------------------------------
 // Main program to create window
 //---------------------------------------
 int main(int argc, char *argv[])
@@ -194,6 +263,8 @@ int main(int argc, char *argv[])
    // Set OpenGL callback functions
    glutDisplayFunc(ray_trace);
    glutIdleFunc(ray_trace);
+   glutKeyboardFunc(keyboard); // Added keyboard callback
+   glutTimerFunc(1000 / 60, timer, 0); // Added timer callback
 
    // Initialize scene
    init();
