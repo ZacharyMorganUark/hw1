@@ -30,7 +30,12 @@ const float RADIUS = 2.0;
 const int SPHERES = 10;
 Sphere3D sphere[SPHERES];
 ColorRGB color[SPHERES];
-// Global variables
+
+// rotation variables
+float animation_radius = 5.0; // Radius of circular path
+float animation_speed = 0.1;  // Speed of rotation
+float animation_angle = 0.0;  // Current angle of rotation
+
 #define MAX_LIGHTS 2 // Maximum number of light sources
 std::vector<ColorRGB> light_colors(MAX_LIGHTS); // Array to store light colors
 std::vector<Vector3D> light_dirs(MAX_LIGHTS); // Array to store light directions
@@ -42,6 +47,19 @@ float myrand(float min, float max)
 {
    return rand() * (max - min) / RAND_MAX + min;
 }
+
+
+//---------------------------------------
+// Idle function
+//---------------------------------------
+void idle() {
+    // Update angle based on time and speed
+    animation_angle += animation_speed;
+
+    // Redraw the scene
+    glutPostRedisplay();
+}
+
 
 // Function to initialize light sources
 void init_lights() {
@@ -222,7 +240,15 @@ void display()
    // Display image
    glClear(GL_COLOR_BUFFER_BIT);
    glDrawPixels(XDIM, YDIM, GL_RGB, GL_UNSIGNED_BYTE, image);
-   glFlush();
+   
+   // Draw the animated sphere
+   glColor3f(1.0f, 1.0f, 1.0f); // Set color to white
+   glPushMatrix(); // Save current transformation matrix
+   glTranslatef(sphere[0].center.px, sphere[0].center.py, sphere[0].center.pz); // Translate to animated sphere's position
+   glutWireSphere(sphere[0].radius, 20, 20); // Draw wireframe sphere
+   glPopMatrix(); // Restore previous transformation matrix
+   
+   glFlush(); // Flush OpenGL buffer
 }
 
 //---------------------------------------
@@ -264,7 +290,7 @@ void timer(int value)
 {
    // Move bouncing balls
    int i;
-   for (i = 0; i < SPHERES; i++)
+   for (i = 1; i < SPHERES; i++) // Start from 1 to skip the animated sphere
    {
       // Update ball position
       sphere[i].center.px += sphere[i].motion.vx;
@@ -290,12 +316,20 @@ void timer(int value)
       if (sphere[i].center.pz < -RADIUS/2 + sphere[i].radius) 
          {sphere[i].center.pz = -RADIUS/2 + sphere[i].radius; 
           sphere[i].motion.vz *= Bounce; }
-
    }
+
+   // Update animation angle
+   animation_angle += animation_speed;
+
+   // Update position of animated sphere along circular path
+   sphere[0].center.px = RADIUS * cos(animation_angle);
+   sphere[0].center.py = RADIUS * sin(animation_angle);
 
    // Calculate and display image
    ray_trace();
    glutPostRedisplay();
+
+   // Set timer for next frame
    glutTimerFunc(10, timer, 0);
 }
 
@@ -315,6 +349,7 @@ int main(int argc, char *argv[])
 
    // Specify callback function
    glutDisplayFunc(display);
+   glutIdleFunc(idle);
    glutKeyboardFunc(keyboard);
    glutTimerFunc(10, timer, 0);
    glutMainLoop();
