@@ -39,6 +39,7 @@ class ColorRGB
       void add(ColorRGB c);
       void sub(ColorRGB c);
       void clamp();
+      void normalize();
 };
 
 //----------------------------------------------
