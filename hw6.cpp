@@ -190,18 +190,14 @@ void keyboard(unsigned char key, int x, int y)
 }
 
 //---------------------------------------
-// Display function
+// Display callback for OpenGL
 //---------------------------------------
 void display()
 {
-    // Clear color buffer
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    // Draw image
-    glDrawPixels(XDIM, YDIM, GL_RGB, GL_UNSIGNED_BYTE, image);
-
-    // Swap buffers
-    glutSwapBuffers();
+   // Display image
+   glClear(GL_COLOR_BUFFER_BIT);
+   glDrawPixels(XDIM, YDIM, GL_RGB, GL_UNSIGNED_BYTE, image);
+   glFlush();
 }
 
 //---------------------------------------
