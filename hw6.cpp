@@ -76,10 +76,6 @@ void ray_trace()
     Point3D light_positions[NUM_LIGHTS] = {Point3D(-7.0f, 7.0f, 7.0f), Point3D(7.0f, 7.0f, -7.0f)};
     ColorRGB light_colors[NUM_LIGHTS] = {ColorRGB(), ColorRGB()};
 
-    // Define shader
-    Phong shader;
-    shader.SetCamera(camera);
-
     // Perform ray tracing
     for (int y = 0; y < YDIM; y++)
         for (int x = 0; x < XDIM; x++)
@@ -113,50 +109,57 @@ void ray_trace()
                 }
             }
 
-            // Calculate pixel color
+            // Calculate pixel color using Phong shading
             if (closest >= 0)
             {
-                // Display surface normal
-                if (mode == "normal")
-                {
-                    image[y][x][0] = 127 + closest_n.vx * 127;
-                    image[y][x][1] = 127 + closest_n.vy * 127;
-                    image[y][x][2] = 127 + closest_n.vz * 127;
-                }
+                // Set object color for Phong shading
+                ColorRGB object_color = color[closest];
 
-                // Calculate Phong shading
-                if (mode == "phong")
+                // Ambient light component (base color)
+                float ambient_coefficient = 0.2;
+                ColorRGB ambient_color = object_color * ambient_coefficient;
+
+                // Diffuse and specular light components
+                ColorRGB diffuse_color(0, 0, 0);
+                ColorRGB specular_color(0, 0, 0);
+
+                // Loop through each light source
+                for (int l = 0; l < NUM_LIGHTS; l++)
                 {
-                    // Accumulate color from each light source
-                    ColorRGB pixel;
-                    for (int l = 0; l < NUM_LIGHTS; l++)
+                    // Calculate light direction vector
+                    Vector3D light_dir;
+                    light_dir.set(light_positions[l].px - closest_p.px,
+                                  light_positions[l].py - closest_p.py,
+                                  light_positions[l].pz - closest_p.pz);
+                    light_dir.normalize();
+
+                    // Check if in shadow
+                    if (!in_shadow(closest_p, light_dir, closest, sphere, SPHERES))
                     {
-                        // Calculate light direction vector
-                        Vector3D light_dir;
-                        light_dir.set(light_positions[l].px - closest_p.px,
-                                      light_positions[l].py - closest_p.py,
-                                      light_positions[l].pz - closest_p.pz);
-                        light_dir.normalize();
+                        // Diffuse component
+                        float diffuse_coefficient = 0.8;
+                        float diffuse_intensity = max(0.0f, closest_n.dot(light_dir));
+                        diffuse_color += object_color * light_colors[l] * diffuse_intensity * diffuse_coefficient;
 
-                        // Check if in shadow
-                        if (!in_shadow(closest_p, light_dir, closest, sphere, SPHERES))
-                        {
-                            // Set shader parameters
-                            shader.SetLight(light_colors[l], light_dir);
-                            shader.SetObject(color[closest], 0.4, 0.4, 0.4, 10);
-
-                            // Calculate pixel color from this light source
-                            ColorRGB light_contribution;
-                            shader.GetShade(closest_p, closest_n, light_contribution);
-
-                            // Add light contribution to pixel color
-                            pixel.add(light_contribution);
-                        }
+                        // Specular component
+                        float specular_coefficient = 0.5;
+                        Vector3D reflection_dir = closest_n * 2.0 * closest_n.dot(light_dir) - light_dir;
+                        float specular_intensity = max(0.0f, -ray.dir.dot(reflection_dir));
+                        specular_intensity = pow(specular_intensity, 10); // Shininess factor
+                        specular_color += light_colors[l] * specular_intensity * specular_coefficient;
                     }
-                    image[y][x][0] = pixel.R;
-                    image[y][x][1] = pixel.G;
-                    image[y][x][2] = pixel.B;
                 }
+
+                // Final pixel color (ambient + diffuse + specular)
+                ColorRGB pixel_color = ambient_color + diffuse_color + specular_color;
+
+                // Clamp pixel color components to [0, 255]
+                pixel_color.clamp();
+
+                // Assign pixel color to image
+                image[y][x][0] = pixel_color.R;
+                image[y][x][1] = pixel_color.G;
+                image[y][x][2] = pixel_color.B;
             }
         }
 
