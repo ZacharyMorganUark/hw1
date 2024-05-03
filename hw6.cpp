@@ -232,9 +232,6 @@ void init()
    ray_trace();
 }
 
-//---------------------------------------
-// Display callback for OpenGL
-//---------------------------------------
 void display()
 {
    // Display image
@@ -248,6 +245,15 @@ void display()
        glutSolidSphere(sphere[i].radius, 20, 20);
        glPopMatrix();
    }
+
+   // Draw the rotating sphere (index 0) around another sphere (index 1)
+   glColor3ub(color[0].R, color[0].G, color[0].B); // Set color of the rotating sphere
+   glPushMatrix();
+   glTranslatef(sphere[1].center.px, sphere[1].center.py, sphere[1].center.pz); // Translate to the center of the fixed sphere
+   glRotatef(animation_angle, 0.0, 0.0, 1.0); // Rotate around the z-axis
+   glTranslatef(0.0, RADIUS, 0.0); // Translate to a distance from the center of the fixed sphere
+   glutSolidSphere(sphere[0].radius, 20, 20); // Draw the rotating sphere
+   glPopMatrix();
 
    glFlush();
 }
