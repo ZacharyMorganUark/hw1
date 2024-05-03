@@ -73,6 +73,7 @@ bool in_shadow(Point3D pt, Vector3D dir, int current, Sphere3D sphere[], int cou
    return false;
 }
 
+
 //---------------------------------------
 // Perform ray tracing of scene
 //---------------------------------------
@@ -138,14 +139,14 @@ void ray_trace()
             ColorRGB pixel;
             for (int i = 0; i < MAX_LIGHTS; ++i) {
                 // Check if in shadow
-                bool in_shadow = in_shadow(closest_p, light_dirs[i], closest, sphere, SPHERES);
+                bool is_in_shadow = in_shadow(closest_p, light_dirs[i], closest, sphere, SPHERES);
 
-                if (!in_shadow) {
+                if (!is_in_shadow) {
                     // Set light source for shading
                     shader.SetLight(light_colors[i], light_dirs[i]);
 
                     // Set object color and shading parameters
-                    if (in_shadow) {
+                    if (is_in_shadow) {
                         // Adjust shading parameters for shadows
                         shader.SetObject(color[closest], 0.4, 0.0, 0.0, 1);
                     } else {
