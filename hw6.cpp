@@ -239,16 +239,17 @@ void display()
 {
    // Display image
    glClear(GL_COLOR_BUFFER_BIT);
-   glDrawPixels(XDIM, YDIM, GL_RGB, GL_UNSIGNED_BYTE, image);
-   
-   // Draw the animated sphere
-   glColor3f(1.0f, 1.0f, 1.0f); // Set color to white
-   glPushMatrix(); // Save current transformation matrix
-   glTranslatef(sphere[0].center.px, sphere[0].center.py, sphere[0].center.pz); // Translate to animated sphere's position
-   glutWireSphere(sphere[0].radius, 20, 20); // Draw wireframe sphere
-   glPopMatrix(); // Restore previous transformation matrix
-   
-   glFlush(); // Flush OpenGL buffer
+
+   // Draw all spheres
+   for (int i = 0; i < SPHERES; ++i) {
+       glColor3ub(color[i].R, color[i].G, color[i].B);
+       glPushMatrix();
+       glTranslatef(sphere[i].center.px, sphere[i].center.py, sphere[i].center.pz);
+       glutSolidSphere(sphere[i].radius, 20, 20);
+       glPopMatrix();
+   }
+
+   glFlush();
 }
 
 //---------------------------------------
