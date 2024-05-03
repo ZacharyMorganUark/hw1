@@ -232,14 +232,20 @@ void init()
    ray_trace();
 }
 
+//---------------------------------------
+// Display callback for OpenGL
+//---------------------------------------
 void display()
 {
-   // Display image
+   // Clear the color buffer
    glClear(GL_COLOR_BUFFER_BIT);
 
    // Draw all spheres
    for (int i = 0; i < SPHERES; ++i) {
+       // Set color for each sphere
        glColor3ub(color[i].R, color[i].G, color[i].B);
+       
+       // Draw each sphere
        glPushMatrix();
        glTranslatef(sphere[i].center.px, sphere[i].center.py, sphere[i].center.pz);
        glutSolidSphere(sphere[i].radius, 20, 20);
@@ -250,11 +256,12 @@ void display()
    glColor3ub(color[0].R, color[0].G, color[0].B); // Set color of the rotating sphere
    glPushMatrix();
    glTranslatef(sphere[1].center.px, sphere[1].center.py, sphere[1].center.pz); // Translate to the center of the fixed sphere
-   glRotatef(animation_angle, 0.0, 0.0, 1.0); // Rotate around the z-axis
-   glTranslatef(0.0, RADIUS, 0.0); // Translate to a distance from the center of the fixed sphere
+   glRotatef(animation_angle, 0.0, 1.0, 0.0); // Rotate around the y-axis
+   glTranslatef(0.0, 0.0, RADIUS); // Translate to a distance from the center of the fixed sphere
    glutSolidSphere(sphere[0].radius, 20, 20); // Draw the rotating sphere
    glPopMatrix();
 
+   // Flush OpenGL buffer
    glFlush();
 }
 
