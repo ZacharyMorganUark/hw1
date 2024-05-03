@@ -1,13 +1,13 @@
 //---------------------------------------
-// Program: hw6.cpp
-// Purpose: Demonstrate ray tracing with multiple light sources and two spheres.
-// Author: [Your Name]
-// Date: [Current Date]
+// Program: ray_trace.cpp
+// Purpose: Demonstrate ray tracing.
+// Author:  John Gauch
+// Date:    Spring 2019
 //---------------------------------------
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <ctime>
+#include <vector>
 #ifdef MAC
 #include <GLUT/glut.h>
 #else
@@ -25,23 +25,33 @@ using namespace std;
 unsigned char image[YDIM][XDIM][3];
 float position = -5;
 string mode = "phong";
-const float BOUNCE = -1;
+float Bounce = -1;
 const float RADIUS = 2.0;
-const int SPHERES = 2; // Only two spheres
+const int SPHERES = 10;
 Sphere3D sphere[SPHERES];
 ColorRGB color[SPHERES];
-
-// Parameters for rotating sphere
-const float ROTATION_RADIUS = 4.0;
-const float ANGULAR_SPEED = 0.05; // Adjust as needed
-float rotation_angle = 0.0;
+// Global variables
+#define MAX_LIGHTS 5 // Maximum number of light sources
+std::vector<ColorRGB> light_colors(MAX_LIGHTS); // Array to store light colors
+std::vector<Vector3D> light_dirs(MAX_LIGHTS); // Array to store light directions
 
 //---------------------------------------
 // Calculate random value between [min..max]
 //---------------------------------------
 float myrand(float min, float max)
 {
-    return rand() * (max - min) / RAND_MAX + min;
+   return rand() * (max - min) / RAND_MAX + min;
+}
+
+// Function to initialize light sources
+void init_lights() {
+    // Initialize light sources here with appropriate colors and directions
+    // For example:
+    for (int i = 0; i < MAX_LIGHTS; ++i) {
+        light_colors[i].set(255, 255, 255); // Default: white light
+        light_dirs[i].set(-1, -1, -1); // Default: diagonal light direction
+        light_dirs[i].normalize();
+    }
 }
 
 //---------------------------------------
@@ -49,115 +59,159 @@ float myrand(float min, float max)
 //---------------------------------------
 bool in_shadow(Point3D pt, Vector3D dir, int current, Sphere3D sphere[], int count)
 {
-    // Define ray to light source
-    Ray3D shadow_ray;
-    shadow_ray.set(pt, dir);
+   // Define ray to light source
+   Ray3D shadow_ray;
+   shadow_ray.set(pt, dir);
 
-    // Check to see if ray intersects any sphere
-    Point3D point;
-    Vector3D normal;
-    for (int index = 0; index < count; index++)
-        if ((index != current) &&
-            (sphere[index].get_intersection(shadow_ray, point, normal)))
-            return true;
-    return false;
+   // Check to see ray intersects any sphere
+   Point3D point;
+   Vector3D normal;
+   for (int index=0; index<count; index++)
+      if ((index != current) && 
+         (sphere[index].get_intersection(shadow_ray, point, normal)))
+         return true;
+   return false;
 }
 
+//---------------------------------------
+// Perform ray tracing of scene
+//---------------------------------------
 void ray_trace()
 {
-    // Initialize camera
-    Point3D camera(0, 0, -500);
-    LightModel.SetCamera(camera);
+   // Define camera point
+   Point3D camera;
+   camera.set(0,0,position);
 
-    // Loop over image rows
-    for (int y = -250; y <= 250; y++)
-    {
-        // Loop over image columns
-        for (int x = -250; x <= 250; x++)
-        {
-            // Create ray from camera to pixel
-            Point3D origin(0, 0, 0);
-            Vector3D direction(x - origin.px, y - origin.py, 500 - origin.pz);
-            direction.normalize();
-            Ray3D ray;
-            ray.set(origin, direction);
+   // Define shader
+   Phong shader;
+   shader.SetCamera(camera);
 
-            // Initialize pixel color
-            ColorRGB pixel_color(0, 0, 0);
+   // Perform ray tracing
+   for (int y = 0; y < YDIM; y++)
+   for (int x = 0; x < XDIM; x++)
+   {
+      // Clear image
+      image[y][x][0] = 0;
+      image[y][x][1] = 0;
+      image[y][x][2] = 0;
 
-            // Loop over spheres
-            for (int s = 0; s < SPHERES; s++) // Change NUM_SPHERES to SPHERES
-            {
-                // Find intersection with sphere
-                Point3D point;
-                Vector3D normal;
-                bool hit = sphere[s].get_intersection(ray, point, normal); // Change Spheres to sphere
+      // Define sample point on image plane
+      float xpos = (x - XDIM/2) * 2.0 / XDIM;
+      float ypos = (y - YDIM/2) * 2.0 / YDIM;
+      Point3D point;
+      point.set(xpos, ypos, 0);
+   
+      // Define ray from camera through image
+      Ray3D ray;
+      ray.set(camera, point);
 
-                // If intersection, compute shading
-                if (hit)
-                {
-                    ColorRGB color;
-                    LightModel.GetShade(point, normal, color);
-                    pixel_color.add(color);
+      // Perform sphere intersection
+      int closest = -1;
+      Point3D p, closest_p;
+      Vector3D n, closest_n;
+      closest_p.set(0,0,ZDIM);
+      for (int s=0; s<SPHERES; s++)
+      {
+         if ((sphere[s].get_intersection(ray, p, n)) && (p.pz < closest_p.pz))
+         {
+            closest = s;
+            closest_p = p;
+            closest_n = n;
+         }
+      }
+
+      // Calculate pixel color
+      if (closest >= 0)
+      {
+         // Display surface normal
+         if (mode == "normal")
+         {
+            image[y][x][0] = 127 + closest_n.vx * 127;
+            image[y][x][1] = 127 + closest_n.vy * 127;
+            image[y][x][2] = 127 + closest_n.vz * 127;
+         }
+
+         // Calculate Phong shade
+         if (mode == "phong")
+         {
+            // Calculate pixel color from all light sources
+            ColorRGB pixel;
+            for (int i = 0; i < MAX_LIGHTS; ++i) {
+                // Check if in shadow
+                bool in_shadow = in_shadow(closest_p, light_dirs[i], closest, sphere, SPHERES);
+
+                if (!in_shadow) {
+                    // Set light source for shading
+                    shader.SetLight(light_colors[i], light_dirs[i]);
+
+                    // Set object color and shading parameters
+                    if (in_shadow) {
+                        // Adjust shading parameters for shadows
+                        shader.SetObject(color[closest], 0.4, 0.0, 0.0, 1);
+                    } else {
+                        shader.SetObject(color[closest], 0.4, 0.4, 0.4, 10);
+                    }
+
+                    // Calculate Phong shading for this light source
+                    ColorRGB light_contribution;
+                    shader.GetShade(closest_p, closest_n, light_contribution);
+
+                    // Add up the color contribution from this light source
+                    pixel.add(light_contribution);
                 }
             }
 
-            // Store pixel color in image array
-            image[y + 250][x + 250][0] = pixel_color.R; // Red component
-            image[y + 250][x + 250][1] = pixel_color.G; // Green component
-            image[y + 250][x + 250][2] = pixel_color.B; // Blue component
-        }
-    }
+            // Store the final pixel color in the image array
+            image[y][x][0] = pixel.R;
+            image[y][x][1] = pixel.G;
+            image[y][x][2] = pixel.B;
+         }
+      }
+   }
 }
-
+ 
 //---------------------------------------
 // Init function for OpenGL
 //---------------------------------------
 void init()
 {
-    // Initialize OpenGL
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+   // Initialize OpenGL
+   glClearColor(0.0, 0.0, 0.0, 1.0);
 
-    // Print command menu
-    cout << "Program commands:\n"
-         << "   '+' - increase camera distance\n"
-         << "   '-' - decrease camera distance\n"
-         << "   'p' - show Phong shading\n"
-         << "   'n' - show surface normals\n"
-         << "   'q' - quit program\n";
+   // Print command menu
+   cout << "Program commands:\n"
+        << "   '+' - increase camera distance\n"
+        << "   '-' - decrease camera distance\n"
+        << "   'p' - show Phong shading\n"
+        << "   'n' - show surface normals\n"
+        << "   'q' - quit program\n";
 
-    // Define array of spheres
-    srand(time(NULL));
+   // Define array of spheres
+   srand(time(NULL));
+   for (int s=0; s<SPHERES; s++)
+   {
+      float cx = myrand(-RADIUS/2, RADIUS/2);
+      float cy = myrand(-RADIUS/2, RADIUS/2);
+      float cz = myrand(0, RADIUS/2);
+      Point3D center;
+      center.set(cx,cy,cz);
 
-    // Define properties for the first sphere
-    Point3D center1(0, 0, 4); // Center of the first sphere
-    Vector3D motion1(0.01, 0.02, 0.03); // Motion of the first sphere
-    float radius1 = 1.5; // Radius of the first sphere
-    sphere[0].set(center1, motion1, radius1);
-    color[0].set(255, 0, 0); // Red color for the first sphere
+      float mx = myrand(-RADIUS/100, RADIUS/200);
+      float my = myrand(-RADIUS/100, RADIUS/200);
+      float mz = myrand(-RADIUS/100, RADIUS/200);
+      Vector3D motion;
+      motion.set(mx,my,mz);
+      float radius = myrand(RADIUS/20, RADIUS/10);
+      sphere[s].set(center, motion, radius);
+      int R = rand() % 255;
+      int G = rand() % 255;
+      int B = rand() % 255;
+      color[s].set(R,G,B);
+   }
 
-    // Define properties for the second sphere
-    Point3D center2(-1.5, 1.5, 6); // Center of the second sphere
-    Vector3D motion2(-0.01, -0.02, -0.03); // Motion of the second sphere
-    float radius2 = 1.0; // Radius of the second sphere
-    sphere[1].set(center2, motion2, radius2);
-    color[1].set(0, 0, 255); // Blue color for the second sphere
-
-    // Perform ray tracing
-    cout << "camera: 0,0," << position << endl;
-    ray_trace();
-}
-
-//---------------------------------------
-// Keyboard function
-//---------------------------------------
-void keyboard(unsigned char key, int x, int y)
-{
-    if (key == 'n') // Toggle mode between normal and phong
-    {
-        mode = (mode == "normal") ? "phong" : "normal";
-        glutPostRedisplay(); // Request redisplay
-    }
+   // Perform ray tracing
+   cout << "camera: 0,0," << position << endl;
+   ray_trace();
 }
 
 //---------------------------------------
@@ -165,10 +219,42 @@ void keyboard(unsigned char key, int x, int y)
 //---------------------------------------
 void display()
 {
-    // Display image
-    glClear(GL_COLOR_BUFFER_BIT);
-    glDrawPixels(XDIM, YDIM, GL_RGB, GL_UNSIGNED_BYTE, image);
-    glFlush();
+   // Display image
+   glClear(GL_COLOR_BUFFER_BIT);
+   glDrawPixels(XDIM, YDIM, GL_RGB, GL_UNSIGNED_BYTE, image);
+   glFlush();
+}
+
+//---------------------------------------
+// Keyboard callback for OpenGL
+//---------------------------------------
+void keyboard(unsigned char key, int x, int y)
+{
+   // End program
+   if (key == 'q')
+      exit(0);
+
+   // Move camera position
+   else if (key == '+' && position > -10)
+   {
+      position = position - 0.5;
+      cout << "camera: 0,0," << position << endl;
+   }
+   else if (key == '-' && position < -5)
+   {
+      position = position + 0.5;
+      cout << "camera: 0,0," << position << endl;
+   }
+
+   // Change display mode
+   else if (key == 'n')
+      mode = "normal";
+   else if (key == 'p')
+      mode = "phong";
+
+   // Perform ray tracing
+   ray_trace();
+   glutPostRedisplay();
 }
 
 //---------------------------------------
@@ -176,36 +262,61 @@ void display()
 //---------------------------------------
 void timer(int value)
 {
-    // Calculate and display image
-    ray_trace();
-    glutPostRedisplay();
-    glutTimerFunc(10, timer, 0);
+   // Move bouncing balls
+   int i;
+   for (i = 0; i < SPHERES; i++)
+   {
+      // Update ball position
+      sphere[i].center.px += sphere[i].motion.vx;
+      sphere[i].center.py += sphere[i].motion.vy;
+      sphere[i].center.pz += sphere[i].motion.vz;
+
+      // Bounce off walls
+      if (sphere[i].center.px > RADIUS/2 - sphere[i].radius) 
+         {sphere[i].center.px = RADIUS/2 - sphere[i].radius; 
+          sphere[i].motion.vx *= Bounce; }
+      if (sphere[i].center.py > RADIUS/2 - sphere[i].radius) 
+         {sphere[i].center.py = RADIUS/2 - sphere[i].radius; 
+          sphere[i].motion.vy *= Bounce; }
+      if (sphere[i].center.pz > RADIUS/2 - sphere[i].radius) 
+         {sphere[i].center.pz = RADIUS/2 - sphere[i].radius; 
+          sphere[i].motion.vz *= Bounce; }
+      if (sphere[i].center.px < -RADIUS/2 + sphere[i].radius) 
+         {sphere[i].center.px = -RADIUS/2 + sphere[i].radius; 
+          sphere[i].motion.vx *= Bounce; }
+      if (sphere[i].center.py < -RADIUS/2 + sphere[i].radius) 
+         {sphere[i].center.py = -RADIUS/2 + sphere[i].radius; 
+          sphere[i].motion.vy *= Bounce; }
+      if (sphere[i].center.pz < -RADIUS/2 + sphere[i].radius) 
+         {sphere[i].center.pz = -RADIUS/2 + sphere[i].radius; 
+          sphere[i].motion.vz *= Bounce; }
+
+   }
+
+   // Calculate and display image
+   ray_trace();
+   glutPostRedisplay();
+   glutTimerFunc(10, timer, 0);
 }
 
+
 //---------------------------------------
-// Main program to create window
+// Main program
 //---------------------------------------
 int main(int argc, char *argv[])
 {
-    // Initialize random seed
-    srand(time(NULL));
+   // Create OpenGL window
+   glutInit(&argc, argv);
+   glutInitWindowSize(XDIM, YDIM);
+   glutInitWindowPosition(0, 0);
+   glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
+   glutCreateWindow("Ray Trace");
+   init();
 
-    // Initialize OpenGL
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
-    glutInitWindowSize(XDIM, YDIM);
-    glutInitWindowPosition(100, 100);
-    glutCreateWindow("Ray Tracing");
-
-    // Set OpenGL callback functions
-    glutDisplayFunc(display);
-    glutKeyboardFunc(keyboard);
-    glutTimerFunc(1000 / 60, timer, 0); // Added timer callback
-
-    // Initialize scene
-    init();
-
-    // Enter main OpenGL loop
-    glutMainLoop();
-    return 0;
+   // Specify callback function
+   glutDisplayFunc(display);
+   glutKeyboardFunc(keyboard);
+   glutTimerFunc(10, timer, 0);
+   glutMainLoop();
+   return 0;
 }
