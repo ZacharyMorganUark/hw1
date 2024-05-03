@@ -146,13 +146,14 @@ void ray_trace()
                ColorRGB light_contribution;
                shader.GetShade(closest_p, closest_n, light_contribution);
 
-               // Normalize the light contribution to prevent exceeding 255
-               light_contribution.normalize();
-
                // Add up the color contribution from this light source
                pixel.add(light_contribution);
             }
          }
+
+         // Normalize the accumulated pixel color to prevent exceeding 255
+         pixel.normalize();
+
          // Assign the accumulated pixel color to the image
          image[y][x][0] = pixel.R;
          image[y][x][1] = pixel.G;
@@ -160,7 +161,6 @@ void ray_trace()
       }
    }
 }
-
  
 //---------------------------------------
 // Init function for OpenGL
