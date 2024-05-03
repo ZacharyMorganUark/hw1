@@ -31,7 +31,7 @@ const int SPHERES = 10;
 Sphere3D sphere[SPHERES];
 ColorRGB color[SPHERES];
 // Global variables
-#define MAX_LIGHTS 5 // Maximum number of light sources
+#define MAX_LIGHTS 3 // Maximum number of light sources
 std::vector<ColorRGB> light_colors(MAX_LIGHTS); // Array to store light colors
 std::vector<Vector3D> light_dirs(MAX_LIGHTS); // Array to store light directions
 
@@ -73,103 +73,97 @@ bool in_shadow(Point3D pt, Vector3D dir, int current, Sphere3D sphere[], int cou
    return false;
 }
 
-
 //---------------------------------------
 // Perform ray tracing of scene
 //---------------------------------------
 void ray_trace()
 {
-   // Define camera point
-   Point3D camera;
-   camera.set(0,0,position);
+    // Define camera point
+    Point3D camera;
+    camera.set(0, 0, position);
 
-   // Define shader
-   Phong shader;
-   shader.SetCamera(camera);
+    // Define light source
+    init_lights();
 
-   // Perform ray tracing
-   for (int y = 0; y < YDIM; y++)
-   for (int x = 0; x < XDIM; x++)
-   {
-      // Clear image
-      image[y][x][0] = 0;
-      image[y][x][1] = 0;
-      image[y][x][2] = 0;
+    // Define shader
+    Phong shader;
+    shader.SetCamera(camera);
 
-      // Define sample point on image plane
-      float xpos = (x - XDIM/2) * 2.0 / XDIM;
-      float ypos = (y - YDIM/2) * 2.0 / YDIM;
-      Point3D point;
-      point.set(xpos, ypos, 0);
-   
-      // Define ray from camera through image
-      Ray3D ray;
-      ray.set(camera, point);
+    // Perform ray tracing
+    for (int y = 0; y < YDIM; y++)
+    {
+        for (int x = 0; x < XDIM; x++)
+        {
+            // Clear image
+            image[y][x][0] = 0;
+            image[y][x][1] = 0;
+            image[y][x][2] = 0;
 
-      // Perform sphere intersection
-      int closest = -1;
-      Point3D p, closest_p;
-      Vector3D n, closest_n;
-      closest_p.set(0,0,ZDIM);
-      for (int s=0; s<SPHERES; s++)
-      {
-         if ((sphere[s].get_intersection(ray, p, n)) && (p.pz < closest_p.pz))
-         {
-            closest = s;
-            closest_p = p;
-            closest_n = n;
-         }
-      }
+            // Define sample point on image plane
+            float xpos = (x - XDIM / 2) * 2.0 / XDIM;
+            float ypos = (y - YDIM / 2) * 2.0 / YDIM;
+            Point3D point;
+            point.set(xpos, ypos, 0);
 
-      // Calculate pixel color
-      if (closest >= 0)
-      {
-         // Display surface normal
-         if (mode == "normal")
-         {
-            image[y][x][0] = 127 + closest_n.vx * 127;
-            image[y][x][1] = 127 + closest_n.vy * 127;
-            image[y][x][2] = 127 + closest_n.vz * 127;
-         }
+            // Define ray from camera through image
+            Ray3D ray;
+            ray.set(camera, point);
 
-         // Calculate Phong shade
-         if (mode == "phong")
-         {
-            // Calculate pixel color from all light sources
-            ColorRGB pixel;
-            for (int i = 0; i < MAX_LIGHTS; ++i) {
-                // Check if in shadow
-                bool is_in_shadow = in_shadow(closest_p, light_dirs[i], closest, sphere, SPHERES);
-
-                if (!is_in_shadow) {
-                    // Set light source for shading
-                    shader.SetLight(light_colors[i], light_dirs[i]);
-
-                    // Set object color and shading parameters
-                    if (is_in_shadow) {
-                        // Adjust shading parameters for shadows
-                        shader.SetObject(color[closest], 0.4, 0.0, 0.0, 1);
-                    } else {
-                        shader.SetObject(color[closest], 0.4, 0.4, 0.4, 10);
-                    }
-
-                    // Calculate Phong shading for this light source
-                    ColorRGB light_contribution;
-                    shader.GetShade(closest_p, closest_n, light_contribution);
-
-                    // Add up the color contribution from this light source
-                    pixel.add(light_contribution);
+            // Perform sphere intersection
+            int closest = -1;
+            Point3D p, closest_p;
+            Vector3D n, closest_n;
+            closest_p.set(0, 0, ZDIM);
+            for (int s = 0; s < SPHERES; s++)
+            {
+                if ((sphere[s].get_intersection(ray, p, n)) && (p.pz < closest_p.pz))
+                {
+                    closest = s;
+                    closest_p = p;
+                    closest_n = n;
                 }
             }
 
-            // Store the final pixel color in the image array
-            image[y][x][0] = pixel.R;
-            image[y][x][1] = pixel.G;
-            image[y][x][2] = pixel.B;
-         }
-      }
-   }
+            // Calculate pixel color
+            if (closest >= 0)
+            {
+                // Calculate Phong shade
+                if (mode == "phong")
+                {
+                    // Calculate pixel color from all light sources
+                    ColorRGB pixel;
+                    for (int i = 0; i < MAX_LIGHTS; ++i)
+                    {
+                        // Check if in shadow
+                        bool is_in_shadow = in_shadow(closest_p, light_dirs[i], closest, sphere, SPHERES);
+
+                        // Set light source for shading
+                        shader.SetLight(light_colors[i], light_dirs[i]);
+
+                        if (!is_in_shadow)
+                        {
+                            // Set object color and shading parameters
+                            shader.SetObject(color[closest], 0.4, 0.4, 0.4, 10);
+
+                            // Calculate Phong shading for this light source
+                            ColorRGB light_contribution;
+                            shader.GetShade(closest_p, closest_n, light_contribution);
+
+                            // Add up the color contribution from this light source
+                            pixel.add(light_contribution);
+                        }
+                    }
+
+                    // Assign the accumulated pixel color to the image
+                    image[y][x][0] = pixel.R;
+                    image[y][x][1] = pixel.G;
+                    image[y][x][2] = pixel.B;
+                }
+            }
+        }
+    }
 }
+
  
 //---------------------------------------
 // Init function for OpenGL
