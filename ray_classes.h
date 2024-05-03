@@ -29,128 +29,98 @@ const bool DEBUG = false;
 //----------------------------------------------
 class ColorRGB
 {
-public:
-    float R, G, B;
+   public:
+      float R, G, B;
 
-    // Constructors
-    ColorRGB() : R(0), G(0), B(0) {} // Default constructor
-    ColorRGB(float r, float g, float b) : R(r), G(g), B(b) {} // Constructor with three float arguments
-
-    // Methods
-    void set(float r, float g, float b);
-    string print();
-    void mult(float c);
-    void mult(ColorRGB c);
-    void add(ColorRGB c);
-    void sub(ColorRGB c);
-    void clamp();
-
-    // Define multiplication operator for scalar multiplication
-    ColorRGB operator*(const float& scalar) const {
-        return ColorRGB(R * scalar, G * scalar, B * scalar);
-    }
+      void set(float r, float g, float b);
+      string print();
+      void mult(float c);
+      void mult(ColorRGB c);
+      void add(ColorRGB c);
+      void sub(ColorRGB c);
+      void clamp();
 };
 
 //----------------------------------------------
 class Point3D
 {
-public:
-    float px, py, pz;
+   public:
+      float px, py, pz;
 
-    Point3D() {}
-    Point3D(float x, float y, float z) : px(x), py(y), pz(z) {}
-
-    void set(float x, float y, float z);
-    string print();
-    float distance(Point3D p);
-
-    // Subtraction operator
-    Point3D operator-(const Point3D& other) const {
-        Point3D result;
-        result.px = px - other.px;
-        result.py = py - other.py;
-        result.pz = pz - other.pz;
-        return result;
-    }
+      void set(float x, float y, float z);
+      string print();
+      float distance(Point3D p);
 };
 
 //----------------------------------------------
 class Vector3D
 {
-public:
-    float vx, vy, vz;
+   public:
+      float vx, vy, vz;
 
-    Vector3D() {}
-    Vector3D(float x, float y, float z) : vx(x), vy(y), vz(z) {}
-
-    void set(float x, float y, float z);
-    string print();
-    void normalize();
-    float dot(Vector3D v);
-    void mult(float c);
-    void add(Vector3D v);
-    void sub(Vector3D v);
-
-    // Define multiplication operator for scalar multiplication
-    Vector3D operator*(const double& scalar) const {
-        return Vector3D(vx * scalar, vy * scalar, vz * scalar);
-    }
+      void set(float x, float y, float z);
+      string print();
+      void normalize();
+      float dot(Vector3D v);
+      void mult(float c);
+      void add(Vector3D v);
+      void sub(Vector3D v);
 };
 
 //----------------------------------------------
 class Ray3D
 {
-public:
-    Point3D point;
-    Vector3D dir;
+   public:
+      Point3D point;
+      Vector3D dir;
 
-    void set(Point3D p, Vector3D d);
-    void set(Point3D p1, Point3D p2);
-    string print();
-    Point3D get_sample(float t);
+      void set(Point3D p, Vector3D d);
+      void set(Point3D p1, Point3D p2);
+      string print();
+      Point3D get_sample(float t);
 };
 
 //----------------------------------------------
 class Sphere3D
 {
-public:
-    Point3D center;
-    Vector3D motion;
-    float radius;
+   public:
+      Point3D center;
+      Vector3D motion;
+      float radius;
 
-    void set(Point3D p, float r) ;
-    void set(Point3D p, Vector3D m, float r) ;
-    string print() ;
-    bool get_intersection(Ray3D ray, Point3D &point, Vector3D &normal);
+      void set(Point3D p, float r) ;
+      void set(Point3D p, Vector3D m, float r) ;
+      string print() ;
+      bool get_intersection(Ray3D ray, Point3D &point, Vector3D &normal);
 };
 
 //----------------------------------------------
 class Phong
 {
-public:
-    // Constructors
-    Phong();
-    ~Phong();
+ public:
+   // Constructors
+   Phong();
+   ~Phong();
 
-    // Set methods
-    void SetCamera(Point3D pos);
-    void SetLight(ColorRGB color, Vector3D dir);
-    void SetObject(ColorRGB color, float ka, float kd, float ks, float kp);
+   // Set methods
+   void SetCamera(Point3D pos);
+   void SetLight(ColorRGB color, Vector3D dir);
+   void SetObject(ColorRGB color, float ka, float kd, float ks, float kp);
+    
+   // Get method
+   void GetShade(Point3D point, Vector3D normal, ColorRGB & color);
 
-    // Get method
-    void GetShade(Point3D point, Vector3D normal, ColorRGB & color);
+ private:
+   // Camera
+   Point3D CameraPos;
 
-private:
-    // Camera
-    Point3D CameraPos;
-
-    // Light
-    ColorRGB LightColor;
-    Vector3D LightDir;
-
-    // Object
-    ColorRGB ObjectColor;
-    float Ka, Kd, Ks, Kp;
+   // Light
+   ColorRGB LightColor;
+   Vector3D LightDir;
+   
+   // Object
+   ColorRGB ObjectColor;
+   float Ka, Kd, Ks, Kp;
 };
 
 #endif
