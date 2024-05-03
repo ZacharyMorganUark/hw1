@@ -82,6 +82,17 @@ void ColorRGB::clamp()
 }
 
 //----------------------------------------------
+void ColorRGB::normalize() {
+    float max_component = std::max({R, G, B});
+    if (max_component > 255) {
+        float scale_factor = 255 / max_component;
+        R *= scale_factor;
+        G *= scale_factor;
+        B *= scale_factor;
+    }
+}
+
+//----------------------------------------------
 void Point3D::set(float x, float y, float z) 
 { 
    px = x; 
