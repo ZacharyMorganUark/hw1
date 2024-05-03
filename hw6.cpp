@@ -47,9 +47,15 @@ float myrand(float min, float max)
 void init_lights() {
     // Initialize light sources here with appropriate colors and directions
     // For example:
+    light_colors[0].set(255, 255, 255); // White light
+    light_dirs[0].set(1, -1, -1); // Directional light from top-right
+
+    light_colors[1].set(255, 0, 0); // Red light
+    light_dirs[1].set(-1, 1, -1); // Directional light from bottom-left
+
+    // You can add more light sources with different colors and directions as needed
+    // Ensure to normalize the light directions
     for (int i = 0; i < MAX_LIGHTS; ++i) {
-        light_colors[i].set(255, 255, 255); // Default: white light
-        light_dirs[i].set(-1, -1, -1); // Default: diagonal light direction
         light_dirs[i].normalize();
     }
 }
