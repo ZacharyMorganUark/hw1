@@ -162,19 +162,49 @@ if (closest >= 0)
    glutPostRedisplay();
 }
 
+
 //---------------------------------------
-// Initialize the scene
+// Init function for OpenGL
 //---------------------------------------
 void init()
 {
-   // Define sphere and color
-   sphere[0].set(Point3D(0.0f, 0.0f, RADIUS / 2.0f), Vector3D(0.0f, 0.0f, 0.0f), RADIUS / 4.0f);
-   color[0].set(255.0f, 0.0f, 0.0f);
-   sphere[1].set(Point3D(ROTATION_RADIUS * cos(rotation_angle), ROTATION_RADIUS * sin(rotation_angle), RADIUS / 2.0f), Vector3D(0.0f, 0.0f, 0.0f), RADIUS / 4.0f);
-   color[1].set(0.0f, 0.0f, 255.0f);
+   // Initialize OpenGL
+   glClearColor(0.0, 0.0, 0.0, 1.0);
 
-   // Set up background color
-   glClearColor(0, 0, 0, 0);
+   // Print command menu
+   cout << "Program commands:\n"
+        << "   '+' - increase camera distance\n"
+        << "   '-' - decrease camera distance\n"
+        << "   'p' - show Phong shading\n"
+        << "   'n' - show surface normals\n"
+        << "   'q' - quit program\n";
+
+   // Define array of spheres
+   srand(time(NULL));
+   for (int s=0; s<SPHERES; s++)
+   {
+      float cx = myrand(-RADIUS/2, RADIUS/2);
+      float cy = myrand(-RADIUS/2, RADIUS/2);
+      float cz = myrand(0, RADIUS/2);
+      Point3D center;
+      center.set(cx,cy,cz);
+
+      float mx = myrand(-RADIUS/100, RADIUS/200);
+      float my = myrand(-RADIUS/100, RADIUS/200);
+      float mz = myrand(-RADIUS/100, RADIUS/200);
+      Vector3D motion;
+      motion.set(mx,my,mz);
+      float radius = myrand(RADIUS/20, RADIUS/10);
+      sphere[s].set(center, motion, radius);
+      int R = rand() % 255;
+      int G = rand() % 255;
+      int B = rand() % 255;
+      color[s].set(R,G,B);
+   }
+
+   // Perform ray tracing
+   cout << "camera: 0,0," << position << endl;
+   ray_trace();
 }
 
 //---------------------------------------
