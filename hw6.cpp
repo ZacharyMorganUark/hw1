@@ -72,8 +72,8 @@ void ray_trace()
    Point3D camera(0, 0, position);
 
    // Define light sources
-   const int NUM_LIGHTS = 2;
-   Point3D light_positions[NUM_LIGHTS] = {Point3D(-5.0f, 5.0f, 5.0f), Point3D(5.0f, 5.0f, -5.0f)};
+   const int NUM_LIGHTS = 1;
+   Point3D light_positions[NUM_LIGHTS] = {Point3D(-7.0f, 7.0f, 7.0f), Point3D(7.0f, 7.0f, -7.0f)};
    ColorRGB light_colors[NUM_LIGHTS] = {ColorRGB(), ColorRGB()};
 
    // Define shader
