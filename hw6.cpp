@@ -69,17 +69,18 @@ bool in_shadow(Point3D pt, Vector3D dir, int current, Sphere3D sphere[], int cou
 void ray_trace()
 {
    // Define camera point
-   Point3D camera(0, 0, position);
+   Point3D camera;
+   camera.set(0,0,position);
 
    // Define light sources
    const int NUM_LIGHTS = 2;
    Point3D light_positions[NUM_LIGHTS] = {Point3D(-7.0f, 7.0f, 7.0f), Point3D(7.0f, 7.0f, -7.0f)};
-   ColorRGB light_colors[NUM_LIGHTS] = {ColorRGB(), ColorRGB()};
+   ColorRGB light_colors[NUM_LIGHTS] = {ColorRGB(250,250,250), ColorRGB(250,250,250)};
 
    // Define shader
    Phong shader;
    shader.SetCamera(camera);
-   
+
    // Perform ray tracing
    for (int y = 0; y < YDIM; y++)
       for (int x = 0; x < XDIM; x++)
@@ -90,10 +91,11 @@ void ray_trace()
          image[y][x][2] = 0;
 
          // Define sample point on image plane
-         float xpos = (x - XDIM / 2) * 2.0 / XDIM;
-         float ypos = (y - YDIM / 2) * 2.0 / YDIM;
-         Point3D point(xpos, ypos, 0);
-
+         float xpos = (x - XDIM/2) * 2.0 / XDIM;
+         float ypos = (y - YDIM/2) * 2.0 / YDIM;
+         Point3D point;
+         point.set(xpos, ypos, 0);
+      
          // Define ray from camera through image
          Ray3D ray;
          ray.set(camera, point);
@@ -102,8 +104,8 @@ void ray_trace()
          int closest = -1;
          Point3D p, closest_p;
          Vector3D n, closest_n;
-         closest_p.set(0, 0, ZDIM);
-         for (int s = 0; s < SPHERES; s++)
+         closest_p.set(0,0,ZDIM);
+         for (int s=0; s<SPHERES; s++)
          {
             if ((sphere[s].get_intersection(ray, p, n)) && (p.pz < closest_p.pz))
             {
@@ -114,54 +116,50 @@ void ray_trace()
          }
 
          // Calculate pixel color
-if (closest >= 0)
-{
-    // Display surface normal
-    if (mode == "normal")
-    {
-        image[y][x][0] = 127 + closest_n.vx * 127;
-        image[y][x][1] = 127 + closest_n.vy * 127;
-        image[y][x][2] = 127 + closest_n.vz * 127;
-    }
+         if (closest >= 0)
+         {
+            // Display surface normal
+            if (mode == "normal")
+            {
+               image[y][x][0] = 127 + closest_n.vx * 127;
+               image[y][x][1] = 127 + closest_n.vy * 127;
+               image[y][x][2] = 127 + closest_n.vz * 127;
+            }
 
-    // Calculate Phong shading
-    if (mode == "phong")
-    {
-        // Accumulate color from each light source
-        ColorRGB pixel;
-        for (int l = 0; l < NUM_LIGHTS; l++)
-        {
-            // Calculate light direction vector
-            Vector3D light_dir;
-            light_dir.set(light_positions[l].px - closest_p.px,
-                          light_positions[l].py - closest_p.py,
-                          light_positions[l].pz - closest_p.pz);
-            light_dir.normalize();
+            // Calculate Phong shading with multiple light sources
+            if (mode == "phong")
+            {
+               // Accumulate color from each light source
+               ColorRGB pixel;
+               for (int l = 0; l < NUM_LIGHTS; l++)
+               {
+                  // Calculate light direction vector
+                  Vector3D light_dir;
+                  light_dir.set(light_positions[l].px - closest_p.px,
+                                light_positions[l].py - closest_p.py,
+                                light_positions[l].pz - closest_p.pz);
+                  light_dir.normalize();
 
-            // Check if in shadow
-            if (in_shadow(closest_p, light_dir, closest, sphere, SPHERES))
-                shader.SetObject(color[closest], 0.4, 0.0, 0.0, 1);
-            else
-                shader.SetObject(color[closest], 0.4, 0.4, 0.4, 10);
+                  // Check if in shadow
+                  if (!in_shadow(closest_p, light_dir, closest, sphere, SPHERES))
+                  {
+                     // Calculate pixel color from this light source
+                     ColorRGB light_contribution;
+                     shader.SetLight(light_colors[l], light_dir);
+                     shader.SetObject(color[closest], 0.4, 0.4, 0.4, 10);
+                     shader.GetShade(closest_p, closest_n, light_contribution);
 
-            // Calculate pixel color from this light source
-            ColorRGB light_contribution;
-            shader.GetShade(closest_p, closest_n, light_contribution);
-
-            // Add light contribution to pixel color
-            pixel.add(light_contribution);
-        }
-        image[y][x][0] = pixel.R;
-        image[y][x][1] = pixel.G;
-        image[y][x][2] = pixel.B;
-    }
-}
+                     // Add light contribution to pixel color
+                     pixel.add(light_contribution);
+                  }
+               }
+               image[y][x][0] = pixel.R;
+               image[y][x][1] = pixel.G;
+               image[y][x][2] = pixel.B;
+            }
+         }
       }
-
-   // Update display
-   glutPostRedisplay();
 }
-
 
 //---------------------------------------
 // Init function for OpenGL
