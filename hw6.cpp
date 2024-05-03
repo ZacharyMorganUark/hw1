@@ -63,108 +63,51 @@ bool in_shadow(Point3D pt, Vector3D dir, int current, Sphere3D sphere[], int cou
     return false;
 }
 
-//---------------------------------------
-// Perform ray tracing of scene
-//---------------------------------------
 void ray_trace()
 {
-    // Define camera point
-    Point3D camera(0, 0, position);
+    // Initialize camera
+    Point3D camera(0, 0, -500);
+    LightModel.SetCamera(camera);
 
-    // Define light sources
-    const int NUM_LIGHTS = 2;
-    Point3D light_positions[NUM_LIGHTS] = {Point3D(-7.0f, 7.0f, 7.0f), Point3D(7.0f, 7.0f, -7.0f)};
-    ColorRGB light_colors[NUM_LIGHTS] = {ColorRGB(), ColorRGB()};
-
-    // Perform ray tracing
-    for (int y = 0; y < YDIM; y++)
-        for (int x = 0; x < XDIM; x++)
+    // Loop over image rows
+    for (int y = -250; y <= 250; y++)
+    {
+        // Loop over image columns
+        for (int x = -250; x <= 250; x++)
         {
-            // Clear image
-            image[y][x][0] = 0;
-            image[y][x][1] = 0;
-            image[y][x][2] = 0;
-
-            // Define sample point on image plane
-            float xpos = (x - XDIM / 2) * 2.0 / XDIM;
-            float ypos = (y - YDIM / 2) * 2.0 / YDIM;
-            Point3D point(xpos, ypos, 0);
-
-            // Define ray from camera through image
+            // Create ray from camera to pixel
+            Point3D origin(0, 0, 0);
+            Vector3D direction(x - origin.px, y - origin.py, 500 - origin.pz);
+            direction.normalize();
             Ray3D ray;
-            ray.set(camera, point);
+            ray.set(origin, direction);
 
-            // Perform sphere intersection
-            int closest = -1;
-            Point3D p, closest_p;
-            Vector3D n, closest_n;
-            closest_p.set(0, 0, ZDIM);
-            for (int s = 0; s < SPHERES; s++)
+            // Initialize pixel color
+            ColorRGB pixel_color(0, 0, 0);
+
+            // Loop over spheres
+            for (int s = 0; s < SPHERES; s++) // Change NUM_SPHERES to SPHERES
             {
-                if ((sphere[s].get_intersection(ray, p, n)) && (p.pz < closest_p.pz))
+                // Find intersection with sphere
+                Point3D point;
+                Vector3D normal;
+                bool hit = sphere[s].get_intersection(ray, point, normal); // Change Spheres to sphere
+
+                // If intersection, compute shading
+                if (hit)
                 {
-                    closest = s;
-                    closest_p = p;
-                    closest_n = n;
+                    ColorRGB color;
+                    LightModel.GetShade(point, normal, color);
+                    pixel_color.add(color);
                 }
             }
 
-            // Calculate pixel color using Phong shading
-            if (closest >= 0)
-            {
-                // Set object color for Phong shading
-                ColorRGB object_color = color[closest];
-
-                // Ambient light component (base color)
-                float ambient_coefficient = 0.2;
-                ColorRGB ambient_color = object_color * ambient_coefficient;
-
-                // Diffuse and specular light components
-                ColorRGB diffuse_color(0, 0, 0);
-                ColorRGB specular_color(0, 0, 0);
-
-                // Loop through each light source
-                for (int l = 0; l < NUM_LIGHTS; l++)
-                {
-                    // Calculate light direction vector
-                    Vector3D light_dir;
-                    light_dir.set(light_positions[l].px - closest_p.px,
-                                  light_positions[l].py - closest_p.py,
-                                  light_positions[l].pz - closest_p.pz);
-                    light_dir.normalize();
-
-                    // Check if in shadow
-                    if (!in_shadow(closest_p, light_dir, closest, sphere, SPHERES))
-                    {
-                        // Diffuse component
-                        float diffuse_coefficient = 0.8;
-                        float diffuse_intensity = max(0.0f, closest_n.dot(light_dir));
-                        diffuse_color += object_color * light_colors[l] * diffuse_intensity * diffuse_coefficient;
-
-                        // Specular component
-                        float specular_coefficient = 0.5;
-                        Vector3D reflection_dir = closest_n * 2.0 * closest_n.dot(light_dir) - light_dir;
-                        float specular_intensity = max(0.0f, -ray.dir.dot(reflection_dir));
-                        specular_intensity = pow(specular_intensity, 10); // Shininess factor
-                        specular_color += light_colors[l] * specular_intensity * specular_coefficient;
-                    }
-                }
-
-                // Final pixel color (ambient + diffuse + specular)
-                ColorRGB pixel_color = ambient_color + diffuse_color + specular_color;
-
-                // Clamp pixel color components to [0, 255]
-                pixel_color.clamp();
-
-                // Assign pixel color to image
-                image[y][x][0] = pixel_color.R;
-                image[y][x][1] = pixel_color.G;
-                image[y][x][2] = pixel_color.B;
-            }
+            // Store pixel color in image array
+            image[y + 250][x + 250][0] = pixel_color.R; // Red component
+            image[y + 250][x + 250][1] = pixel_color.G; // Green component
+            image[y + 250][x + 250][2] = pixel_color.B; // Blue component
         }
-
-    // Update display
-    glutPostRedisplay();
+    }
 }
 
 //---------------------------------------
