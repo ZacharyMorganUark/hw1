@@ -25,6 +25,7 @@ using namespace std;
 unsigned char image[YDIM][XDIM][3];
 float position = -5;
 string mode = "phong";
+float Bounce = -1;
 const float RADIUS = 2.0;
 const int SPHERES = 2; // Only two spheres - one static, one rotating
 Sphere3D sphere[SPHERES];
