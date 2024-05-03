@@ -77,9 +77,7 @@ bool in_shadow(Point3D pt, Vector3D dir, int current, Sphere3D sphere[], int cou
    return false;
 }
 
-//---------------------------------------
 // Perform ray tracing of scene
-//---------------------------------------
 void ray_trace()
 {
    // Define camera point
@@ -147,7 +145,7 @@ void ray_trace()
                shader.GetShade(closest_p, closest_n, light_contribution);
 
                // Add up the color contribution from this light source
-               //pixel.add(light_contribution);
+               pixel.add(light_contribution);
             }
          }
          // Assign the accumulated pixel color to the image
