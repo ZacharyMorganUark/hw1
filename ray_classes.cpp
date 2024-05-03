@@ -82,6 +82,7 @@ void ColorRGB::clamp()
 }
 
 //----------------------------------------------
+//should keep colors from exceding 255 and washing out 
 void ColorRGB::normalize() {
     float max_component = std::max({R, G, B});
     if (max_component > 255) {
