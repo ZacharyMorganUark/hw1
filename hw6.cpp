@@ -289,7 +289,18 @@ void init()
 
    // Define array of spheres
    srand(time(NULL));
-   for (int s=0; s<SPHERES; s++)
+   
+   // Static red sphere in the center
+   Point3D center_static;
+   center_static.set(0, 0, RADIUS/4); // Adjust the Z-coordinate as per your requirement
+   Vector3D motion_static;
+   motion_static.set(0, 0, 0); // No motion
+   float radius_static = RADIUS/10; // Adjust the radius as per your requirement
+   sphere[0].set(center_static, motion_static, radius_static);
+   color[0].set(255, 0, 0); // Red color
+   
+   // Random spheres
+   for (int s=1; s<SPHERES; s++)
    {
       float cx = myrand(-RADIUS/2, RADIUS/2);
       float cy = myrand(-RADIUS/2, RADIUS/2);
