@@ -1,6 +1,6 @@
-//---------------------------------------
+/---------------------------------------
 // Program: ray_trace.cpp
-// Purpose: Demonstrate ray tracing with reflection.
+// Purpose: Demonstrate ray tracing.
 // Author:  John Gauch
 // Date:    Spring 2019
 //---------------------------------------
@@ -8,9 +8,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
-#include <iostream>
-#include <string>
-#include <ctime>
 #ifdef MAC
 #include <GLUT/glut.h>
 #else
@@ -28,7 +25,7 @@ using namespace std;
 unsigned char image[YDIM][XDIM][3];
 float position = -5;
 string mode = "phong";
-float Bounce = 0.5; // Reflection intensity
+float Bounce = -1;
 const float RADIUS = 2.0;
 const int SPHERES = 10;
 Sphere3D sphere[SPHERES];
@@ -83,8 +80,6 @@ bool in_shadow(Point3D pt, Vector3D dir, int current, Sphere3D sphere[], int cou
 //---------------------------------------
 // Perform ray tracing of scene
 //---------------------------------------
-void ray_trace_reflection(const Ray3D& ray, ColorRGB& color, int depth);
-
 void ray_trace()
 {
     // Define camera point
@@ -159,20 +154,6 @@ void ray_trace()
                     }
                 }
 
-                // Calculate reflection ray
-                if (Bounce > 0) {
-                    Vector3D reflected_dir = ray.dir - 2 * ray.dir.dot(closest_n) * closest_n;
-                    Ray3D reflected_ray;
-                    reflected_ray.set(closest_p, reflected_dir);
-
-                    // Trace reflection ray
-                    ColorRGB reflection_color;
-                    ray_trace_reflection(reflected_ray, reflection_color, 5); // Set the maximum reflection depth here
-
-                    // Add reflection color to pixel color
-                    pixel.add(reflection_color);
-                }
-
                 // Normalize the accumulated pixel color to prevent exceeding 255
                 if (num_contributions > 0) {
                     pixel.R /= num_contributions;
@@ -188,88 +169,6 @@ void ray_trace()
             }
         }
 }
-
-//---------------------------------------
-// Ray tracing for reflection rays
-//---------------------------------------
-void ray_trace_reflection(const Ray3D& ray, ColorRGB& color, int depth)
-{
-    if (depth <= 0) {
-        // If reached maximum recursion depth, return black
-        color.set(0, 0, 0);
-        return;
-    }
-
-    // Perform intersection test with scene objects
-    int closest = -1;
-    Point3D p, closest_p;
-    Vector3D n, closest_n;
-    closest_p.set(0, 0, ZDIM);
-    for (int s = 0; s < SPHERES; s++) {
-        if ((sphere[s].get_intersection(ray, p, n)) && (p.pz < closest_p.pz)) {
-            closest = s;
-            closest_p = p;
-            closest_n = n;
-        }
-    }
-
-    // If ray intersects with an object
-    if (closest >= 0) {
-        // Define shader
-        Phong shader;
-
-        // Calculate pixel color from all light sources
-        ColorRGB pixel;
-        int num_contributions = 0; // Track the number of contributions
-
-        for (int i = 0; i < MAX_LIGHTS; ++i) {
-            // Check if in shadow
-            bool is_in_shadow = in_shadow(closest_p, light_dirs[i], closest, sphere, SPHERES);
-
-            // Set light source for shading
-            shader.SetLight(light_colors[i], light_dirs[i]);
-
-            if (!is_in_shadow) {
-                // Set object color and shading parameters
-                shader.SetObject(color[closest], 0.4, 0.4, 0.4, 10);
-
-                // Calculate Phong shading for this light source
-                ColorRGB light_contribution;
-                shader.GetShade(closest_p, closest_n, light_contribution);
-
-                // Add up the color contribution from this light source
-                pixel.add(light_contribution);
-                num_contributions++; // Increment the number of contributions
-            }
-        }
-
-        // Calculate reflection ray
-        Vector3D reflected_dir = ray.dir - 2 * ray.dir.dot(closest_n) * closest_n;
-        Ray3D reflected_ray;
-        reflected_ray.set(closest_p, reflected_dir);
-
-        // Trace reflection ray recursively
-        ColorRGB reflection_color;
-        ray_trace_reflection(reflected_ray, reflection_color, depth - 1);
-
-        // Add reflection color to pixel color
-        pixel.add(reflection_color);
-
-        // Normalize the accumulated pixel color to prevent exceeding 255
-        if (num_contributions > 0) {
-            pixel.R /= num_contributions;
-            pixel.G /= num_contributions;
-            pixel.B /= num_contributions;
-            pixel.normalize();
-        }
-
-        color = pixel;
-    } else {
-        // If no intersection, return black
-        color.set(0, 0, 0);
-    }
-}
-
  
 //---------------------------------------
 // Init function for OpenGL
