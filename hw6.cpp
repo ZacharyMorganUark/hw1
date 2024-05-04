@@ -37,7 +37,7 @@ float rotation_radius = 5.0;
 float rotatingSphereX = 0.0; // Declare and initialize rotatingSphereX
 float rotatingSphereY = 0.0; // Declare and initialize rotatingSphereY
 Sphere3D rotatingSphere; // Declare rotatingSphere
-
+Point3D center_sphere_position;
 
 #define MAX_LIGHTS 2 // Maximum number of light sources
 std::vector<ColorRGB> light_colors(MAX_LIGHTS); // Array to store light colors
