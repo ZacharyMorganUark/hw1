@@ -37,7 +37,7 @@ ColorRGB rotatingSphereColor;
 #define CENTER_SPHERE_X 0 // X coordinate of the center sphere
 #define CENTER_SPHERE_Y 0 // Y coordinate of the center sphere
 #define ROTATION_SPEED 0.01 // Speed of rotation (adjust as needed)
-#define ORBIT_RADIUS 5.0 // Radius of the orbit around the center sphere
+#define ROTATION_RADIUS 5.0 // Radius of the orbit around the center sphere
 
 // for rotation
 float angle = 0; // Current angle of rotation
