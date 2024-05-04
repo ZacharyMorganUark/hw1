@@ -124,4 +124,12 @@ class Phong
    float Ka, Kd, Ks, Kp;
 };
 
+
+class Point3D;
+class Sphere3D;
+
+extern Point3D center_sphere_position;
+extern float rotatingSphereX;
+extern float rotatingSphereY;
+extern Sphere3D rotatingSphere;
 #endif
