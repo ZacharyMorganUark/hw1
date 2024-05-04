@@ -78,8 +78,9 @@ void update_rotating_sphere_position() {
     rotatingSphereY = center_sphere_position.py + rotation_radius * sin(rotation_angle);
 
     // Increment the angle of rotation for the next frame
-    rotation_angle += 1.4; // Adjust the rotation speed as needed
+    rotation_angle += 0.4; // Adjust the rotation speed as needed
 }
+
 
 //---------------------------------------
 // Check to see if point is in shadow
@@ -326,7 +327,7 @@ void timer(int value)
    }
 
    // Update the position of the rotating sphere
-    update_rotating_sphere_position();
+   update_rotating_sphere_position();
 
    // Calculate and display image
    ray_trace();
