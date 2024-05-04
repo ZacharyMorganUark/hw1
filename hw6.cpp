@@ -319,16 +319,19 @@ void timer(int value)
 
    // Update position of the red sphere in a circular motion around the selected sphere
    float radius = RADIUS / 2; // Adjust the radius of the circular motion
-   sphere[0].center.px = sphere[rotate_around_index].center.px + radius * cos(angle);
-   sphere[0].center.py = sphere[rotate_around_index].center.py + radius * sin(angle);
-   sphere[0].center.pz = sphere[rotate_around_index].center.pz;
+   float center_x = sphere[rotate_around_index].center.px;
+   float center_y = sphere[rotate_around_index].center.py;
+   float center_z = sphere[rotate_around_index].center.pz;
+   float orbit_x = center_x + radius * cos(angle);
+   float orbit_y = center_y + radius * sin(angle);
+   float orbit_z = center_z;
+   sphere[0].center.set(orbit_x, orbit_y, orbit_z);
 
    // Calculate and display image
    ray_trace();
    glutPostRedisplay();
    glutTimerFunc(10, timer, value + 1); // Increase value for continuous rotation
 }
-
 
 //---------------------------------------
 // Main program
