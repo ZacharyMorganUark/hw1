@@ -316,6 +316,9 @@ void timer(int value)
    rotatingSphere.center.px = x; // Set new x position
    rotatingSphere.center.py = y; // Set new y position
 
+   // Debug print statements
+   cout << "Rotating Sphere Position: (" << x << ", " << y << ")" << endl;
+
    // Calculate and display image
    ray_trace();
    glutPostRedisplay();
