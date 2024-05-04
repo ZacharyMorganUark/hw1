@@ -161,7 +161,7 @@ void ray_trace()
                     pixel.R /= num_contributions;
                     pixel.G /= num_contributions;
                     pixel.B /= num_contributions;
-                    pixel.normalize();
+                    pixel.clamp(); // Clamp the RGB values to ensure they're within [0, 255]
                 }
 
                 // Assign the accumulated pixel color to the image
