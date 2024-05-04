@@ -91,7 +91,7 @@ bool in_shadow(Point3D pt, Vector3D dir, int current, Sphere3D sphere[], int cou
 //---------------------------------------
 // Perform ray tracing of scene
 //---------------------------------------
-void ray_trace()
+void ray_trace(float angle, float position)
 {
     // Define camera point
     Point3D camera;
@@ -102,6 +102,12 @@ void ray_trace()
 
     // Define shader
     Phong shader;
+
+    // Update rotating sphere position
+    float x = CENTER_SPHERE_X + ROTATION_RADIUS * cos(angle); // Calculate x position relative to center
+    float y = CENTER_SPHERE_Y + ROTATION_RADIUS * sin(angle); // Calculate y position relative to center
+    rotatingSphere.center.px = x; // Set new x position
+    rotatingSphere.center.py = y; // Set new y position
 
     // Perform ray tracing
     for (int y = 0; y < YDIM; y++)
@@ -320,7 +326,7 @@ void timer(int value)
    cout << "Angle: " << angle << endl;
 
    // Calculate and display image
-   ray_trace();
+   ray_trace(angle, position);
    glutPostRedisplay();
    glutTimerFunc(10, timer, 0);
 }
