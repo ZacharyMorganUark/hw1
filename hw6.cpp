@@ -1,8 +1,8 @@
 //---------------------------------------
-// Program: ray_trace.cpp
+// Program: ray_trace3.cpp used as skelton
 // Purpose: Demonstrate ray tracing.
-// Author:  John Gauch
-// Date:    Spring 2019
+// Author:  Zachary Morgan
+// Date:    4 May 2024
 //---------------------------------------
 #include <cmath>
 #include <cstdio>
@@ -47,14 +47,14 @@ float myrand(float min, float max)
 
 // Function to initialize light sources
 void init_lights() {
-    // Initialize light sources here with appropriate colors and directions
+    // Initialize light sources colors and directions
     light_colors[0].set(255, 255, 255); // White light
     light_dirs[0].set(1, -1, -1); // Directional light from top-right
 
     light_colors[1].set(255, 255, 255);
     light_dirs[1].set(-1, 1, -1); // Directional light from bottom-left
 
-    // Ensure to normalize the light directions
+    // normalize the light directions
     for (int i = 0; i < MAX_LIGHTS; ++i) {
         light_dirs[i].normalize();
     }
@@ -95,7 +95,7 @@ void ray_trace()
     Phong shader;
 
     // Maximum number of contributions per pixel
-    const int MAX_CONTRIBUTIONS = 4; // Adjust this value as needed
+    const int MAX_CONTRIBUTIONS = 4; // 
 
     // Perform ray tracing
     for (int y = 0; y < YDIM; y++)
@@ -168,7 +168,7 @@ void ray_trace()
                     pixel.R /= num_contributions;
                     pixel.G /= num_contributions;
                     pixel.B /= num_contributions;
-                    pixel.clamp(); // Clamp the RGB values to ensure they're within [0, 255]
+                    pixel.clamp(); // Clamp the RGB values to ensure they're within 0-255
                 }
 
                 // Assign the accumulated pixel color to the image
@@ -313,7 +313,6 @@ void timer(int value)
           sphere[i].motion.vz *= Bounce; }
    }
 
-   // If the index of the sphere around which the red sphere rotates is not set or is out of range,
    // randomly select a sphere and set it as the rotation target.
    if (rotate_around_index == -1 || rotate_around_index >= SPHERES) {
        rotate_around_index = rand() % SPHERES;
@@ -322,11 +321,11 @@ void timer(int value)
        }
    }
 
-   // Calculate rotation angle (adjust the factor as needed for desired speed)
-   float angle = value * 0.45; // Increase the rotation speed
+   // Calculate rotation angle 
+   float angle = value * 0.45; // rotation speed
 
    // Update position of the red sphere in a circular motion around the selected sphere
-   float radius = RADIUS / 4; // Decrease the orbit radius for closer orbit
+   float radius = RADIUS / 4; // orbit radius
    float orbit_x = sphere[rotate_around_index].center.px + radius * cos(angle);
    float orbit_y = sphere[rotate_around_index].center.py + radius * sin(angle);
    float orbit_z = sphere[rotate_around_index].center.pz;
@@ -335,7 +334,7 @@ void timer(int value)
    // Calculate and display image
    ray_trace();
    glutPostRedisplay();
-   glutTimerFunc(10, timer, value + 1); // Increase value for continuous rotation
+   glutTimerFunc(10, timer, value + 1); 
 }
 
 //---------------------------------------
@@ -348,7 +347,7 @@ int main(int argc, char *argv[])
    glutInitWindowSize(XDIM, YDIM);
    glutInitWindowPosition(0, 0);
    glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
-   glutCreateWindow("Ray Trace");
+   glutCreateWindow("Ray Trace Assignment 6");
    init();
 
    // Specify callback function
