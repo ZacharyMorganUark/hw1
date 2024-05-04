@@ -318,6 +318,7 @@ void timer(int value)
 
    // Debug print statements
    cout << "Rotating Sphere Position: (" << x << ", " << y << ")" << endl;
+   cout << "Angle: " << angle << endl;
 
    // Calculate and display image
    ray_trace();
