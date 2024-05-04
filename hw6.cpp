@@ -30,7 +30,11 @@ const float RADIUS = 2.0;
 const int SPHERES = 10;
 Sphere3D sphere[SPHERES];
 ColorRGB color[SPHERES];
-// Global variables
+
+float animation_radius = 5.0; // Radius of circular path
+float animation_speed = 0.1;  // Speed of rotation
+float animation_angle = 0.0;  // Current angle of rotation
+
 #define MAX_LIGHTS 2 // Maximum number of light sources
 std::vector<ColorRGB> light_colors(MAX_LIGHTS); // Array to store light colors
 std::vector<Vector3D> light_dirs(MAX_LIGHTS); // Array to store light directions
