@@ -315,10 +315,10 @@ void timer(int value)
    }
 
    // Calculate rotation angle (adjust the factor as needed for desired speed)
-   float angle = value * 0.01;
+   float angle = value * 0.45; // Increase the rotation speed
 
    // Update position of the red sphere in a circular motion around the selected sphere
-   float radius = RADIUS / 2; // Adjust the radius of the circular motion
+   float radius = RADIUS / 4; // Decrease the orbit radius for closer orbit
    float orbit_x = sphere[rotate_around_index].center.px + radius * cos(angle);
    float orbit_y = sphere[rotate_around_index].center.py + radius * sin(angle);
    float orbit_z = sphere[rotate_around_index].center.pz;
