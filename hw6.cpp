@@ -301,13 +301,27 @@ void timer(int value)
       if (sphere[i].center.pz < -RADIUS/2 + sphere[i].radius) 
          {sphere[i].center.pz = -RADIUS/2 + sphere[i].radius; 
           sphere[i].motion.vz *= Bounce; }
-
    }
+
+   // Randomly select a sphere around which the red sphere will rotate
+   int rotate_around = rand() % SPHERES;
+   while (rotate_around == 0) { // Ensure the red sphere doesn't rotate around itself
+       rotate_around = rand() % SPHERES;
+   }
+
+   // Calculate rotation angle (adjust the factor as needed for desired speed)
+   float angle = value * 0.01;
+
+   // Update position of the red sphere in a circular motion around the selected sphere
+   float radius = RADIUS / 2; // Adjust the radius of the circular motion
+   sphere[0].center.px = sphere[rotate_around].center.px + radius * cos(angle);
+   sphere[0].center.py = sphere[rotate_around].center.py + radius * sin(angle);
+   sphere[0].center.pz = sphere[rotate_around].center.pz;
 
    // Calculate and display image
    ray_trace();
    glutPostRedisplay();
-   glutTimerFunc(10, timer, 0);
+   glutTimerFunc(10, timer, value + 1); // Increase value for continuous rotation
 }
 
 
