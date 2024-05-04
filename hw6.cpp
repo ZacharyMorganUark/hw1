@@ -233,7 +233,7 @@ void init()
 
    // Perform ray tracing
    cout << "camera: 0,0," << position << endl;
-   ray_trace();
+   ray_trace(angle, position);
 }
 
 //---------------------------------------
@@ -275,7 +275,7 @@ void keyboard(unsigned char key, int x, int y)
       mode = "phong";
 
    // Perform ray tracing
-   ray_trace();
+   ray_trace(angle, position);
    glutPostRedisplay();
 }
 
