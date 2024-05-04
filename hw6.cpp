@@ -1,4 +1,4 @@
-/---------------------------------------
+//---------------------------------------
 // Program: ray_trace.cpp
 // Purpose: Demonstrate ray tracing.
 // Author:  John Gauch
