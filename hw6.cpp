@@ -30,7 +30,9 @@ const float RADIUS = 2.0;
 const int SPHERES = 10;
 Sphere3D sphere[SPHERES];
 ColorRGB color[SPHERES];
-// Global variables
+
+int rotate_around_index = -1;
+
 #define MAX_LIGHTS 2 // Maximum number of light sources
 std::vector<ColorRGB> light_colors(MAX_LIGHTS); // Array to store light colors
 std::vector<Vector3D> light_dirs(MAX_LIGHTS); // Array to store light directions
@@ -303,10 +305,13 @@ void timer(int value)
           sphere[i].motion.vz *= Bounce; }
    }
 
-   // Randomly select a sphere around which the red sphere will rotate
-   int rotate_around = rand() % SPHERES;
-   while (rotate_around == 0) { // Ensure the red sphere doesn't rotate around itself
-       rotate_around = rand() % SPHERES;
+   // If the index of the sphere around which the red sphere rotates is not set or is out of range,
+   // randomly select a sphere and set it as the rotation target.
+   if (rotate_around_index == -1 || rotate_around_index >= SPHERES) {
+       rotate_around_index = rand() % SPHERES;
+       while (rotate_around_index == 0) { // Ensure the red sphere doesn't rotate around itself
+           rotate_around_index = rand() % SPHERES;
+       }
    }
 
    // Calculate rotation angle (adjust the factor as needed for desired speed)
@@ -314,9 +319,9 @@ void timer(int value)
 
    // Update position of the red sphere in a circular motion around the selected sphere
    float radius = RADIUS / 2; // Adjust the radius of the circular motion
-   sphere[0].center.px = sphere[rotate_around].center.px + radius * cos(angle);
-   sphere[0].center.py = sphere[rotate_around].center.py + radius * sin(angle);
-   sphere[0].center.pz = sphere[rotate_around].center.pz;
+   sphere[0].center.px = sphere[rotate_around_index].center.px + radius * cos(angle);
+   sphere[0].center.py = sphere[rotate_around_index].center.py + radius * sin(angle);
+   sphere[0].center.pz = sphere[rotate_around_index].center.pz;
 
    // Calculate and display image
    ray_trace();
