@@ -51,7 +51,7 @@ void init_lights() {
     light_colors[0].set(255, 255, 255); // White light
     light_dirs[0].set(1, -1, -1); // Directional light from top-right
 
-    light_colors[1].set(255, 255, 255); // Red light
+    light_colors[1].set(255, 255, 255);
     light_dirs[1].set(-1, 1, -1); // Directional light from bottom-left
 
     // Ensure to normalize the light directions
@@ -86,7 +86,7 @@ void ray_trace()
 {
     // Define camera point
     Point3D camera;
-    camera.set(0,0,position);
+    camera.set(0, 0, position);
 
     // Define light sources
     init_lights();
@@ -94,8 +94,12 @@ void ray_trace()
     // Define shader
     Phong shader;
 
+    // Maximum number of contributions per pixel
+    const int MAX_CONTRIBUTIONS = 4; // Adjust this value as needed
+
     // Perform ray tracing
     for (int y = 0; y < YDIM; y++)
+    {
         for (int x = 0; x < XDIM; x++)
         {
             // Clear image
@@ -104,8 +108,8 @@ void ray_trace()
             image[y][x][2] = 0;
 
             // Define sample point on image plane
-            float xpos = (x - XDIM/2) * 2.0 / XDIM;
-            float ypos = (y - YDIM/2) * 2.0 / YDIM;
+            float xpos = (x - XDIM / 2) * 2.0 / XDIM;
+            float ypos = (y - YDIM / 2) * 2.0 / YDIM;
             Point3D point;
             point.set(xpos, ypos, 0);
 
@@ -117,8 +121,8 @@ void ray_trace()
             int closest = -1;
             Point3D p, closest_p;
             Vector3D n, closest_n;
-            closest_p.set(0,0,ZDIM);
-            for (int s=0; s<SPHERES; s++)
+            closest_p.set(0, 0, ZDIM);
+            for (int s = 0; s < SPHERES; s++)
             {
                 if ((sphere[s].get_intersection(ray, p, n)) && (p.pz < closest_p.pz))
                 {
@@ -135,14 +139,16 @@ void ray_trace()
                 ColorRGB pixel;
                 int num_contributions = 0; // Track the number of contributions
 
-                for (int i = 0; i < MAX_LIGHTS; ++i) {
+                for (int i = 0; i < MAX_LIGHTS && num_contributions < MAX_CONTRIBUTIONS; ++i)
+                {
                     // Check if in shadow
                     bool is_in_shadow = in_shadow(closest_p, light_dirs[i], closest, sphere, SPHERES);
 
                     // Set light source for shading
                     shader.SetLight(light_colors[i], light_dirs[i]);
 
-                    if (!is_in_shadow) {
+                    if (!is_in_shadow)
+                    {
                         // Set object color and shading parameters
                         shader.SetObject(color[closest], 0.4, 0.4, 0.4, 10);
 
@@ -157,7 +163,8 @@ void ray_trace()
                 }
 
                 // Normalize the accumulated pixel color to prevent exceeding 255
-                if (num_contributions > 0) {
+                if (num_contributions > 0)
+                {
                     pixel.R /= num_contributions;
                     pixel.G /= num_contributions;
                     pixel.B /= num_contributions;
@@ -170,6 +177,7 @@ void ray_trace()
                 image[y][x][2] = pixel.B;
             }
         }
+    }
 }
  
 //---------------------------------------
@@ -191,12 +199,12 @@ void init()
    // Define array of spheres
    srand(time(NULL));
    
-   // Static red sphere in the center
+   // Rotating sphere
    Point3D center_static;
-   center_static.set(0, 0, RADIUS/4); // Adjust the Z-coordinate as per your requirement
+   center_static.set(0, 0, RADIUS/4);//starting location
    Vector3D motion_static;
-   motion_static.set(0, 0, 0); // No motion
-   float radius_static = RADIUS/10; // Adjust the radius as per your requirement
+   motion_static.set(0, 0, 0); 
+   float radius_static = RADIUS/10; // radius of sphere rotation
    sphere[0].set(center_static, motion_static, radius_static);
    color[0].set(255, 0, 0); // Red color
    
