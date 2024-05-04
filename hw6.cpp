@@ -310,14 +310,10 @@ void timer(int value)
    }
 
    // Update rotating sphere position
-   float angle = value * ROTATION_SPEED; // Adjust rotation speed as needed
-   float x = CENTER_SPHERE_X + ROTATION_RADIUS * cos(angle); // Calculate x position relative to center
-   float y = CENTER_SPHERE_Y + ROTATION_RADIUS * sin(angle); // Calculate y position relative to center
-   rotatingSphere.center.px = x; // Set new x position
-   rotatingSphere.center.py = y; // Set new y position
+   angle += ROTATION_SPEED; // Increment the global angle variable
 
    // Debug print statements
-   cout << "Rotating Sphere Position: (" << x << ", " << y << ")" << endl;
+   cout << "Rotating Sphere Position: (" << rotatingSphere.center.px << ", " << rotatingSphere.center.py << ")" << endl;
    cout << "Angle: " << angle << endl;
 
    // Calculate and display image
