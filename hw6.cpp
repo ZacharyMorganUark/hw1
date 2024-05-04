@@ -32,7 +32,7 @@ Sphere3D sphere[SPHERES];
 ColorRGB color[SPHERES];
 
 float animation_radius = 10.0; // Radius of circular path
-float animation_speed = 0.9;  // Speed of rotation
+float animation_speed = 2.0;  // Speed of rotation
 float animation_angle = 0.0;  // Current angle of rotation
 
 #define MAX_LIGHTS 2 // Maximum number of light sources
@@ -223,30 +223,10 @@ void init()
 //---------------------------------------
 void display()
 {
-   // Clear color buffer and depth buffer
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-   // Set up projection matrix
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   gluPerspective(45.0, (float)XDIM / (float)YDIM, 0.1, 100.0); // Adjust the perspective as needed
-
-   // Set up modelview matrix
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
-   gluLookAt(0.0, 0.0, -5.0,  // Camera position
-             0.0, 0.0, 0.0,   // Look-at position
-             0.0, 1.0, 0.0);  // Up vector
-
-   // Draw the rotating sphere
-   glColor3f(1.0f, 1.0f, 1.0f); // Set color to white
-   glPushMatrix(); // Save current transformation matrix
-   glTranslatef(sphere[0].center.px, sphere[0].center.py, sphere[0].center.pz); // Translate to animated sphere's position
-   glutWireSphere(sphere[0].radius, 20, 20); // Draw wireframe sphere
-   glPopMatrix(); // Restore previous transformation matrix
-   
-   // Swap buffers to display the rendered image
-   glutSwapBuffers();
+   // Display image
+   glClear(GL_COLOR_BUFFER_BIT);
+   glDrawPixels(XDIM, YDIM, GL_RGB, GL_UNSIGNED_BYTE, image);
+   glFlush();
 }
 
 //---------------------------------------
