@@ -31,18 +31,11 @@ const int SPHERES = 10;
 Sphere3D sphere[SPHERES];
 ColorRGB color[SPHERES];
 
-Sphere3D rotatingSphere;
-ColorRGB rotatingSphereColor;
-#define CENTER_SPHERE_INDEX 0 // Index of the center sphere in the sphere array
-#define CENTER_SPHERE_X 0 // X coordinate of the center sphere
-#define CENTER_SPHERE_Y 0 // Y coordinate of the center sphere
-#define ROTATION_SPEED 0.5 // Speed of rotation (adjust as needed)
-#define ROTATION_RADIUS 5.0 // Radius of the orbit around the center sphere
+// Global variables for rotating sphere
+float rotation_angle = 0.0;
+float rotation_radius = 5.0; // Adjust as needed
+Point3D center_sphere_position(0, 0, 0); // Position of the center sphere
 
-// for rotation
-float angle = 0; // Current angle of rotation
-float rotatingSphereX = 0; // X position of the rotating sphere
-float rotatingSphereY = 0; // Y position of the rotating sphere
 
 #define MAX_LIGHTS 2 // Maximum number of light sources
 std::vector<ColorRGB> light_colors(MAX_LIGHTS); // Array to store light colors
@@ -56,7 +49,10 @@ float myrand(float min, float max)
    return rand() * (max - min) / RAND_MAX + min;
 }
 
+
+//---------------------------------------
 // Function to initialize light sources
+//---------------------------------------
 void init_lights() {
     // Initialize light sources here with appropriate colors and directions
     light_colors[0].set(255, 255, 255); // White light
@@ -69,6 +65,18 @@ void init_lights() {
     for (int i = 0; i < MAX_LIGHTS; ++i) {
         light_dirs[i].normalize();
     }
+}
+
+//---------------------------------------
+// Function to update the position of the rotating sphere
+//---------------------------------------
+void update_rotating_sphere_position() {
+    // Calculate the new position of the rotating sphere based on the angle of rotation
+    rotatingSphereX = center_sphere_position.px + rotation_radius * cos(rotation_angle);
+    rotatingSphereY = center_sphere_position.py + rotation_radius * sin(rotation_angle);
+
+    // Increment the angle of rotation for the next frame
+    rotation_angle += 0.01; // Adjust the rotation speed as needed
 }
 
 //---------------------------------------
@@ -173,13 +181,16 @@ void ray_trace()
 
                 // Normalize the accumulated pixel color to prevent exceeding 255
                 if (num_contributions > 0) {
-                    pixel.normalize(); // Normalize the color here
-
-                    // Assign the normalized pixel color to the image
-                    image[y][x][0] = static_cast<unsigned char>(pixel.R);
-                    image[y][x][1] = static_cast<unsigned char>(pixel.G);
-                    image[y][x][2] = static_cast<unsigned char>(pixel.B);
+                    pixel.R /= num_contributions;
+                    pixel.G /= num_contributions;
+                    pixel.B /= num_contributions;
+                    pixel.normalize();
                 }
+
+                // Assign the accumulated pixel color to the image
+                image[y][x][0] = pixel.R;
+                image[y][x][1] = pixel.G;
+                image[y][x][2] = pixel.B;
             }
         }
 }
@@ -222,11 +233,6 @@ void init()
       int B = rand() % 255;
       color[s].set(R,G,B);
    }
-
-   // Initialize the rotating sphere
-   rotatingSphere.center.set(0, 0, 0); // Set the initial position of the rotating sphere
-   rotatingSphere.radius = 1.0; // Set the radius of the rotating sphere
-   rotatingSphereColor.set(255, 0, 0); // Set the color of the rotating sphere 
 
    // Perform ray tracing
    cout << "camera: 0,0," << position << endl;
@@ -281,11 +287,9 @@ void keyboard(unsigned char key, int x, int y)
 //---------------------------------------
 void timer(int value)
 {
-   // Get elapsed time since the program started
-   int elapsed_time = glutGet(GLUT_ELAPSED_TIME);
-
    // Move bouncing balls
-   for (int i = 0; i < SPHERES; i++)
+   int i;
+   for (i = 0; i < SPHERES; i++)
    {
       // Update ball position
       sphere[i].center.px += sphere[i].motion.vx;
@@ -314,20 +318,15 @@ void timer(int value)
 
    }
 
-   // Update rotating sphere position
-   float angle_rad = elapsed_time * ROTATION_SPEED * 3.14159 / 180.0;
-   rotatingSphereX = CENTER_SPHERE_X + ROTATION_RADIUS * cos(angle_rad);
-   rotatingSphereY = CENTER_SPHERE_Y + ROTATION_RADIUS * sin(angle_rad);
-
-   // Debug print statements
-   cout << "Current Angle of Rotation: " << angle_rad << " radians" << endl;
-   cout << "Rotating Sphere Position: (" << rotatingSphereX << ", " << rotatingSphereY << ")" << endl;
+   // Update the position of the rotating sphere
+    update_rotating_sphere_position();
 
    // Calculate and display image
    ray_trace();
    glutPostRedisplay();
    glutTimerFunc(10, timer, 0);
 }
+
 
 //---------------------------------------
 // Main program
