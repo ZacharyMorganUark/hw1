@@ -41,6 +41,8 @@ ColorRGB rotatingSphereColor;
 
 // for rotation
 float angle = 0; // Current angle of rotation
+float rotatingSphereX = 0; // X position of the rotating sphere
+float rotatingSphereY = 0; // Y position of the rotating sphere
 
 #define MAX_LIGHTS 2 // Maximum number of light sources
 std::vector<ColorRGB> light_colors(MAX_LIGHTS); // Array to store light colors
@@ -91,7 +93,7 @@ bool in_shadow(Point3D pt, Vector3D dir, int current, Sphere3D sphere[], int cou
 //---------------------------------------
 // Perform ray tracing of scene
 //---------------------------------------
-void ray_trace(float angle, float position)
+void ray_trace()
 {
     // Define camera point
     Point3D camera;
@@ -104,10 +106,8 @@ void ray_trace(float angle, float position)
     Phong shader;
 
     // Update rotating sphere position
-    float x = CENTER_SPHERE_X + ROTATION_RADIUS * cos(angle); // Calculate x position relative to center
-    float y = CENTER_SPHERE_Y + ROTATION_RADIUS * sin(angle); // Calculate y position relative to center
-    rotatingSphere.center.px = x; // Set new x position
-    rotatingSphere.center.py = y; // Set new y position
+    rotatingSphere.center.px = rotatingSphereX;
+    rotatingSphere.center.py = rotatingSphereY;
 
     // Perform ray tracing
     for (int y = 0; y < YDIM; y++)
@@ -233,7 +233,7 @@ void init()
 
    // Perform ray tracing
    cout << "camera: 0,0," << position << endl;
-   ray_trace(angle, position);
+   ray_trace();
 }
 
 //---------------------------------------
@@ -275,7 +275,7 @@ void keyboard(unsigned char key, int x, int y)
       mode = "phong";
 
    // Perform ray tracing
-   ray_trace(angle, position);
+   ray_trace();
    glutPostRedisplay();
 }
 
@@ -316,17 +316,16 @@ void timer(int value)
    }
 
    // Update rotating sphere position
-   float x = CENTER_SPHERE_X + ROTATION_RADIUS * cos(angle); // Calculate x position relative to center
-   float y = CENTER_SPHERE_Y + ROTATION_RADIUS * sin(angle); // Calculate y position relative to center
-   rotatingSphere.center.px = x; // Set new x position
-   rotatingSphere.center.py = y; // Set new y position
+    float angle_rad = value * ROTATION_SPEED * 3.14159 / 180.0;
+    rotatingSphereX = CENTER_SPHERE_X + ROTATION_RADIUS * cos(angle_rad);
+    rotatingSphereY = CENTER_SPHERE_Y + ROTATION_RADIUS * sin(angle_rad);
 
-   // Debug print statements
-   cout << "Rotating Sphere Position: (" << rotatingSphere.center.px << ", " << rotatingSphere.center.py << ")" << endl;
-   cout << "Angle: " << angle << endl;
+    // Debug print statements
+    cout << "Current Angle of Rotation: " << angle_rad << " radians" << endl;
+    cout << "Rotating Sphere Position: (" << rotatingSphereX << ", " << rotatingSphereY << ")" << endl;
 
    // Calculate and display image
-   ray_trace(angle, position);
+   ray_trace();
    glutPostRedisplay();
    glutTimerFunc(10, timer, 0);
 }
