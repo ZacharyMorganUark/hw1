@@ -226,11 +226,14 @@ void display()
    // Clear color buffer and depth buffer
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+   // Set up projection matrix
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   gluPerspective(45.0, (float)XDIM / (float)YDIM, 0.1, 100.0); // Adjust the perspective as needed
+
    // Set up modelview matrix
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
-
-   // Set camera position
    gluLookAt(0.0, 0.0, -5.0,  // Camera position
              0.0, 0.0, 0.0,   // Look-at position
              0.0, 1.0, 0.0);  // Up vector
