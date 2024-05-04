@@ -31,9 +31,14 @@ const int SPHERES = 10;
 Sphere3D sphere[SPHERES];
 ColorRGB color[SPHERES];
 
-float animation_radius = 5.0; // Radius of circular path
-float animation_speed = 5.0;  // Speed of rotation
-float animation_angle = 0.0;  // Current angle of rotation
+#define CENTER_SPHERE_INDEX 0 // Index of the center sphere in the sphere array
+#define CENTER_SPHERE_X 0 // X coordinate of the center sphere
+#define CENTER_SPHERE_Y 0 // Y coordinate of the center sphere
+#define ROTATION_SPEED 0.01 // Speed of rotation (adjust as needed)
+#define ORBIT_RADIUS 5.0 // Radius of the orbit around the center sphere
+
+// for rotation
+float angle = 0; // Current angle of rotation
 
 #define MAX_LIGHTS 2 // Maximum number of light sources
 std::vector<ColorRGB> light_colors(MAX_LIGHTS); // Array to store light colors
@@ -261,58 +266,28 @@ void keyboard(unsigned char key, int x, int y)
    glutPostRedisplay();
 }
 
-//---------------------------------------
-// Timer callback for OpenGL
-//---------------------------------------
 void timer(int value)
 {
-   // Update animation angle for the rotating sphere
-   animation_angle += animation_speed;
-
-   // Calculate the position of the rotating sphere based on the angle
-   float orbit_radius = 5.0; // Radius of the orbit
-   float orbit_center_x = 0.0; // X-coordinate of the center of the orbit
-   float orbit_center_y = 0.0; // Y-coordinate of the center of the orbit
-   float rotating_sphere_x = orbit_center_x + orbit_radius * cos(animation_angle);
-   float rotating_sphere_y = orbit_center_y + orbit_radius * sin(animation_angle);
-
-   // Update the position of the rotating sphere
-   sphere[0].center.px = rotating_sphere_x;
-   sphere[0].center.py = rotating_sphere_y;
-
    // Move bouncing balls
-   for (int i = 1; i < SPHERES; i++)
+   for (int i = 0; i < SPHERES; i++)
    {
       // Update ball position
-      sphere[i].center.px += sphere[i].motion.vx;
-      sphere[i].center.py += sphere[i].motion.vy;
-      sphere[i].center.pz += sphere[i].motion.vz;
-
-      // Bounce off walls
-      if (sphere[i].center.px > RADIUS/2 - sphere[i].radius) 
-         {sphere[i].center.px = RADIUS/2 - sphere[i].radius; 
-          sphere[i].motion.vx *= Bounce; }
-      if (sphere[i].center.py > RADIUS/2 - sphere[i].radius) 
-         {sphere[i].center.py = RADIUS/2 - sphere[i].radius; 
-          sphere[i].motion.vy *= Bounce; }
-      if (sphere[i].center.pz > RADIUS/2 - sphere[i].radius) 
-         {sphere[i].center.pz = RADIUS/2 - sphere[i].radius; 
-          sphere[i].motion.vz *= Bounce; }
-      if (sphere[i].center.px < -RADIUS/2 + sphere[i].radius) 
-         {sphere[i].center.px = -RADIUS/2 + sphere[i].radius; 
-          sphere[i].motion.vx *= Bounce; }
-      if (sphere[i].center.py < -RADIUS/2 + sphere[i].radius) 
-         {sphere[i].center.py = -RADIUS/2 + sphere[i].radius; 
-          sphere[i].motion.vy *= Bounce; }
-      if (sphere[i].center.pz < -RADIUS/2 + sphere[i].radius) 
-         {sphere[i].center.pz = -RADIUS/2 + sphere[i].radius; 
-          sphere[i].motion.vz *= Bounce; }
+      if (i != CENTER_SPHERE_INDEX) { // Skip updating the center sphere
+         // Calculate the angle for the orbit
+         float angle = value * ROTATION_SPEED; // Adjust rotation speed as needed
+         // Calculate new position of the rotating sphere around the center sphere
+         float x = CENTER_SPHERE_X + ORBIT_RADIUS * cos(angle);
+         float y = CENTER_SPHERE_Y + ORBIT_RADIUS * sin(angle);
+         // Set the new position of the rotating sphere
+         sphere[i].center.px = x;
+         sphere[i].center.py = y;
+      }
    }
 
    // Calculate and display image
    ray_trace();
    glutPostRedisplay();
-   glutTimerFunc(10, timer, 0);
+   glutTimerFunc(10, timer, value + 1);
 }
 
 
