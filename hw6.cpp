@@ -1,6 +1,6 @@
 //---------------------------------------
 // Program: ray_trace.cpp
-// Purpose: Demonstrate ray tracing.
+// Purpose: Demonstrate ray tracing with reflection.
 // Author:  John Gauch
 // Date:    Spring 2019
 //---------------------------------------
@@ -8,6 +8,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
+#include <iostream>
+#include <string>
+#include <ctime>
 #ifdef MAC
 #include <GLUT/glut.h>
 #else
@@ -25,20 +28,12 @@ using namespace std;
 unsigned char image[YDIM][XDIM][3];
 float position = -5;
 string mode = "phong";
-float Bounce = -1;
+float Bounce = 0.5; // Reflection intensity
 const float RADIUS = 2.0;
 const int SPHERES = 10;
 Sphere3D sphere[SPHERES];
 ColorRGB color[SPHERES];
-
-// Global variables for circular motion
-float rotation_angle = 0.0;
-float rotation_radius = 5.0;
-float rotatingSphereX = 0.0; // Declare and initialize rotatingSphereX
-float rotatingSphereY = 0.0; // Declare and initialize rotatingSphereY
-Sphere3D rotatingSphere; // Declare rotatingSphere
-Point3D center_sphere_position;
-
+// Global variables
 #define MAX_LIGHTS 2 // Maximum number of light sources
 std::vector<ColorRGB> light_colors(MAX_LIGHTS); // Array to store light colors
 std::vector<Vector3D> light_dirs(MAX_LIGHTS); // Array to store light directions
@@ -51,10 +46,7 @@ float myrand(float min, float max)
    return rand() * (max - min) / RAND_MAX + min;
 }
 
-
-//---------------------------------------
 // Function to initialize light sources
-//---------------------------------------
 void init_lights() {
     // Initialize light sources here with appropriate colors and directions
     light_colors[0].set(255, 255, 255); // White light
@@ -68,19 +60,6 @@ void init_lights() {
         light_dirs[i].normalize();
     }
 }
-
-//---------------------------------------
-// Function to update the position of the rotating sphere
-//---------------------------------------
-void update_rotating_sphere_position() {
-    // Calculate the new position of the rotating sphere based on the angle of rotation
-    rotatingSphereX = center_sphere_position.px + rotation_radius * cos(rotation_angle);
-    rotatingSphereY = center_sphere_position.py + rotation_radius * sin(rotation_angle);
-
-    // Increment the angle of rotation for the next frame
-    rotation_angle += 0.4; // Adjust the rotation speed as needed
-}
-
 
 //---------------------------------------
 // Check to see if point is in shadow
@@ -101,10 +80,11 @@ bool in_shadow(Point3D pt, Vector3D dir, int current, Sphere3D sphere[], int cou
    return false;
 }
 
-
 //---------------------------------------
 // Perform ray tracing of scene
 //---------------------------------------
+void ray_trace_reflection(const Ray3D& ray, ColorRGB& color, int depth);
+
 void ray_trace()
 {
     // Define camera point
@@ -117,13 +97,10 @@ void ray_trace()
     // Define shader
     Phong shader;
 
-    // Update rotating sphere position
-    rotatingSphere.center.px = rotatingSphereX;
-    rotatingSphere.center.py = rotatingSphereY;
-
     // Perform ray tracing
-    for (int y = 0; y < YDIM; y++) {
-        for (int x = 0; x < XDIM; x++) {
+    for (int y = 0; y < YDIM; y++)
+        for (int x = 0; x < XDIM; x++)
+        {
             // Clear image
             image[y][x][0] = 0;
             image[y][x][1] = 0;
@@ -143,9 +120,11 @@ void ray_trace()
             int closest = -1;
             Point3D p, closest_p;
             Vector3D n, closest_n;
-            closest_p.set(0, 0, ZDIM);
-            for (int s = 0; s < SPHERES; s++) {
-                if ((sphere[s].get_intersection(ray, p, n)) && (p.pz < closest_p.pz)) {
+            closest_p.set(0,0,ZDIM);
+            for (int s=0; s<SPHERES; s++)
+            {
+                if ((sphere[s].get_intersection(ray, p, n)) && (p.pz < closest_p.pz))
+                {
                     closest = s;
                     closest_p = p;
                     closest_n = n;
@@ -153,7 +132,8 @@ void ray_trace()
             }
 
             // Calculate pixel color
-            if (closest >= 0) {
+            if (closest >= 0)
+            {
                 // Calculate pixel color from all light sources
                 ColorRGB pixel;
                 int num_contributions = 0; // Track the number of contributions
@@ -167,11 +147,7 @@ void ray_trace()
 
                     if (!is_in_shadow) {
                         // Set object color and shading parameters
-                        if (closest == SPHERES - 1) { // If the closest sphere is the rotating one
-                            shader.SetObject(color[SPHERES], 0.4, 0.4, 0.4, 10); // Set its color to red
-                        } else {
-                            shader.SetObject(color[closest], 0.4, 0.4, 0.4, 10);
-                        }
+                        shader.SetObject(color[closest], 0.4, 0.4, 0.4, 10);
 
                         // Calculate Phong shading for this light source
                         ColorRGB light_contribution;
@@ -181,6 +157,20 @@ void ray_trace()
                         pixel.add(light_contribution);
                         num_contributions++; // Increment the number of contributions
                     }
+                }
+
+                // Calculate reflection ray
+                if (Bounce > 0) {
+                    Vector3D reflected_dir = ray.dir - 2 * ray.dir.dot(closest_n) * closest_n;
+                    Ray3D reflected_ray;
+                    reflected_ray.set(closest_p, reflected_dir);
+
+                    // Trace reflection ray
+                    ColorRGB reflection_color;
+                    ray_trace_reflection(reflected_ray, reflection_color, 5); // Set the maximum reflection depth here
+
+                    // Add reflection color to pixel color
+                    pixel.add(reflection_color);
                 }
 
                 // Normalize the accumulated pixel color to prevent exceeding 255
@@ -197,8 +187,89 @@ void ray_trace()
                 image[y][x][2] = pixel.B;
             }
         }
+}
+
+//---------------------------------------
+// Ray tracing for reflection rays
+//---------------------------------------
+void ray_trace_reflection(const Ray3D& ray, ColorRGB& color, int depth)
+{
+    if (depth <= 0) {
+        // If reached maximum recursion depth, return black
+        color.set(0, 0, 0);
+        return;
+    }
+
+    // Perform intersection test with scene objects
+    int closest = -1;
+    Point3D p, closest_p;
+    Vector3D n, closest_n;
+    closest_p.set(0, 0, ZDIM);
+    for (int s = 0; s < SPHERES; s++) {
+        if ((sphere[s].get_intersection(ray, p, n)) && (p.pz < closest_p.pz)) {
+            closest = s;
+            closest_p = p;
+            closest_n = n;
+        }
+    }
+
+    // If ray intersects with an object
+    if (closest >= 0) {
+        // Define shader
+        Phong shader;
+
+        // Calculate pixel color from all light sources
+        ColorRGB pixel;
+        int num_contributions = 0; // Track the number of contributions
+
+        for (int i = 0; i < MAX_LIGHTS; ++i) {
+            // Check if in shadow
+            bool is_in_shadow = in_shadow(closest_p, light_dirs[i], closest, sphere, SPHERES);
+
+            // Set light source for shading
+            shader.SetLight(light_colors[i], light_dirs[i]);
+
+            if (!is_in_shadow) {
+                // Set object color and shading parameters
+                shader.SetObject(color[closest], 0.4, 0.4, 0.4, 10);
+
+                // Calculate Phong shading for this light source
+                ColorRGB light_contribution;
+                shader.GetShade(closest_p, closest_n, light_contribution);
+
+                // Add up the color contribution from this light source
+                pixel.add(light_contribution);
+                num_contributions++; // Increment the number of contributions
+            }
+        }
+
+        // Calculate reflection ray
+        Vector3D reflected_dir = ray.dir - 2 * ray.dir.dot(closest_n) * closest_n;
+        Ray3D reflected_ray;
+        reflected_ray.set(closest_p, reflected_dir);
+
+        // Trace reflection ray recursively
+        ColorRGB reflection_color;
+        ray_trace_reflection(reflected_ray, reflection_color, depth - 1);
+
+        // Add reflection color to pixel color
+        pixel.add(reflection_color);
+
+        // Normalize the accumulated pixel color to prevent exceeding 255
+        if (num_contributions > 0) {
+            pixel.R /= num_contributions;
+            pixel.G /= num_contributions;
+            pixel.B /= num_contributions;
+            pixel.normalize();
+        }
+
+        color = pixel;
+    } else {
+        // If no intersection, return black
+        color.set(0, 0, 0);
     }
 }
+
  
 //---------------------------------------
 // Init function for OpenGL
@@ -238,9 +309,6 @@ void init()
       int B = rand() % 255;
       color[s].set(R,G,B);
    }
-
-   // rotating sphere color
-   color[SPHERES].set(255, 0, 0); // Set rotating sphere color to red
 
    // Perform ray tracing
    cout << "camera: 0,0," << position << endl;
@@ -325,9 +393,6 @@ void timer(int value)
           sphere[i].motion.vz *= Bounce; }
 
    }
-
-   // Update the position of the rotating sphere
-   update_rotating_sphere_position();
 
    // Calculate and display image
    ray_trace();
