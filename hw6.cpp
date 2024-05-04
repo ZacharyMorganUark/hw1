@@ -173,16 +173,13 @@ void ray_trace()
 
                 // Normalize the accumulated pixel color to prevent exceeding 255
                 if (num_contributions > 0) {
-                    pixel.R /= num_contributions;
-                    pixel.G /= num_contributions;
-                    pixel.B /= num_contributions;
-                    pixel.normalize();
-                }
+                    pixel.normalize(); // Normalize the color here
 
-                // Assign the accumulated pixel color to the image
-                image[y][x][0] = pixel.R;
-                image[y][x][1] = pixel.G;
-                image[y][x][2] = pixel.B;
+                    // Assign the normalized pixel color to the image
+                    image[y][x][0] = static_cast<unsigned char>(pixel.R);
+                    image[y][x][1] = static_cast<unsigned char>(pixel.G);
+                    image[y][x][2] = static_cast<unsigned char>(pixel.B);
+                }
             }
         }
 }
@@ -229,7 +226,7 @@ void init()
    // Initialize the rotating sphere
    rotatingSphere.center.set(0, 0, 0); // Set the initial position of the rotating sphere
    rotatingSphere.radius = 1.0; // Set the radius of the rotating sphere
-   rotatingSphereColor.set(255, 0, 0); // Set the color of the rotating sphere (e.g., red)
+   rotatingSphereColor.set(255, 0, 0); // Set the color of the rotating sphere 
 
    // Perform ray tracing
    cout << "camera: 0,0," << position << endl;
