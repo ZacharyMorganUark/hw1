@@ -30,12 +30,7 @@ const float RADIUS = 2.0;
 const int SPHERES = 10;
 Sphere3D sphere[SPHERES];
 ColorRGB color[SPHERES];
-
-// rotation variables
-float animation_radius = 5.0; // Radius of circular path
-float animation_speed = 0.1;  // Speed of rotation
-float animation_angle = 0.0;  // Current angle of rotation
-
+// Global variables
 #define MAX_LIGHTS 2 // Maximum number of light sources
 std::vector<ColorRGB> light_colors(MAX_LIGHTS); // Array to store light colors
 std::vector<Vector3D> light_dirs(MAX_LIGHTS); // Array to store light directions
@@ -47,19 +42,6 @@ float myrand(float min, float max)
 {
    return rand() * (max - min) / RAND_MAX + min;
 }
-
-
-//---------------------------------------
-// Idle function
-//---------------------------------------
-void idle() {
-    // Update angle based on time and speed
-    animation_angle += animation_speed;
-
-    // Redraw the scene
-    glutPostRedisplay();
-}
-
 
 // Function to initialize light sources
 void init_lights() {
@@ -237,31 +219,9 @@ void init()
 //---------------------------------------
 void display()
 {
-   // Clear the color buffer
+   // Display image
    glClear(GL_COLOR_BUFFER_BIT);
-
-   // Draw all spheres
-   for (int i = 0; i < SPHERES; ++i) {
-       // Set color for each sphere
-       glColor3ub(color[i].R, color[i].G, color[i].B);
-       
-       // Draw each sphere
-       glPushMatrix();
-       glTranslatef(sphere[i].center.px, sphere[i].center.py, sphere[i].center.pz);
-       glutSolidSphere(sphere[i].radius, 20, 20);
-       glPopMatrix();
-   }
-
-   // Draw the rotating sphere (index 0) around another sphere (index 1)
-   glColor3ub(color[0].R, color[0].G, color[0].B); // Set color of the rotating sphere
-   glPushMatrix();
-   glTranslatef(sphere[1].center.px, sphere[1].center.py, sphere[1].center.pz); // Translate to the center of the fixed sphere
-   glRotatef(animation_angle, 0.0, 1.0, 0.0); // Rotate around the y-axis
-   glTranslatef(0.0, 0.0, RADIUS); // Translate to a distance from the center of the fixed sphere
-   glutSolidSphere(sphere[0].radius, 20, 20); // Draw the rotating sphere
-   glPopMatrix();
-
-   // Flush OpenGL buffer
+   glDrawPixels(XDIM, YDIM, GL_RGB, GL_UNSIGNED_BYTE, image);
    glFlush();
 }
 
@@ -302,9 +262,22 @@ void keyboard(unsigned char key, int x, int y)
 //---------------------------------------
 void timer(int value)
 {
+   // Update animation angle for the rotating sphere
+   animation_angle += animation_speed;
+
+   // Calculate the position of the rotating sphere based on the angle
+   float orbit_radius = 5.0; // Radius of the orbit
+   float orbit_center_x = 0.0; // X-coordinate of the center of the orbit
+   float orbit_center_y = 0.0; // Y-coordinate of the center of the orbit
+   float rotating_sphere_x = orbit_center_x + orbit_radius * cos(animation_angle);
+   float rotating_sphere_y = orbit_center_y + orbit_radius * sin(animation_angle);
+
+   // Update the position of the rotating sphere
+   sphere[0].center.px = rotating_sphere_x;
+   sphere[0].center.py = rotating_sphere_y;
+
    // Move bouncing balls
-   int i;
-   for (i = 1; i < SPHERES; i++) // Start from 1 to skip the animated sphere
+   for (int i = 1; i < SPHERES; i++)
    {
       // Update ball position
       sphere[i].center.px += sphere[i].motion.vx;
@@ -332,18 +305,9 @@ void timer(int value)
           sphere[i].motion.vz *= Bounce; }
    }
 
-   // Update animation angle
-   animation_angle += animation_speed;
-
-   // Update position of animated sphere along circular path
-   sphere[0].center.px = RADIUS * cos(animation_angle);
-   sphere[0].center.py = RADIUS * sin(animation_angle);
-
    // Calculate and display image
    ray_trace();
    glutPostRedisplay();
-
-   // Set timer for next frame
    glutTimerFunc(10, timer, 0);
 }
 
@@ -363,7 +327,6 @@ int main(int argc, char *argv[])
 
    // Specify callback function
    glutDisplayFunc(display);
-   glutIdleFunc(idle);
    glutKeyboardFunc(keyboard);
    glutTimerFunc(10, timer, 0);
    glutMainLoop();
