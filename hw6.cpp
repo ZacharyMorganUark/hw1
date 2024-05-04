@@ -31,10 +31,12 @@ const int SPHERES = 10;
 Sphere3D sphere[SPHERES];
 ColorRGB color[SPHERES];
 
-// Global variables for rotating sphere
+// Global variables for circular motion
 float rotation_angle = 0.0;
-float rotation_radius = 5.0; // Adjust as needed
-Point3D center_sphere_position(0, 0, 0); // Position of the center sphere
+float rotation_radius = 5.0;
+float rotatingSphereX = 0.0; // Declare and initialize rotatingSphereX
+float rotatingSphereY = 0.0; // Declare and initialize rotatingSphereY
+Sphere3D rotatingSphere; // Declare rotatingSphere
 
 
 #define MAX_LIGHTS 2 // Maximum number of light sources
@@ -76,7 +78,7 @@ void update_rotating_sphere_position() {
     rotatingSphereY = center_sphere_position.py + rotation_radius * sin(rotation_angle);
 
     // Increment the angle of rotation for the next frame
-    rotation_angle += 0.01; // Adjust the rotation speed as needed
+    rotation_angle += 0.4; // Adjust the rotation speed as needed
 }
 
 //---------------------------------------
