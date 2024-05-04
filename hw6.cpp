@@ -31,8 +31,8 @@ const int SPHERES = 10;
 Sphere3D sphere[SPHERES];
 ColorRGB color[SPHERES];
 
-float animation_radius = 10.0; // Radius of circular path
-float animation_speed = 2.0;  // Speed of rotation
+float animation_radius = 5.0; // Radius of circular path
+float animation_speed = 5.0;  // Speed of rotation
 float animation_angle = 0.0;  // Current angle of rotation
 
 #define MAX_LIGHTS 2 // Maximum number of light sources
