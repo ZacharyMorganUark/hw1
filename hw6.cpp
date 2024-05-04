@@ -284,9 +284,11 @@ void keyboard(unsigned char key, int x, int y)
 //---------------------------------------
 void timer(int value)
 {
+   // Get elapsed time since the program started
+   int elapsed_time = glutGet(GLUT_ELAPSED_TIME);
+
    // Move bouncing balls
-   int i;
-   for (i = 0; i < SPHERES; i++)
+   for (int i = 0; i < SPHERES; i++)
    {
       // Update ball position
       sphere[i].center.px += sphere[i].motion.vx;
@@ -316,13 +318,13 @@ void timer(int value)
    }
 
    // Update rotating sphere position
-    float angle_rad = value * ROTATION_SPEED * 3.14159 / 180.0;
-    rotatingSphereX = CENTER_SPHERE_X + ROTATION_RADIUS * cos(angle_rad);
-    rotatingSphereY = CENTER_SPHERE_Y + ROTATION_RADIUS * sin(angle_rad);
+   float angle_rad = elapsed_time * ROTATION_SPEED * 3.14159 / 180.0;
+   rotatingSphereX = CENTER_SPHERE_X + ROTATION_RADIUS * cos(angle_rad);
+   rotatingSphereY = CENTER_SPHERE_Y + ROTATION_RADIUS * sin(angle_rad);
 
-    // Debug print statements
-    cout << "Current Angle of Rotation: " << angle_rad << " radians" << endl;
-    cout << "Rotating Sphere Position: (" << rotatingSphereX << ", " << rotatingSphereY << ")" << endl;
+   // Debug print statements
+   cout << "Current Angle of Rotation: " << angle_rad << " radians" << endl;
+   cout << "Rotating Sphere Position: (" << rotatingSphereX << ", " << rotatingSphereY << ")" << endl;
 
    // Calculate and display image
    ray_trace();
