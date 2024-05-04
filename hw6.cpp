@@ -223,10 +223,27 @@ void init()
 //---------------------------------------
 void display()
 {
-   // Display image
-   glClear(GL_COLOR_BUFFER_BIT);
-   glDrawPixels(XDIM, YDIM, GL_RGB, GL_UNSIGNED_BYTE, image);
-   glFlush();
+   // Clear color buffer and depth buffer
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+   // Set up modelview matrix
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();
+
+   // Set camera position
+   gluLookAt(0.0, 0.0, -5.0,  // Camera position
+             0.0, 0.0, 0.0,   // Look-at position
+             0.0, 1.0, 0.0);  // Up vector
+
+   // Draw the rotating sphere
+   glColor3f(1.0f, 1.0f, 1.0f); // Set color to white
+   glPushMatrix(); // Save current transformation matrix
+   glTranslatef(sphere[0].center.px, sphere[0].center.py, sphere[0].center.pz); // Translate to animated sphere's position
+   glutWireSphere(sphere[0].radius, 20, 20); // Draw wireframe sphere
+   glPopMatrix(); // Restore previous transformation matrix
+   
+   // Swap buffers to display the rendered image
+   glutSwapBuffers();
 }
 
 //---------------------------------------
