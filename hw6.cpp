@@ -78,7 +78,7 @@ void update_rotating_sphere_position() {
     rotatingSphereY = center_sphere_position.py + rotation_radius * sin(rotation_angle);
 
     // Increment the angle of rotation for the next frame
-    rotation_angle += 0.4; // Adjust the rotation speed as needed
+    rotation_angle += 1.4; // Adjust the rotation speed as needed
 }
 
 //---------------------------------------
@@ -235,6 +235,9 @@ void init()
       int B = rand() % 255;
       color[s].set(R,G,B);
    }
+
+   // rotating sphere color
+   color[SPHERES].set(255, 0, 0); // Set rotating sphere color to red
 
    // Perform ray tracing
    cout << "camera: 0,0," << position << endl;
